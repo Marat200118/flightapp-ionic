@@ -1,0 +1,22 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Add Flight</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">Close</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    <ion-item>
+      <ion-label position="stacked">Flight Number</ion-label>
+      <ion-input [(ngModel)]="flightNumber" placeholder="Enter flight number e.g., LO784"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="stacked">Date</ion-label>
+      <ion-datetime [(ngModel)]="flightDate" presentation="date" [showDefaultButtons]="true" cancelText="Cancel" doneText="Done"></ion-datetime>
+    </ion-item>
+  </ion-list>
+  <ion-button expand="block" (click)="addFlight()">Add Flight</ion-button>
+</ion-content>

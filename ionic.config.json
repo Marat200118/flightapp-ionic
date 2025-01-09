@@ -3,5 +3,12 @@
   "integrations": {
     "capacitor": {}
   },
-  "type": "angular-standalone"
+  "type": "angular-standalone",
+  "proxies": [
+    {
+      "path": "/api",
+      "proxyUrl": "https://aeroapi.flightaware.com/aeroapi",
+      "rejectUnauthorized": false
+    }
+  ]
 }
