@@ -1,8 +1,6 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>
-      Home
-    </ion-title>
+    <ion-title>Home</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -13,5 +11,59 @@
     </ion-toolbar>
   </ion-header>
 
-  <app-explore-container name="Home page"></app-explore-container>
+  <ion-button id="open-add-flight-modal" class="add-flight-button" expand="block">Add Flight</ion-button>
+
+  <ion-list *ngIf="flights.length > 0">
+    <ion-card *ngFor="let flight of flights" (click)="openFlightDetails(flight)">
+      <ion-card-header>
+        <ion-card-title>{{ flight.flightNumber }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        {{ flight.originAirport }} → {{ flight.destinationAirport }}
+        <br />
+        Date: {{ flight.date }}
+      </ion-card-content>
+    </ion-card>
+  </ion-list>
+
+  <ion-text *ngIf="flights.length === 0">
+    <p>No flights added yet.</p>
+  </ion-text>
+
+  <ion-modal #modal trigger="open-add-flight-modal">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-buttons slot="start">
+            <ion-button (click)="cancel()">Cancel</ion-button>
+          </ion-buttons>
+          <ion-title>Add Flight</ion-title>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+
+        <ion-item>
+          <ion-input 
+            label="Flight Number" 
+            labelPlacement="stacked" 
+            type="text" 
+            placeholder="Enter flight number e.g., LO 784" 
+            [(ngModel)]="flightNumber">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-datetime
+            label="Date"
+            labelPlacement="stacked"
+            [(ngModel)]="flightDate"
+            presentation="date"
+            placeholder="Select departure date"
+          ><span slot="title">Select a Departure Date</span></ion-datetime>
+        </ion-item>
+        <ion-button expand="block" (click)="confirm()">Confirm</ion-button>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 </ion-content>
+
