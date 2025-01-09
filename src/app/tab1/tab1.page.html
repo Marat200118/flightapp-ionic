@@ -16,12 +16,12 @@
   <ion-list *ngIf="flights.length > 0">
     <ion-card *ngFor="let flight of flights" (click)="openFlightDetails(flight)">
       <ion-card-header>
-        <ion-card-title>{{ flight.flightNumber }}</ion-card-title>
+        <ion-card-title>{{ flight.ident_iata }}</ion-card-title>
       </ion-card-header>
       <ion-card-content>
-        {{ flight.originAirport }} → {{ flight.destinationAirport }}
+        {{ flight.origin_iata }} → {{ flight.destination_iata }}
         <br />
-        Date: {{ flight.date }}
+        Scheduled: {{ flight.scheduled_in | date: 'yyyy-MM-dd HH:mm' }}
       </ion-card-content>
     </ion-card>
   </ion-list>

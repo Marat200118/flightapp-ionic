@@ -43,7 +43,7 @@ export class Tab1Page {
   flightNumber = '';
   flightDate = '';
 
-  private apiBaseUrl = 'https://aeroapi.flightaware.com/aeroapi';
+  private apiBaseUrl = 'http://localhost:3000/api/schedules';
   private apiKey = 'wHf94IBGL2dxGFS13wlB5sbGS34bBfT3';
 
   constructor(private navCtrl: NavController, private http: HttpClient) {}
@@ -52,7 +52,7 @@ export class Tab1Page {
     this.modal.dismiss(null, 'cancel');
   }
 
-  confirm() {
+  async confirm() {
     console.log(this.flightNumber, this.flightDate);
 
     if (!this.flightNumber || !this.flightDate) {
@@ -61,34 +61,35 @@ export class Tab1Page {
     }
 
     const url = `http://localhost:3000/api/schedules`;
-    const headers = new HttpHeaders({ 'x-apikey': this.apiKey });
 
     const params = {
-      dateStart: this.flightDate.split('T')[0], // Ensure only the date is sent
-      dateEnd: this.getEndDate(this.flightDate), // Ensure only the date is sent
-      flightNumber: this.flightNumber.replace(/^\D+/g, ''), // Remove non-numeric prefix
+      dateStart: this.flightDate.split('T')[0], // Strip time
+      dateEnd: this.getEndDate(this.flightDate),
+      flightNumber: this.flightNumber, // Use full flight number
     };
 
-    console.log("Request Params:", params);
+    console.log('Request Params:', params);
 
-    this.http.get(url, { headers, params }).subscribe(
-      (response: any) => {
+    const headers = new HttpHeaders({ 'x-apikey': this.apiKey });
+    this.http.get(this.apiBaseUrl, { headers, params }).subscribe(
+      async (response: any) => {
         console.log('API Response (Full):', response);
 
         if (response.scheduled && response.scheduled.length > 0) {
-          response.scheduled.forEach((flight: any) => {
+          response.scheduled.forEach(async (flight: any) => {
             const newFlight = {
               id: Date.now(),
-              flightNumber: flight.ident_iata || flight.actual_ident_iata || "Unknown",
-              originAirport: flight.origin_iata || flight.origin_icao || "Unknown",
-              destinationAirport:
-                flight.destination_iata || flight.destination_icao || "Unknown",
-              date: flight.scheduled_out,
+              ...flight,
             };
 
-            console.log("Adding Flight to Home Screen:", newFlight);
+            console.log('Adding Flight to Home Screen:', newFlight);
 
             this.flights.push(newFlight);
+
+            // Save to local storage
+            const storedFlights = JSON.parse(localStorage.getItem('flights') || '[]');
+            storedFlights.push(newFlight);
+            localStorage.setItem('flights', JSON.stringify(storedFlights));
           });
 
           this.modal.dismiss(null, 'confirm');
@@ -109,13 +110,26 @@ export class Tab1Page {
     return startDate.toISOString().split('T')[0];
   }
 
+  async loadFlightsFromStorage() {
+    const storedFlights = JSON.parse(localStorage.getItem('flights') || '[]');
+    this.flights = storedFlights;
+    console.log('Loaded Flights from Storage:', this.flights);
+  }
+
+  openFlightDetails(flight: any) {
+    this.navCtrl.navigateForward(`/flight-details`, {
+      state: { flight },
+    });
+  }
+
+  ionViewWillEnter() {
+    this.loadFlightsFromStorage();
+  }
+
   // onWillDismiss(event: CustomEvent<OverlayEventDetail>) {
   //   if (event.detail.role === 'confirm' && event.detail.data) {
   //     this.flights.push(event.detail.data);
   //   }
   // }
 
-  openFlightDetails(flight: any) {
-    this.navCtrl.navigateForward(`/flight-details/${flight.id}`);
-  }
 }
