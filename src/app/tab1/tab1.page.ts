@@ -111,6 +111,45 @@ export class Tab1Page {
 
   async loadFlightsFromStorage() {
     const storedFlights = JSON.parse(localStorage.getItem('flights') || '[]');
+
+    const testFlight = {
+      id: Date.now(),
+      ident: 'LOT784',
+      ident_icao: 'LOT784',
+      ident_iata: 'LO784',
+      actual_ident: null,
+      actual_ident_icao: null,
+      actual_ident_iata: null,
+      aircraft_type: 'E75L',
+      scheduled_in: '2025-01-12T13:50:00Z',
+      scheduled_out: '2025-01-12T12:00:00Z',
+      origin: 'EVRA',
+      origin_icao: 'EVRA',
+      origin_iata: 'RIX',
+      origin_lid: null,
+      destination: 'EPWA',
+      destination_icao: 'EPWA',
+      destination_iata: 'WAW',
+      destination_lid: null,
+      fa_flight_id: 'UAL784-1736491986-airline-250p',
+      meal_service: 'Business: Snack or brunch / Economy: Food for sale',
+      seats_cabin_business: 3,
+      seats_cabin_coach: 76,
+      seats_cabin_first: 0,
+      isTest: true,
+    };
+
+    const isTestFlightAdded = storedFlights.some(
+      (flight: any) => flight.ident === testFlight.ident && flight.isTest
+    );
+
+    if (!isTestFlightAdded) {
+      storedFlights.unshift(testFlight);
+      localStorage.setItem('flights', JSON.stringify(storedFlights));
+    }
+
+
+
     this.flights = storedFlights;
     console.log('Loaded Flights from Storage:', this.flights);
   }
@@ -124,11 +163,5 @@ export class Tab1Page {
   ionViewWillEnter() {
     this.loadFlightsFromStorage();
   }
-
-  // onWillDismiss(event: CustomEvent<OverlayEventDetail>) {
-  //   if (event.detail.role === 'confirm' && event.detail.data) {
-  //     this.flights.push(event.detail.data);
-  //   }
-  // }
 
 }

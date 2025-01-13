@@ -24,16 +24,20 @@
         First: {{ flight.seats_cabin_first || 0 }}</p>
     </ion-card-content>
   </ion-card>
-  <ion-card *ngIf="flightPath.length > 0">
+  <ion-card *ngIf="openskyInfo">
     <ion-card-header>
-      <ion-card-title>Flight Path</ion-card-title>
+      <ion-card-title>Info from OpenSky</ion-card-title>
     </ion-card-header>
     <ion-card-content>
-      <ul>
-        <li *ngFor="let point of flightPath">
-          Latitude: {{ point.latitude }}, Longitude: {{ point.longitude }}, Altitude: {{ point.altitude }}
-        </li>
-      </ul>
+      <p><strong>Callsign:</strong> {{ openskyInfo.callsign }}</p>
+      <p><strong>Departure Airport:</strong> {{ openskyInfo.estDepartureAirport }}</p>
+      <p><strong>Arrival Airport:</strong> {{ openskyInfo.estArrivalAirport }}</p>
+      <p><strong>Departure Time:</strong> {{ openskyInfo.firstSeen * 1000 | date: 'yyyy-MM-dd HH:mm:ss' }}</p>
+      <p><strong>Arrival Time:</strong> {{ openskyInfo.lastSeen * 1000 | date: 'yyyy-MM-dd HH:mm:ss' }}</p>
+      <p><strong>Horizontal Distance to Departure:</strong> {{ openskyInfo.estDepartureAirportHorizDistance }} meters</p>
+      <p><strong>Vertical Distance to Departure:</strong> {{ openskyInfo.estDepartureAirportVertDistance }} meters</p>
+      <p><strong>Horizontal Distance to Arrival:</strong> {{ openskyInfo.estArrivalAirportHorizDistance }} meters</p>
+      <p><strong>Vertical Distance to Arrival:</strong> {{ openskyInfo.estArrivalAirportVertDistance }} meters</p>
     </ion-card-content>
   </ion-card>
 </ion-content>

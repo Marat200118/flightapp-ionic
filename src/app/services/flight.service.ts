@@ -11,7 +11,6 @@ export class FlightService {
 
   constructor(private http: HttpClient) {}
 
-  // Convert ISO timestamp to Unix timestamp
   private toUnixTimestamp(isoDate: string): number {
     return Math.floor(new Date(isoDate).getTime() / 1000);
   }
@@ -31,16 +30,22 @@ export class FlightService {
     departureAirport: string,
     startTime: string,
     endTime: string,
-    arrivalAirport?: string
+    arrivalAirport?: string,
+    callsign?: string
+
   ): Observable<any> {
+
     const begin = this.toUnixTimestamp(startTime);
     const end = this.toUnixTimestamp(endTime);
 
     let url = `${this.proxyBaseUrl}/opensky/departures?airport=${departureAirport}&begin=${begin}&end=${end}`;
     
-    // if (arrivalAirport) {
-    //   url += `&arrivalAirport=${arrivalAirport}`;
-    // }
+    if (arrivalAirport) {
+      url += `&arrivalAirport=${arrivalAirport}`;
+    }
+    if (callsign) {
+      url += `&callsign=${callsign}`;
+    }
 
     return this.http.get(url).pipe(
       catchError((error) => {
@@ -56,7 +61,6 @@ export class FlightService {
     const begin = this.toUnixTimestamp(startTime);
     const end = this.toUnixTimestamp(endTime);
 
-    // Append a space to callsign if needed (less preferred solution)
     const url = `${this.proxyBaseUrl}/opensky/flights?callsign=${callsign.trim()}&begin=${begin}&end=${end}`;
 
     return this.http.get(url).pipe(
