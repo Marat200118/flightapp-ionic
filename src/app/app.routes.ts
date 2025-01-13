@@ -5,6 +5,8 @@ export const routes: Routes = [
     path: '',
     loadChildren: () => import('./tabs/tabs.routes').then((m) => m.routes),
   },
-  { path: 'api/**', pathMatch: 'prefix', redirectTo: '' },
-  { path: '**', redirectTo: '' }, // Fallback route
+  {
+    path: 'flight-details',
+    loadComponent: () => import('./flight-details/flight-details.page').then( m => m.FlightDetailsPage)
+  },
 ];

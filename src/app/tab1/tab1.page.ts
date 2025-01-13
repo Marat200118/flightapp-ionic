@@ -63,9 +63,9 @@ export class Tab1Page {
     const url = `http://localhost:3000/api/schedules`;
 
     const params = {
-      dateStart: this.flightDate.split('T')[0], // Strip time
+      dateStart: this.flightDate.split('T')[0], 
       dateEnd: this.getEndDate(this.flightDate),
-      flightNumber: this.flightNumber, // Use full flight number
+      flightNumber: this.flightNumber,
     };
 
     console.log('Request Params:', params);
@@ -86,7 +86,6 @@ export class Tab1Page {
 
             this.flights.push(newFlight);
 
-            // Save to local storage
             const storedFlights = JSON.parse(localStorage.getItem('flights') || '[]');
             storedFlights.push(newFlight);
             localStorage.setItem('flights', JSON.stringify(storedFlights));
@@ -105,7 +104,7 @@ export class Tab1Page {
   }
 
   getEndDate(date: string): string {
-    const startDate = new Date(date.split('T')[0]); // Strip time if present
+    const startDate = new Date(date.split('T')[0]); 
     startDate.setDate(startDate.getDate() + 1);
     return startDate.toISOString().split('T')[0];
   }
@@ -117,7 +116,7 @@ export class Tab1Page {
   }
 
   openFlightDetails(flight: any) {
-    this.navCtrl.navigateForward(`/flight-details`, {
+    this.navCtrl.navigateForward('/flight-details', {
       state: { flight },
     });
   }

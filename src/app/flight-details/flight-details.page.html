@@ -1,0 +1,39 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>{{ flight.ident_iata || 'Flight Details' }}</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/tab1"></ion-back-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>{{ flight.ident_iata }}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p><strong>Airline:</strong> {{ flight.ident_icao || 'Unknown' }}</p>
+      <p><strong>From:</strong> {{ flight.origin_iata || 'Unknown' }} → <strong>To:</strong> {{ flight.destination_iata || 'Unknown' }}</p>
+      <p><strong>Scheduled Departure:</strong> {{ flight.scheduled_out | date: 'yyyy-MM-dd HH:mm' }}</p>
+      <p><strong>Scheduled Arrival:</strong> {{ flight.scheduled_in | date: 'yyyy-MM-dd HH:mm' }}</p>
+      <p><strong>Aircraft Type:</strong> {{ flight.aircraft_type || 'Unknown' }}</p>
+      <p><strong>Meal Service:</strong> {{ flight.meal_service || 'None' }}</p>
+      <p><strong>Seats:</strong> Business: {{ flight.seats_cabin_business || 0 }},
+        Coach: {{ flight.seats_cabin_coach || 0 }},
+        First: {{ flight.seats_cabin_first || 0 }}</p>
+    </ion-card-content>
+  </ion-card>
+  <ion-card *ngIf="flightPath.length > 0">
+    <ion-card-header>
+      <ion-card-title>Flight Path</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ul>
+        <li *ngFor="let point of flightPath">
+          Latitude: {{ point.latitude }}, Longitude: {{ point.longitude }}, Altitude: {{ point.altitude }}
+        </li>
+      </ul>
+    </ion-card-content>
+  </ion-card>
+</ion-content>
