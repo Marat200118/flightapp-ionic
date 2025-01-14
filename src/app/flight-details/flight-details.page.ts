@@ -13,6 +13,7 @@ import {
   IonCardHeader,
   IonCardTitle,
   IonCardContent,
+  IonIcon,
 } from '@ionic/angular/standalone';
 import { ActivatedRoute } from '@angular/router';
 
@@ -29,6 +30,7 @@ import { ActivatedRoute } from '@angular/router';
     IonButtons,
     IonBackButton,
     IonCard,
+    IonIcon,
     IonCardHeader,
     IonCardTitle,
     IonCardContent,

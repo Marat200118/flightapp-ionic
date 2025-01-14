@@ -1,32 +1,52 @@
 <ion-header>
-  <ion-toolbar>
-    <ion-title>{{ flight.ident_iata || 'Flight Details' }}</ion-title>
+  <ion-toolbar class="details-header">
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/tabs/tab1"></ion-back-button>
     </ion-buttons>
+    <ion-title>{{ flight.ident_iata || 'Flight Details' }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
+<ion-content class="custom-content">
+  <!-- Flight Summary Section -->
+  <div class="flight-summary">
+    <p class="flight-time">{{ flight.ident_iata }}</p>
+    <div class="flight-route">
+      <div>
+        <p class="airport-code">{{ flight.origin_iata }}</p>
+        <p class="airport-name">Departure</p>
+      </div>
+      <ion-icon name="airplane-outline"></ion-icon>
+      <div>
+        <p class="airport-code">{{ flight.destination_iata }}</p>
+        <p class="airport-name">Arrival</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Flight Details Card -->
   <ion-card>
     <ion-card-header>
-      <ion-card-title>{{ flight.ident_iata }}</ion-card-title>
+      <ion-card-title>Flight Information</ion-card-title>
     </ion-card-header>
     <ion-card-content>
       <p><strong>Airline:</strong> {{ flight.ident_icao || 'Unknown' }}</p>
-      <p><strong>From:</strong> {{ flight.origin_iata || 'Unknown' }} → <strong>To:</strong> {{ flight.destination_iata || 'Unknown' }}</p>
       <p><strong>Scheduled Departure:</strong> {{ flight.scheduled_out | date: 'yyyy-MM-dd HH:mm' }}</p>
       <p><strong>Scheduled Arrival:</strong> {{ flight.scheduled_in | date: 'yyyy-MM-dd HH:mm' }}</p>
       <p><strong>Aircraft Type:</strong> {{ flight.aircraft_type || 'Unknown' }}</p>
       <p><strong>Meal Service:</strong> {{ flight.meal_service || 'None' }}</p>
-      <p><strong>Seats:</strong> Business: {{ flight.seats_cabin_business || 0 }},
+      <p>
+        <strong>Seats:</strong> Business: {{ flight.seats_cabin_business || 0 }},
         Coach: {{ flight.seats_cabin_coach || 0 }},
-        First: {{ flight.seats_cabin_first || 0 }}</p>
+        First: {{ flight.seats_cabin_first || 0 }}
+      </p>
     </ion-card-content>
   </ion-card>
+
+  <!-- OpenSky Info Card -->
   <ion-card *ngIf="openskyInfo">
     <ion-card-header>
-      <ion-card-title>Info from OpenSky</ion-card-title>
+      <ion-card-title>OpenSky Flight Data</ion-card-title>
     </ion-card-header>
     <ion-card-content>
       <p><strong>Callsign:</strong> {{ openskyInfo.callsign }}</p>
@@ -34,10 +54,12 @@
       <p><strong>Arrival Airport:</strong> {{ openskyInfo.estArrivalAirport }}</p>
       <p><strong>Departure Time:</strong> {{ openskyInfo.firstSeen * 1000 | date: 'yyyy-MM-dd HH:mm:ss' }}</p>
       <p><strong>Arrival Time:</strong> {{ openskyInfo.lastSeen * 1000 | date: 'yyyy-MM-dd HH:mm:ss' }}</p>
-      <p><strong>Horizontal Distance to Departure:</strong> {{ openskyInfo.estDepartureAirportHorizDistance }} meters</p>
-      <p><strong>Vertical Distance to Departure:</strong> {{ openskyInfo.estDepartureAirportVertDistance }} meters</p>
-      <p><strong>Horizontal Distance to Arrival:</strong> {{ openskyInfo.estArrivalAirportHorizDistance }} meters</p>
-      <p><strong>Vertical Distance to Arrival:</strong> {{ openskyInfo.estArrivalAirportVertDistance }} meters</p>
+      <p>
+        <strong>Horizontal Distance to Departure:</strong> {{ openskyInfo.estDepartureAirportHorizDistance }} meters
+      </p>
+      <p>
+        <strong>Horizontal Distance to Arrival:</strong> {{ openskyInfo.estArrivalAirportHorizDistance }} meters
+      </p>
     </ion-card-content>
   </ion-card>
 </ion-content>

@@ -2,16 +2,15 @@
 // http://ionicframework.com/docs/theming/
 
 :root {
-  /* Light Mode Colors */
-  --ion-color-primary: #007aff; // Main app color
+  --ion-color-primary: #007aff; 
   --ion-color-primary-rgb: 0, 122, 255;
   --ion-color-secondary: #004ba8;
   --ion-color-secondary-rgb: 0, 75, 168;
   --ion-color-tertiary: #f4f4f9;
 
-  /* Custom Colors */
   --header-background: var(--ion-color-primary);
   --header-text-color: white;
+  --card-color: #c6dcff;
   --text-primary: #282828;
   --text-secondary: gray;
   --card-background: white;
@@ -21,12 +20,12 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    /* Dark Mode Colors */
-    --ion-color-primary: #0056b3; // Adjusted for dark mode
+
+    --ion-color-primary: #0056b3;
     --ion-color-secondary: #002e73;
     --ion-color-tertiary: #1e1e1e;
+    --card-color: #375167;
 
-    /* Custom Colors */
     --header-background: var(--ion-color-secondary);
     --header-text-color: #f4f4f9;
     --text-primary: #f4f4f9;

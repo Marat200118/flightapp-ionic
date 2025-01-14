@@ -1,5 +1,11 @@
 .custom-content {
   --ion-safe-area-top: 0px;
+  background: var(--ion-color-tertiary) !important;
+}
+
+.tab-header {
+  --background: var(--header-background);
+  --color: var(--header-text-color);
 }
 
 .fancy-header {
@@ -58,17 +64,35 @@
 
 ion-card {
   border-radius: 16px;
+  background: var(--card-color);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
+ion-card ion-icon {
+  margin-right: .5rem;
+}
+
+ion-card-header ion-card-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--text-primary);
+}
+
+.list-md {
+  background: none ;
+}
+
 .route {
+  display: flex;
+  align-items: center;
   font-size: 16px;
   font-weight: 600;
+  color: var(--text-primary);
 }
 
 .date {
   font-size: 14px;
-  color: gray;
+  color: var(--text-secondary);
 }
 
 .add-flight-button {

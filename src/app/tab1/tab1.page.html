@@ -1,5 +1,5 @@
 <ion-header [translucent]="true">
-  <ion-toolbar>
+  <ion-toolbar class="tab-header">
     <ion-title>Home</ion-title>
   </ion-toolbar>
 </ion-header>
@@ -42,7 +42,7 @@
           </ion-card-header>
           <ion-card-content>
             <div class="flight-details">
-              <div class="route">{{ flight.origin_iata }} → {{ flight.destination_iata }}</div>
+              <div class="route"><ion-icon name="airplane-outline"></ion-icon>{{ flight.origin_iata }} → {{ flight.destination_iata }}</div>
               <div class="date">Scheduled: {{ flight.scheduled_in | date: 'yyyy-MM-dd HH:mm' }}</div>
             </div>
           </ion-card-content>
