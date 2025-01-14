@@ -40,6 +40,8 @@ export class Tab1Page {
   @ViewChild('modal') modal!: IonModal;
 
   flights: any[] = [];
+  upcomingFlights: any[] = [];
+  previousFlights: any[] = [];
   flightNumber = '';
   flightDate = '';
 
@@ -111,6 +113,8 @@ export class Tab1Page {
 
   async loadFlightsFromStorage() {
     const storedFlights = JSON.parse(localStorage.getItem('flights') || '[]');
+    const today = new Date();
+
 
     const testFlight = {
       id: Date.now(),
@@ -138,6 +142,17 @@ export class Tab1Page {
       seats_cabin_first: 0,
       isTest: true,
     };
+
+    this.upcomingFlights = storedFlights.filter((flight: any) => {
+      const scheduledDate = new Date(flight.scheduled_in);
+      return scheduledDate >= today;
+    });
+
+    this.previousFlights = storedFlights.filter((flight: any) => {
+      const scheduledDate = new Date(flight.scheduled_in);
+      return scheduledDate < today;
+    });
+
 
     const isTestFlightAdded = storedFlights.some(
       (flight: any) => flight.ident === testFlight.ident && flight.isTest
