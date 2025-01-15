@@ -63,19 +63,22 @@ export class FlightDetailsPage {
   loadFlightInfoFromOpenSky() {
     const departureAirport = this.flight.origin;
     const arrivalAirport = this.flight.destination;
-    const startTime = '2025-01-12T10:00:00Z';
-    const endTime = '2025-01-12T16:00:00Z';
+
+    const scheduledOut = new Date(this.flight.scheduled_out);
+    const startTime = new Date(scheduledOut.getTime() - 2 * 60 * 60 * 1000); 
+    const endTime = new Date(scheduledOut.getTime() + 4 * 60 * 60 * 1000); 
+
+    const startTimeISO = startTime.toISOString();
+    const endTimeISO = endTime.toISOString();
 
     this.flightService
-      .getDeparturesWithArrival(departureAirport, startTime, endTime, arrivalAirport)
+      .getDeparturesWithArrival(departureAirport, startTimeISO, endTimeISO, arrivalAirport)
       .subscribe(
         (flights: any[]) => {
           console.log('Fetched Flights from OpenSky:', flights);
 
-        
           const airlinePrefix = this.getAirlinePrefix(this.flight.ident_icao);
 
-        
           const matchingFlight = flights.find((flight) => {
             const matchesArrivalAirport = flight.estArrivalAirport === arrivalAirport;
             const matchesAirlinePrefix = this.matchAirlinePrefix(flight.callsign, airlinePrefix);
@@ -92,7 +95,7 @@ export class FlightDetailsPage {
             this.openskyInfo = matchingFlight;
             this.saveOpenSkyInfoToLocalStorage(matchingFlight);
           } else {
-            console.error('No matching flights found for test flight.');
+            console.error('No matching flights found for this flight.');
           }
         },
         (error) => {
@@ -116,19 +119,23 @@ export class FlightDetailsPage {
   }
 
   saveOpenSkyInfoToLocalStorage(flightData: any) {
-    const storedFlights = JSON.parse(localStorage.getItem('openskyInfo') || '[]');
-    storedFlights.push(flightData);
+  const storedFlights = JSON.parse(localStorage.getItem('openskyInfo') || '[]');
+  
+  
+  const flightKey = `${this.flight.origin}-${this.flight.destination}-${this.flight.scheduled_out}`;
+
+  if (!storedFlights.some((stored: any) => stored.flightKey === flightKey)) {
+    storedFlights.push({ ...flightData, flightKey });
     localStorage.setItem('openskyInfo', JSON.stringify(storedFlights));
     console.log('OpenSky info saved to localStorage:', flightData);
   }
+}
 
   getOpenSkyInfoFromLocalStorage() {
     const storedFlights = JSON.parse(localStorage.getItem('openskyInfo') || '[]');
-    const flightIdent = this.flight.ident;
+    const flightKey = `${this.flight.origin}-${this.flight.destination}-${this.flight.scheduled_out}`;
 
-    const storedFlight = storedFlights.find(
-      (stored: any) => stored.callsign?.startsWith(flightIdent.slice(0, 3))
-    );
+    const storedFlight = storedFlights.find((stored: any) => stored.flightKey === flightKey);
 
     console.log('Retrieved OpenSky info from localStorage:', storedFlight);
     return storedFlight || null;
