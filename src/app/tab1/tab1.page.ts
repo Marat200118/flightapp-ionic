@@ -4,6 +4,16 @@ import { NavController, IonicModule } from '@ionic/angular';
 import { OverlayEventDetail } from '@ionic/core/components';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
+
 import {
   IonButton,
   IonButtons,
@@ -23,19 +33,17 @@ import {
   templateUrl: './tab1.page.html',
   styleUrls: ['./tab1.page.scss'],
   imports: [
-    IonicModule,
     CommonModule,
     FormsModule,
-    // IonIcon,
-    // IonButton,
-    // IonButtons,
-    // IonContent,
-    // IonInput,
-    // IonItem,
-    // IonModal,
-    // IonTitle,
-    // IonDatetime,
-    // IonToolbar,
+    IonicModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatToolbarModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatDividerModule,
+    MatTooltipModule,
   ],
 })
 export class Tab1Page {
