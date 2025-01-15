@@ -11,6 +11,7 @@ import {
   IonInput,
   IonItem,
   IonModal,
+  IonIcon,
   IonTitle,
   IonToolbar,
   IonDatetime,
@@ -25,6 +26,7 @@ import {
     IonicModule,
     CommonModule,
     FormsModule,
+    // IonIcon,
     // IonButton,
     // IonButtons,
     // IonContent,
@@ -40,10 +42,12 @@ export class Tab1Page {
   @ViewChild('modal') modal!: IonModal;
 
   flights: any[] = [];
+  upcomingFlights: any[] = [];
+  previousFlights: any[] = [];
   flightNumber = '';
   flightDate = '';
 
-  private apiBaseUrl = 'https://aeroapi.flightaware.com/aeroapi';
+  private apiBaseUrl = 'http://localhost:3000/api/schedules';
   private apiKey = 'wHf94IBGL2dxGFS13wlB5sbGS34bBfT3';
 
   constructor(private navCtrl: NavController, private http: HttpClient) {}
@@ -52,7 +56,7 @@ export class Tab1Page {
     this.modal.dismiss(null, 'cancel');
   }
 
-  confirm() {
+  async confirm() {
     console.log(this.flightNumber, this.flightDate);
 
     if (!this.flightNumber || !this.flightDate) {
@@ -61,34 +65,34 @@ export class Tab1Page {
     }
 
     const url = `http://localhost:3000/api/schedules`;
-    const headers = new HttpHeaders({ 'x-apikey': this.apiKey });
 
     const params = {
-      dateStart: this.flightDate.split('T')[0], // Ensure only the date is sent
-      dateEnd: this.getEndDate(this.flightDate), // Ensure only the date is sent
-      flightNumber: this.flightNumber.replace(/^\D+/g, ''), // Remove non-numeric prefix
+      dateStart: this.flightDate.split('T')[0], 
+      dateEnd: this.getEndDate(this.flightDate),
+      flightNumber: this.flightNumber,
     };
 
-    console.log("Request Params:", params);
+    console.log('Request Params:', params);
 
-    this.http.get(url, { headers, params }).subscribe(
-      (response: any) => {
+    const headers = new HttpHeaders({ 'x-apikey': this.apiKey });
+    this.http.get(this.apiBaseUrl, { headers, params }).subscribe(
+      async (response: any) => {
         console.log('API Response (Full):', response);
 
         if (response.scheduled && response.scheduled.length > 0) {
-          response.scheduled.forEach((flight: any) => {
+          response.scheduled.forEach(async (flight: any) => {
             const newFlight = {
               id: Date.now(),
-              flightNumber: flight.ident_iata || flight.actual_ident_iata || "Unknown",
-              originAirport: flight.origin_iata || flight.origin_icao || "Unknown",
-              destinationAirport:
-                flight.destination_iata || flight.destination_icao || "Unknown",
-              date: flight.scheduled_out,
+              ...flight,
             };
 
-            console.log("Adding Flight to Home Screen:", newFlight);
+            console.log('Adding Flight to Home Screen:', newFlight);
 
             this.flights.push(newFlight);
+
+            const storedFlights = JSON.parse(localStorage.getItem('flights') || '[]');
+            storedFlights.push(newFlight);
+            localStorage.setItem('flights', JSON.stringify(storedFlights));
           });
 
           this.modal.dismiss(null, 'confirm');
@@ -104,18 +108,77 @@ export class Tab1Page {
   }
 
   getEndDate(date: string): string {
-    const startDate = new Date(date.split('T')[0]); // Strip time if present
+    const startDate = new Date(date.split('T')[0]); 
     startDate.setDate(startDate.getDate() + 1);
     return startDate.toISOString().split('T')[0];
   }
 
-  // onWillDismiss(event: CustomEvent<OverlayEventDetail>) {
-  //   if (event.detail.role === 'confirm' && event.detail.data) {
-  //     this.flights.push(event.detail.data);
-  //   }
-  // }
+  async loadFlightsFromStorage() {
+    const storedFlights = JSON.parse(localStorage.getItem('flights') || '[]');
+    const today = new Date();
+
+
+    const testFlight = {
+      id: Date.now(),
+      ident: 'LOT784',
+      ident_icao: 'LOT784',
+      ident_iata: 'LO784',
+      actual_ident: null,
+      actual_ident_icao: null,
+      actual_ident_iata: null,
+      aircraft_type: 'E75L',
+      scheduled_in: '2025-01-12T13:50:00Z',
+      scheduled_out: '2025-01-12T12:00:00Z',
+      origin: 'EVRA',
+      origin_icao: 'EVRA',
+      origin_iata: 'RIX',
+      origin_lid: null,
+      destination: 'EPWA',
+      destination_icao: 'EPWA',
+      destination_iata: 'WAW',
+      destination_lid: null,
+      fa_flight_id: 'UAL784-1736491986-airline-250p',
+      meal_service: 'Business: Snack or brunch / Economy: Food for sale',
+      seats_cabin_business: 3,
+      seats_cabin_coach: 76,
+      seats_cabin_first: 0,
+      isTest: true,
+    };
+
+    this.upcomingFlights = storedFlights.filter((flight: any) => {
+      const scheduledDate = new Date(flight.scheduled_in);
+      return scheduledDate >= today;
+    });
+
+    this.previousFlights = storedFlights.filter((flight: any) => {
+      const scheduledDate = new Date(flight.scheduled_in);
+      return scheduledDate < today;
+    });
+
+
+    const isTestFlightAdded = storedFlights.some(
+      (flight: any) => flight.ident === testFlight.ident && flight.isTest
+    );
+
+    if (!isTestFlightAdded) {
+      storedFlights.unshift(testFlight);
+      localStorage.setItem('flights', JSON.stringify(storedFlights));
+    }
+
+
+
+    this.flights = storedFlights;
+    console.log('Loaded Flights from Storage:', this.flights);
+  }
 
   openFlightDetails(flight: any) {
-    this.navCtrl.navigateForward(`/flight-details/${flight.id}`);
+    this.navCtrl.navigateForward('/flight-details', {
+      state: { flight },
+    });
   }
+
+  ionViewWillEnter() {
+    this.loadFlightsFromStorage();
+  }
+
 }
