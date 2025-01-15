@@ -57,12 +57,8 @@ export class FlightService {
 
 
 
-  getFlightPath(callsign: string, startTime: string, endTime: string): Observable<any> {
-    const begin = this.toUnixTimestamp(startTime);
-    const end = this.toUnixTimestamp(endTime);
-
-    const url = `${this.proxyBaseUrl}/opensky/flights?callsign=${callsign.trim()}&begin=${begin}&end=${end}`;
-
+  getFlightPath(icao24: string, time: number): Observable<any> {
+    const url = `${this.proxyBaseUrl}/opensky/track?icao24=${icao24}&time=${time}`;
     return this.http.get(url).pipe(
       catchError((error) => {
         console.error('Error fetching flight path:', error);

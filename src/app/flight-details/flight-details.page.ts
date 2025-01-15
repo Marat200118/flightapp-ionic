@@ -51,14 +51,16 @@ export class FlightDetailsPage {
   }
 
   ngOnInit() {
-    if (this.flight) {
-      this.openskyInfo = this.flight.openskyInfo || this.getOpenSkyInfoFromLocalStorage();
+  if (this.flight) {
+    this.openskyInfo = this.flight.openskyInfo || this.getOpenSkyInfoFromLocalStorage();
 
-      if (!this.openskyInfo) {
-        this.loadFlightInfoFromOpenSky();
-      }
+    if (!this.openskyInfo) {
+      this.loadFlightInfoFromOpenSky();
+    } else {
+      this.loadFlightPathFromOpenSky();
     }
   }
+}
 
   loadFlightInfoFromOpenSky() {
     const departureAirport = this.flight.origin;
@@ -104,6 +106,41 @@ export class FlightDetailsPage {
       );
   }
 
+  loadFlightPathFromOpenSky() {
+    if (!this.openskyInfo || !this.openskyInfo.icao24) {
+      console.error('No icao24 information available for this flight.');
+      return;
+    }
+
+    const icao24 = this.openskyInfo.icao24.toLowerCase(); // Use lower case as required by the API
+    const time = this.openskyInfo.firstSeen; // Use the departure time (firstSeen)
+
+    // Check if the flight path is already in localStorage
+    const storedPath = this.getFlightPathFromLocalStorage();
+    if (storedPath) {
+      console.log('Using stored flight path from localStorage:', storedPath);
+      this.openskyInfo.path = storedPath;
+      return;
+    }
+
+    this.flightService.getFlightPath(icao24, time).subscribe(
+      (data: any) => {
+        console.log('Flight Path Data:', data);
+
+        if (data && data.path) {
+          this.openskyInfo.path = data.path; // Attach the flight path to the flight details
+          this.saveFlightPathToLocalStorage(data.path); // Save the path to localStorage
+        } else {
+          console.warn('No path data available for this flight.');
+        }
+      },
+      (error) => {
+        console.error('Error fetching flight path data:', error);
+      }
+    );
+  }
+
+
   
   getAirlinePrefix(ident: string): string {
     return ident.replace(/[^\D]/g, '').toUpperCase();
@@ -119,17 +156,40 @@ export class FlightDetailsPage {
   }
 
   saveOpenSkyInfoToLocalStorage(flightData: any) {
-  const storedFlights = JSON.parse(localStorage.getItem('openskyInfo') || '[]');
-  
-  
-  const flightKey = `${this.flight.origin}-${this.flight.destination}-${this.flight.scheduled_out}`;
+    const storedFlights = JSON.parse(localStorage.getItem('openskyInfo') || '[]');
+    
+    
+    const flightKey = `${this.flight.origin}-${this.flight.destination}-${this.flight.scheduled_out}`;
 
-  if (!storedFlights.some((stored: any) => stored.flightKey === flightKey)) {
-    storedFlights.push({ ...flightData, flightKey });
-    localStorage.setItem('openskyInfo', JSON.stringify(storedFlights));
-    console.log('OpenSky info saved to localStorage:', flightData);
+    if (!storedFlights.some((stored: any) => stored.flightKey === flightKey)) {
+      storedFlights.push({ ...flightData, flightKey });
+      localStorage.setItem('openskyInfo', JSON.stringify(storedFlights));
+      console.log('OpenSky info saved to localStorage:', flightData);
+    }
   }
-}
+
+  saveFlightPathToLocalStorage(path: any[]) {
+    const storedPaths = JSON.parse(localStorage.getItem('flightPaths') || '[]');
+    
+    const flightKey = `${this.flight.origin}-${this.flight.destination}-${this.flight.scheduled_out}`;
+
+    if (!storedPaths.some((stored: any) => stored.flightKey === flightKey)) {
+      storedPaths.push({ path, flightKey });
+      localStorage.setItem('flightPaths', JSON.stringify(storedPaths));
+      console.log('Flight path saved to localStorage:', path);
+    }
+  }
+
+  getFlightPathFromLocalStorage() {
+    const storedPaths = JSON.parse(localStorage.getItem('flightPaths') || '[]');
+    const flightKey = `${this.flight.origin}-${this.flight.destination}-${this.flight.scheduled_out}`;
+
+    const storedPath = storedPaths.find((stored: any) => stored.flightKey === flightKey);
+
+    console.log('Retrieved flight path from localStorage:', storedPath?.path);
+    return storedPath?.path || null;
+  }
+
 
   getOpenSkyInfoFromLocalStorage() {
     const storedFlights = JSON.parse(localStorage.getItem('openskyInfo') || '[]');
