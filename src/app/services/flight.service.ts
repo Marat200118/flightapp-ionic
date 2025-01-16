@@ -1,3 +1,5 @@
+//flight.service.ts
+
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, switchMap } from 'rxjs/operators';
@@ -28,26 +30,24 @@ export class FlightService {
 
   getDeparturesWithArrival(
     departureAirport: string,
-    startTime: string,
-    endTime: string,
+    startTime: number,
+    endTime: number, 
     arrivalAirport?: string,
     callsign?: string
-
   ): Observable<any> {
+    const url = new URL(`${this.proxyBaseUrl}/opensky/departures`);
+    url.searchParams.append('airport', departureAirport);
+    url.searchParams.append('begin', startTime.toString());
+    url.searchParams.append('end', endTime.toString());  
 
-    const begin = this.toUnixTimestamp(startTime);
-    const end = this.toUnixTimestamp(endTime);
-
-    let url = `${this.proxyBaseUrl}/opensky/departures?airport=${departureAirport}&begin=${begin}&end=${end}`;
-    
     if (arrivalAirport) {
-      url += `&arrivalAirport=${arrivalAirport}`;
+      url.searchParams.append('arrivalAirport', arrivalAirport);
     }
     if (callsign) {
-      url += `&callsign=${callsign}`;
+      url.searchParams.append('callsign', callsign);
     }
 
-    return this.http.get(url).pipe(
+    return this.http.get(url.toString()).pipe(
       catchError((error) => {
         console.error('Error fetching departures:', error);
         return throwError(() => new Error('Failed to fetch departures from OpenSky API.'));

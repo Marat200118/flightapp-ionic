@@ -33,12 +33,15 @@
       <ion-list>
         <ion-card *ngFor="let flight of upcomingFlights" (click)="openFlightDetails(flight)">
           <ion-card-header>
-            <ion-card-title>{{ flight.ident_iata }}</ion-card-title>
+            <ion-card-title>{{ flight.actual_ident ? flight.actual_ident : flight.ident_iata }}</ion-card-title>
           </ion-card-header>
           <ion-card-content>
             <div class="flight-details">
               <div class="route">{{ flight.origin_iata }} → {{ flight.destination_iata }}</div>
               <div class="date">Scheduled: {{ flight.scheduled_in | date: 'yyyy-MM-dd HH:mm' }}</div>
+              <p *ngIf="flight.codeshares && flight.codeshares.length > 0">
+                Codeshares: {{ getCodeshares(flight.codeshares) }}
+              </p>
             </div>
           </ion-card-content>
         </ion-card>
@@ -56,6 +59,9 @@
             <div class="flight-details">
               <div class="route"><ion-icon name="airplane-outline"></ion-icon>{{ flight.origin_iata }} → {{ flight.destination_iata }}</div>
               <div class="date">Scheduled: {{ flight.scheduled_in | date: 'yyyy-MM-dd HH:mm' }}</div>
+              <p *ngIf="flight.codeshares && flight.codeshares.length > 0">
+                Codeshares:{{ getCodeshares(flight.codeshares) }}
+              </p>
             </div>
           </ion-card-content>
         </ion-card>
@@ -83,10 +89,21 @@
         </ion-item>
 
         <ion-item>
+          <ion-input label="Origin (IATA or ICAO)" labelPlacement="stacked" type="text" placeholder="Enter origin airport e.g., RIX" [(ngModel)]="origin">
+          </ion-input>
+        </ion-item>
+        
+        <ion-item>
+          <ion-input label="Destination (IATA or ICAO)" labelPlacement="stacked" type="text" placeholder="Enter destination airport e.g., WAW" [(ngModel)]="destination">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
           <ion-datetime label="Date" labelPlacement="stacked" [(ngModel)]="flightDate" presentation="date" placeholder="Select departure date">
             <span slot="title">Select a Departure Date</span>
           </ion-datetime>
         </ion-item>
+
         <ion-button expand="block" (click)="confirm()">Confirm</ion-button>
       </ion-content>
     </ng-template>

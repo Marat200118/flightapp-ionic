@@ -54,6 +54,8 @@ export class Tab1Page {
   previousFlights: any[] = [];
   flightNumber = '';
   flightDate = '';
+  origin = '';
+  destination = ''; 
 
   private apiBaseUrl = 'http://localhost:3000/api/schedules';
   private apiKey = 'wHf94IBGL2dxGFS13wlB5sbGS34bBfT3';
@@ -65,54 +67,54 @@ export class Tab1Page {
   }
 
   async confirm() {
-    console.log(this.flightNumber, this.flightDate);
+    console.log("Flight Number:", this.flightNumber, "Date:", this.flightDate, "Origin:", this.origin, "Destination:", this.destination);
 
-    if (!this.flightNumber || !this.flightDate) {
+    if (!this.flightNumber || !this.flightDate || !this.origin || !this.destination) {
       alert('Please enter all details.');
       return;
     }
 
+    const selectedDate = new Date(this.flightDate); // Local time
+    const flightDateUTC = selectedDate.toISOString(); // Convert to UTC
+
     const url = `http://localhost:3000/api/schedules`;
 
     const params = {
-      dateStart: this.flightDate.split('T')[0], 
-      dateEnd: this.getEndDate(this.flightDate),
+      dateStart: flightDateUTC.split('T')[0], 
+      dateEnd: this.getEndDate(flightDateUTC),
       flightNumber: this.flightNumber,
+      origin: this.origin,
+      destination: this.destination,
     };
 
     console.log('Request Params:', params);
 
     const headers = new HttpHeaders({ 'x-apikey': this.apiKey });
-    this.http.get(this.apiBaseUrl, { headers, params }).subscribe(
-      async (response: any) => {
-        console.log('API Response (Full):', response);
+      this.http.get(url, { headers, params }).subscribe(
+        (response: any) => {
+          console.log("API Response:", response);
 
-        if (response.scheduled && response.scheduled.length > 0) {
-          response.scheduled.forEach(async (flight: any) => {
-            const newFlight = {
-              id: Date.now(),
-              ...flight,
-            };
-
-            console.log('Adding Flight to Home Screen:', newFlight);
-
-            this.flights.push(newFlight);
-
-            const storedFlights = JSON.parse(localStorage.getItem('flights') || '[]');
-            storedFlights.push(newFlight);
-            localStorage.setItem('flights', JSON.stringify(storedFlights));
-          });
-
-          this.modal.dismiss(null, 'confirm');
-        } else {
-          alert('No scheduled flights found for the provided details.');
+          if (response.scheduled && response.scheduled.length > 0) {
+            const flight = response.scheduled[0]; 
+            this.addFlightToStorage(flight);
+            this.flights.unshift(flight);
+            this.modal.dismiss();
+            console.log("Flight added to storage:", flight);
+          } else {
+            alert("No scheduled flights found for the provided details.");
+          }
+        },
+        (error) => {
+          console.error("Error fetching flight data:", error);
+          alert("Failed to fetch flight data. Please try again.");
         }
-      },
-      (error) => {
-        console.error('Error fetching flight data:', error);
-        alert('Failed to fetch flight data. Please try again.');
-      }
-    );
+      );
+  }
+
+  addFlightToStorage(flight: any) {
+    const storedFlights = JSON.parse(localStorage.getItem("flights") || "[]");
+    storedFlights.unshift(flight);
+    localStorage.setItem("flights", JSON.stringify(storedFlights));
   }
 
   getEndDate(date: string): string {
@@ -177,6 +179,13 @@ export class Tab1Page {
 
     this.flights = storedFlights;
     console.log('Loaded Flights from Storage:', this.flights);
+  }
+
+  getCodeshares(codeshares: any[]): string {
+    if (!codeshares || codeshares.length === 0) {
+      return '';
+    }
+    return codeshares.map((codeshare) => codeshare.ident).join(', ');
   }
 
   openFlightDetails(flight: any) {

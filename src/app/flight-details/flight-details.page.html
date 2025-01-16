@@ -1,3 +1,5 @@
+<!-- flight-details.page.html -->
+
 <ion-header>
   <ion-toolbar class="details-header">
     <ion-buttons slot="start">
@@ -15,11 +17,13 @@
       <div>
         <p class="airport-code">{{ flight.origin_iata }}</p>
         <p class="airport-name">Departure</p>
+        <p class="outbound-time">{{ flight.scheduled_out | date: 'HH:mm' }}</p>
       </div>
       <ion-icon name="airplane-outline"></ion-icon>
       <div>
         <p class="airport-code">{{ flight.destination_iata }}</p>
         <p class="airport-name">Arrival</p>
+        <p class="inbound-time">{{ flight.scheduled_in | date: 'HH:mm' }}</p>
       </div>
     </div>
   </div>
@@ -76,6 +80,15 @@
           <strong>On Ground:</strong> {{ waypoint[5] ? 'Yes' : 'No' }}
         </li>
       </ul>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="!openskyInfo">
+    <ion-card-header>
+      <ion-card-title>No Flight Path Available</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>The flight path for this flight is not available.</p>
     </ion-card-content>
   </ion-card>
 
