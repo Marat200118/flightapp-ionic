@@ -55,6 +55,17 @@ export class FlightService {
     );
   }
 
+  getHistoricalFlightTrack(flightId: string): Observable<any> {
+    const url = `${this.proxyBaseUrl}/aeroapi/history/flights/${flightId}/track`;
+
+    return this.http.get(url).pipe(
+      catchError((error) => {
+        console.error('Error fetching historical flight track:', error);
+        return throwError(() => new Error('Failed to fetch historical flight track.'));
+      })
+    );
+  }
+
 
 
   getFlightPath(icao24: string, time: number): Observable<any> {

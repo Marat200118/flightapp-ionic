@@ -46,9 +46,9 @@ import { ActivatedRoute } from '@angular/router';
 
 export class FlightDetailsPage {
   flight: any; 
+  flightPath: any = null;
   openskyInfo: any = null;
   
-
   constructor(
     private flightService: FlightService 
   ) {
@@ -61,131 +61,233 @@ export class FlightDetailsPage {
       const now = new Date();
       const scheduledDeparture = new Date(this.flight.scheduled_out);
 
-      // Check if the flight is upcoming (less than 6 hours from now)
+      // Upcoming flights (6 hours before departure)
       if (scheduledDeparture.getTime() > now.getTime()) {
         const timeDifference = (scheduledDeparture.getTime() - now.getTime()) / (1000 * 60 * 60);
         if (timeDifference <= 6) {
           this.findPreviousFlight();
         }
       } else {
-        this.openskyInfo = this.flight.openskyInfo || this.getOpenSkyInfoFromLocalStorage();
-        if (!this.openskyInfo) {
-          this.loadFlightInfoFromOpenSky();
-        } else {
-          this.loadFlightPathFromOpenSky();
+        this.flightPath = this.getFlightPathFromLocalStorage();
+
+        if (!this.flightPath) {
+          this.findHistoricalFlightPath();
         }
       }
     }
   }
 
+  // findPreviousFlight() {
+  //   const departureAirport = this.flight.origin;
+  //   const arrivalAirport = this.flight.destination;
+
+  //   // Time range: 48 hours before the scheduled departure
+  //   const scheduledDepartureUTC = new Date(this.flight.scheduled_out);
+  //   const startTime = Math.floor((scheduledDepartureUTC.getTime() - 48 * 60 * 60 * 1000) / 1000); 
+  //   const endTime = Math.floor(scheduledDepartureUTC.getTime() / 1000); 
+
+  //   const previousFlightKey = `${departureAirport}-${arrivalAirport}-${this.flight.scheduled_out}-previous`;
+
+  //   const savedPreviousFlight = this.getPreviousFlightFromLocalStorage(previousFlightKey);
+
+  //   if (savedPreviousFlight) {
+  //     console.log('Loaded previous flight from localStorage:', savedPreviousFlight);
+  //     this.openskyInfo = savedPreviousFlight;
+  //     this.loadFlightPathFromOpenSky();
+  //   } else {
+  //     this.flightService
+  //       .getDeparturesWithArrival(departureAirport, startTime, endTime, arrivalAirport)
+  //       .subscribe(
+  //         (flights: any[]) => {
+  //           console.log('Previous Flights Fetched:', flights);
+
+  //           const previousFlight = flights.find((flight) => {
+  //             const matchesDepartureAirport = flight.estDepartureAirport === departureAirport;
+  //             const matchesArrivalAirport = flight.estArrivalAirport === arrivalAirport;
+
+  //             const flightDepartureTime = flight.firstSeen * 1000; 
+  //             const matchesTimeRange =
+  //               flightDepartureTime >= startTime * 1000 && flightDepartureTime <= endTime * 1000;
+
+  //             return matchesDepartureAirport && matchesArrivalAirport && matchesTimeRange;
+  //           });
+
+  //           if (previousFlight) {
+  //             console.log('Previous Flight Found:', previousFlight);
+
+  //             this.openskyInfo = previousFlight;
+  //             this.savePreviousFlightToLocalStorage(previousFlightKey, previousFlight);
+
+  //             this.loadFlightPathFromOpenSky();
+  //           } else {
+  //             console.error('No previous flight found for this route and time range.');
+  //           }
+  //         },
+  //         (error) => {
+  //           console.error('Error fetching previous flights:', error);
+  //         }
+  //       );
+  //   }
+  // }
+
   findPreviousFlight() {
     const departureAirport = this.flight.origin;
     const arrivalAirport = this.flight.destination;
 
-    // Time range: 48 hours before the scheduled departure
     const scheduledDepartureUTC = new Date(this.flight.scheduled_out);
-    const startTime = Math.floor((scheduledDepartureUTC.getTime() - 48 * 60 * 60 * 1000) / 1000); 
-    const endTime = Math.floor(scheduledDepartureUTC.getTime() / 1000); 
+    const startTime = Math.floor((scheduledDepartureUTC.getTime() - 48 * 60 * 60 * 1000) / 1000); // 48 hours before
+    const endTime = Math.floor(scheduledDepartureUTC.getTime() / 1000);
 
-    console.log('Fetching previous flights with the following parameters:');
-    console.log(`Departure Airport: ${departureAirport}`);
-    console.log(`Arrival Airport: ${arrivalAirport}`);
-    console.log(`Start Time (Unix): ${startTime}`);
-    console.log(`End Time (Unix): ${endTime}`);
+    const previousFlightKey = `${departureAirport}-${arrivalAirport}-${this.flight.scheduled_out}-previous`;
 
-    this.flightService
-      .getDeparturesWithArrival(departureAirport, startTime, endTime, arrivalAirport)
-      .subscribe(
-        (flights: any[]) => {
-          console.log('Previous Flights Fetched:', flights);
+    // Check if previous flight is already stored in localStorage
+    const savedPreviousFlight = this.getPreviousFlightFromLocalStorage(previousFlightKey);
 
+    if (savedPreviousFlight) {
+      console.log('Loaded previous flight from localStorage:', savedPreviousFlight);
+      this.openskyInfo = savedPreviousFlight;
+      this.flightPath = savedPreviousFlight.path || null;
+    } else {
+      this.flightService
+        .getDeparturesWithArrival(departureAirport, startTime, endTime, arrivalAirport)
+        .subscribe((flights: any[]) => {
           const previousFlight = flights.find((flight) => {
             const matchesDepartureAirport = flight.estDepartureAirport === departureAirport;
             const matchesArrivalAirport = flight.estArrivalAirport === arrivalAirport;
 
-            const flightDepartureTime = flight.firstSeen * 1000; 
-            const matchesTimeRange =
-              flightDepartureTime >= startTime * 1000 && flightDepartureTime <= endTime * 1000;
-
-            console.log(`Checking flight: ${flight.callsign}`);
-            console.log(`Matches Departure Airport: ${matchesDepartureAirport}`);
-            console.log(`Matches Arrival Airport: ${matchesArrivalAirport}`);
-            console.log(`Matches Time Range: ${matchesTimeRange}`);
-
-            return matchesDepartureAirport && matchesArrivalAirport && matchesTimeRange;
+            return matchesDepartureAirport && matchesArrivalAirport;
           });
 
           if (previousFlight) {
-            console.log('Previous Flight Found:', previousFlight);
-
             this.openskyInfo = previousFlight;
-            this.saveOpenSkyInfoToLocalStorage(previousFlight);
+            this.flightPath = previousFlight.path || null;
 
-            this.loadFlightPathFromOpenSky();
-          } else {
-            console.error('No previous flight found for this route and time range.');
+            this.savePreviousFlightToLocalStorage(previousFlightKey, previousFlight);
           }
-        },
-        (error) => {
-          console.error('Error fetching previous flights:', error);
-        }
-      );
+        });
+    }
   }
 
+  // findHistoricalFlightPath() {
+  //   const departureAirport = this.flight.origin;
+  //   const arrivalAirport = this.flight.destination;
 
+  //   const scheduledOutUTC = new Date(this.flight.scheduled_out); // UTC time
+  //   const startTime = Math.floor((scheduledOutUTC.getTime() - 2 * 60 * 60 * 1000) / 1000); // 2 hours before
+  //   const endTime = Math.floor((scheduledOutUTC.getTime() + 4 * 60 * 60 * 1000) / 1000); // 4 hours after
 
-  loadFlightInfoFromOpenSky() {
-    const departureAirport = this.flight.origin; 
-    const arrivalAirport = this.flight.destination; 
+  //   this.flightService
+  //     .getDeparturesWithArrival(departureAirport, startTime, endTime, arrivalAirport)
+  //     .subscribe(
+  //       (flights: any[]) => {
+  //         console.log('Fetched Historical Flights from OpenSky:', flights);
 
-    const scheduledOutUTC = new Date(this.flight.scheduled_out); // UTC time
-    const startTime = new Date(scheduledOutUTC.getTime() - 2 * 60 * 60 * 1000); // 2 hours before
-    const endTime = new Date(scheduledOutUTC.getTime() + 4 * 60 * 60 * 1000)
+  //         const matchingFlight = flights.find((flight) => {
+  //           const matchesDepartureAirport = flight.estDepartureAirport === departureAirport;
+  //           const matchesArrivalAirport = flight.estArrivalAirport === arrivalAirport;
 
-    const startTimeUnix = Math.floor(startTime.getTime() / 1000); // Convert to Unix timestamp
-    const endTimeUnix = Math.floor(endTime.getTime() / 1000); 
+  //           const flightDepartureTime = new Date(flight.firstSeen * 1000);
+  //           const flightArrivalTime = new Date(flight.lastSeen * 1000);
 
-    // Call the FlightService to fetch departures within the time range
+  //           const matchesTimeRange =
+  //             flightDepartureTime >= new Date(startTime * 1000) &&
+  //             flightArrivalTime <= new Date(endTime * 1000);
+
+  //           return matchesDepartureAirport && matchesArrivalAirport && matchesTimeRange;
+  //         });
+
+  //         if (matchingFlight) {
+  //           console.log('Matching Historical Flight Found:', matchingFlight);
+
+  //           this.flightPath = matchingFlight;
+  //           this.saveFlightPathToLocalStorage(matchingFlight);
+  //         } else {
+  //           console.error('No matching historical flight found.');
+  //         }
+  //       },
+  //       (error) => {
+  //         console.error('Error fetching historical flight path:', error);
+  //       }
+  //     );
+  // }
+
+  findHistoricalFlightPath() {
+    const departureAirport = this.flight.origin;
+    const arrivalAirport = this.flight.destination;
+    const scheduledOutUTC = new Date(this.flight.scheduled_out);
+
+    const startTime = Math.floor((scheduledOutUTC.getTime() - 2 * 60 * 60 * 1000) / 1000); // 2 hours before
+    const endTime = Math.floor((scheduledOutUTC.getTime() + 4 * 60 * 60 * 1000) / 1000); // 4 hours after
+
     this.flightService
-      .getDeparturesWithArrival(departureAirport, startTimeUnix, endTimeUnix, arrivalAirport)
-      .subscribe(
-        (flights: any[]) => {
-          console.log('Fetched Flights from OpenSky:', flights);
+      .getDeparturesWithArrival(departureAirport, startTime, endTime, arrivalAirport)
+      .subscribe((flights: any[]) => {
+        const matchingFlight = flights.find((flight) => {
+          const matchesDepartureAirport = flight.estDepartureAirport === departureAirport;
+          const matchesArrivalAirport = flight.estArrivalAirport === arrivalAirport;
 
-          // Match a flight by origin, destination, and time
-          const matchingFlight = flights.find((flight) => {
-            const matchesDepartureAirport = flight.estDepartureAirport === departureAirport;
-            const matchesArrivalAirport = flight.estArrivalAirport === arrivalAirport;
+          return matchesDepartureAirport && matchesArrivalAirport;
+        });
 
-            const flightDepartureTime = new Date(flight.firstSeen * 1000);
-            const flightArrivalTime = new Date(flight.lastSeen * 1000);
-
-            const matchesTimeRange =
-              flightDepartureTime >= startTime && flightArrivalTime <= endTime;
-
-            console.log(`Checking flight: ${flight.callsign}`);
-            console.log(`Matches Departure Airport: ${matchesDepartureAirport}`);
-            console.log(`Matches Arrival Airport: ${matchesArrivalAirport}`);
-            console.log(`Matches Time Range: ${matchesTimeRange}`);
-
-            return matchesDepartureAirport && matchesArrivalAirport && matchesTimeRange;
-          });
-
-          if (matchingFlight) {
-            console.log('Matching Flight Found:', matchingFlight);
-
-            this.openskyInfo = matchingFlight;
-            this.saveOpenSkyInfoToLocalStorage(matchingFlight);
-            this.loadFlightPathFromOpenSky();
-          } else {
-            console.error('No matching flights found for this flight.');
-          }
-        },
-        (error) => {
-          console.error('Error fetching OpenSky data:', error);
+        if (matchingFlight) {
+          this.flightPath = matchingFlight.path || null;
+          this.saveFlightPathToLocalStorage(this.flightPath);
         }
-      );
+      });
   }
+
+  // loadFlightInfoFromOpenSky() {
+  //   const departureAirport = this.flight.origin; 
+  //   const arrivalAirport = this.flight.destination; 
+
+  //   const scheduledOutUTC = new Date(this.flight.scheduled_out); // UTC time
+  //   const startTime = new Date(scheduledOutUTC.getTime() - 2 * 60 * 60 * 1000); // 2 hours before
+  //   const endTime = new Date(scheduledOutUTC.getTime() + 4 * 60 * 60 * 1000)
+
+  //   const startTimeUnix = Math.floor(startTime.getTime() / 1000); // Convert to Unix timestamp
+  //   const endTimeUnix = Math.floor(endTime.getTime() / 1000); 
+
+  //   // Call the FlightService to fetch departures within the time range
+  //   this.flightService
+  //     .getDeparturesWithArrival(departureAirport, startTimeUnix, endTimeUnix, arrivalAirport)
+  //     .subscribe(
+  //       (flights: any[]) => {
+  //         console.log('Fetched Flights from OpenSky:', flights);
+
+  //         // Match a flight by origin, destination, and time
+  //         const matchingFlight = flights.find((flight) => {
+  //           const matchesDepartureAirport = flight.estDepartureAirport === departureAirport;
+  //           const matchesArrivalAirport = flight.estArrivalAirport === arrivalAirport;
+
+  //           const flightDepartureTime = new Date(flight.firstSeen * 1000);
+  //           const flightArrivalTime = new Date(flight.lastSeen * 1000);
+
+  //           const matchesTimeRange =
+  //             flightDepartureTime >= startTime && flightArrivalTime <= endTime;
+
+  //           console.log(`Checking flight: ${flight.callsign}`);
+  //           console.log(`Matches Departure Airport: ${matchesDepartureAirport}`);
+  //           console.log(`Matches Arrival Airport: ${matchesArrivalAirport}`);
+  //           console.log(`Matches Time Range: ${matchesTimeRange}`);
+
+  //           return matchesDepartureAirport && matchesArrivalAirport && matchesTimeRange;
+  //         });
+
+  //         if (matchingFlight) {
+  //           console.log('Matching Flight Found:', matchingFlight);
+
+  //           this.openskyInfo = matchingFlight;
+  //           this.saveOpenSkyInfoToLocalStorage(matchingFlight);
+  //           this.loadFlightPathFromOpenSky();
+  //         } else {
+  //           console.error('No matching flights found for this flight.');
+  //         }
+  //       },
+  //       (error) => {
+  //         console.error('Error fetching OpenSky data:', error);
+  //       }
+  //     );
+  // }
 
   loadFlightPathFromOpenSky() {
     if (!this.openskyInfo || !this.openskyInfo.icao24) {
@@ -244,6 +346,16 @@ export class FlightDetailsPage {
     }
   }
 
+  savePreviousFlightToLocalStorage(key: string, flightData: any) {
+    localStorage.setItem(key, JSON.stringify(flightData));
+    console.log('Previous flight saved to localStorage:', flightData);
+  }
+
+  getPreviousFlightFromLocalStorage(key: string) {
+    const storedFlight = localStorage.getItem(key);
+    return storedFlight ? JSON.parse(storedFlight) : null;
+  }
+
   saveFlightPathToLocalStorage(path: any[]) {
     const storedPaths = JSON.parse(localStorage.getItem('flightPaths') || '[]');
     
@@ -255,6 +367,8 @@ export class FlightDetailsPage {
       console.log('Flight path saved to localStorage:', path);
     }
   }
+
+
 
   getFlightPathFromLocalStorage() {
     const storedPaths = JSON.parse(localStorage.getItem('flightPaths') || '[]');

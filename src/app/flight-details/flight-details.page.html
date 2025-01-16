@@ -65,31 +65,30 @@
     </ion-card-content>
   </ion-card>
 
-  <ion-card *ngIf="openskyInfo?.path">
+  <ion-card *ngIf="flightPath">
     <ion-card-header>
       <ion-card-title>Flight Path</ion-card-title>
     </ion-card-header>
     <ion-card-content>
       <ul>
-        <li *ngFor="let waypoint of openskyInfo.path">
+        <li *ngFor="let waypoint of flightPath">
           <strong>Time:</strong> {{ waypoint[0] * 1000 | date: 'yyyy-MM-dd HH:mm:ss' }}<br />
-          <strong>Latitude:</strong> {{ waypoint[1] || 'N/A' }}<br />
-          <strong>Longitude:</strong> {{ waypoint[2] || 'N/A' }}<br />
+          <strong>Latitude:</strong> {{ waypoint[1] }}<br />
+          <strong>Longitude:</strong> {{ waypoint[2] }}<br />
           <strong>Altitude:</strong> {{ waypoint[3] || 'N/A' }} meters<br />
-          <strong>Track:</strong> {{ waypoint[4] || 'N/A' }}°<br />
-          <strong>On Ground:</strong> {{ waypoint[5] ? 'Yes' : 'No' }}
+          <strong>Track:</strong> {{ waypoint[4] || 'N/A' }}°
         </li>
       </ul>
     </ion-card-content>
   </ion-card>
 
-  <ion-card *ngIf="!openskyInfo">
+
+  <ion-card *ngIf="!flightPath">
     <ion-card-header>
       <ion-card-title>No Flight Path Available</ion-card-title>
     </ion-card-header>
     <ion-card-content>
-      <p>The flight path for this flight is not available.</p>
+      <p>The flight path is not available at this time.</p>
     </ion-card-content>
   </ion-card>
-
 </ion-content>
