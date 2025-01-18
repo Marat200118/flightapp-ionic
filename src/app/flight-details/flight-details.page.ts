@@ -4,6 +4,8 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FlightService } from '../services/flight.service';
+import { StorageService } from '../services/storage.service';
+import { Flight } from '../models/flight.model';
 import { airplaneOutline } from 'ionicons/icons';
 import { addIcons } from 'ionicons';
 import {
@@ -48,193 +50,126 @@ export class FlightDetailsPage {
   flight: any; 
   flightPath: any = null;
   openskyInfo: any = null;
+  previousFlight: any = null;
+  actualFlight: any = null;
+  
   
   constructor(
-    private flightService: FlightService 
+    private flightService: FlightService,
+    private storageService: StorageService,
   ) {
     const state = history.state;
     this.flight = state.flight || null;
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     if (this.flight) {
+      console.log('Flight Details:', this.flight);
+
       const now = new Date();
-      const scheduledDeparture = new Date(this.flight.scheduled_out);
+      const scheduledDeparture = new Date(this.flight.flightDetails.scheduled_out);
 
-      // Upcoming flights (6 hours before departure)
-      if (scheduledDeparture.getTime() > now.getTime()) {
-        const timeDifference = (scheduledDeparture.getTime() - now.getTime()) / (1000 * 60 * 60);
-        if (timeDifference <= 6) {
-          this.findPreviousFlight();
-        }
-      } else {
-        this.flightPath = this.getFlightPathFromLocalStorage();
+      const timeToDeparture = (scheduledDeparture.getTime() - now.getTime()) / (1000 * 60 * 60);
+      console.log('Time to Departure (hours):', timeToDeparture);
 
-        if (!this.flightPath) {
-          this.findHistoricalFlightPath();
-        }
+      if (timeToDeparture <= 8 && timeToDeparture > 0) {
+        console.log('Fetching previous flight...');
+        await this.findPreviousFlight();
+      }
+
+      const timeSinceDeparture = (now.getTime() - scheduledDeparture.getTime()) / (1000 * 60 * 60);
+      console.log('Time since Departure (hours):', timeSinceDeparture);
+
+      if (timeSinceDeparture >= 12) {
+        console.log('Fetching actual flight...');
+        await this.findAndSaveActualFlight();
+      }
+
+      if (this.flight.actualFlight) {
+        console.log('Fetching flight path...');
+        await this.loadFlightPath(this.flight.actualFlight.icao24, this.flight.actualFlight.firstSeen);
       }
     }
   }
 
-  // findPreviousFlight() {
-  //   const departureAirport = this.flight.origin;
-  //   const arrivalAirport = this.flight.destination;
 
-  //   // Time range: 48 hours before the scheduled departure
-  //   const scheduledDepartureUTC = new Date(this.flight.scheduled_out);
-  //   const startTime = Math.floor((scheduledDepartureUTC.getTime() - 48 * 60 * 60 * 1000) / 1000); 
-  //   const endTime = Math.floor(scheduledDepartureUTC.getTime() / 1000); 
-
-  //   const previousFlightKey = `${departureAirport}-${arrivalAirport}-${this.flight.scheduled_out}-previous`;
-
-  //   const savedPreviousFlight = this.getPreviousFlightFromLocalStorage(previousFlightKey);
-
-  //   if (savedPreviousFlight) {
-  //     console.log('Loaded previous flight from localStorage:', savedPreviousFlight);
-  //     this.openskyInfo = savedPreviousFlight;
-  //     this.loadFlightPathFromOpenSky();
-  //   } else {
-  //     this.flightService
-  //       .getDeparturesWithArrival(departureAirport, startTime, endTime, arrivalAirport)
-  //       .subscribe(
-  //         (flights: any[]) => {
-  //           console.log('Previous Flights Fetched:', flights);
-
-  //           const previousFlight = flights.find((flight) => {
-  //             const matchesDepartureAirport = flight.estDepartureAirport === departureAirport;
-  //             const matchesArrivalAirport = flight.estArrivalAirport === arrivalAirport;
-
-  //             const flightDepartureTime = flight.firstSeen * 1000; 
-  //             const matchesTimeRange =
-  //               flightDepartureTime >= startTime * 1000 && flightDepartureTime <= endTime * 1000;
-
-  //             return matchesDepartureAirport && matchesArrivalAirport && matchesTimeRange;
-  //           });
-
-  //           if (previousFlight) {
-  //             console.log('Previous Flight Found:', previousFlight);
-
-  //             this.openskyInfo = previousFlight;
-  //             this.savePreviousFlightToLocalStorage(previousFlightKey, previousFlight);
-
-  //             this.loadFlightPathFromOpenSky();
-  //           } else {
-  //             console.error('No previous flight found for this route and time range.');
-  //           }
-  //         },
-  //         (error) => {
-  //           console.error('Error fetching previous flights:', error);
-  //         }
-  //       );
-  //   }
-  // }
-
-  findPreviousFlight() {
-    const departureAirport = this.flight.origin;
-    const arrivalAirport = this.flight.destination;
-
-    const scheduledDepartureUTC = new Date(this.flight.scheduled_out);
+  async findPreviousFlight() {
+    const { origin, destination, scheduled_out } = this.flight.flightDetails;
+    const scheduledDepartureUTC = new Date(scheduled_out);
     const startTime = Math.floor((scheduledDepartureUTC.getTime() - 48 * 60 * 60 * 1000) / 1000); // 48 hours before
-    const endTime = Math.floor(scheduledDepartureUTC.getTime() / 1000);
+    const endTime = Math.floor(scheduledDepartureUTC.getTime() / 1000); // Scheduled departure
 
-    const previousFlightKey = `${departureAirport}-${arrivalAirport}-${this.flight.scheduled_out}-previous`;
+    try {
+      const flights = await this.flightService
+        .getDeparturesWithArrival(origin, startTime, endTime, destination)
+        .toPromise();
 
-    // Check if previous flight is already stored in localStorage
-    const savedPreviousFlight = this.getPreviousFlightFromLocalStorage(previousFlightKey);
+        console.log('Fetched flights:', flights);
 
-    if (savedPreviousFlight) {
-      console.log('Loaded previous flight from localStorage:', savedPreviousFlight);
-      this.openskyInfo = savedPreviousFlight;
-      this.flightPath = savedPreviousFlight.path || null;
-    } else {
-      this.flightService
-        .getDeparturesWithArrival(departureAirport, startTime, endTime, arrivalAirport)
-        .subscribe((flights: any[]) => {
-          const previousFlight = flights.find((flight) => {
-            const matchesDepartureAirport = flight.estDepartureAirport === departureAirport;
-            const matchesArrivalAirport = flight.estArrivalAirport === arrivalAirport;
+      const previousFlight = flights.find((flight: any) => {
+      console.log(
+        `Checking flight: ${flight.callsign}, origin: ${flight.estDepartureAirport}, destination: ${flight.estArrivalAirport}`
+      );
+      return (
+        flight.estDepartureAirport === origin && flight.estArrivalAirport === destination
+      );
+    });
 
-            return matchesDepartureAirport && matchesArrivalAirport;
-          });
 
-          if (previousFlight) {
-            this.openskyInfo = previousFlight;
-            this.flightPath = previousFlight.path || null;
+      if (previousFlight) {
+        const flightPath = await this.loadFlightPath(previousFlight.icao24, previousFlight.firstSeen);
+        previousFlight.flightPath = flightPath;
 
-            this.savePreviousFlightToLocalStorage(previousFlightKey, previousFlight);
-          }
-        });
+        this.flight.previousFlight = previousFlight;
+
+        await this.storageService.set(this.flight.flightId, this.flight);
+
+        console.log('Updated flight with previous flight:', this.flight);
+      } else {
+        console.warn('No previous flight found.');
+      }
+    } catch (error) {
+      console.error('Error fetching previous flight:', error);
     }
   }
 
-  // findHistoricalFlightPath() {
-  //   const departureAirport = this.flight.origin;
-  //   const arrivalAirport = this.flight.destination;
 
-  //   const scheduledOutUTC = new Date(this.flight.scheduled_out); // UTC time
-  //   const startTime = Math.floor((scheduledOutUTC.getTime() - 2 * 60 * 60 * 1000) / 1000); // 2 hours before
-  //   const endTime = Math.floor((scheduledOutUTC.getTime() + 4 * 60 * 60 * 1000) / 1000); // 4 hours after
+  async findAndSaveActualFlight() {
+    const { origin, destination, scheduled_out } = this.flight.flightDetails;
+    const scheduledDepartureUTC = new Date(scheduled_out);
+    const scheduledDepartureTime = Math.floor(scheduledDepartureUTC.getTime() / 1000);
+    const startTime = scheduledDepartureTime;
+    const endTime = Math.floor((scheduledDepartureUTC.getTime() + 12 * 60 * 60 * 1000) / 1000);
 
-  //   this.flightService
-  //     .getDeparturesWithArrival(departureAirport, startTime, endTime, arrivalAirport)
-  //     .subscribe(
-  //       (flights: any[]) => {
-  //         console.log('Fetched Historical Flights from OpenSky:', flights);
+    try {
+      const flights = await this.flightService
+        .getDeparturesWithArrival(origin, startTime, endTime, destination)
+        .toPromise();
 
-  //         const matchingFlight = flights.find((flight) => {
-  //           const matchesDepartureAirport = flight.estDepartureAirport === departureAirport;
-  //           const matchesArrivalAirport = flight.estArrivalAirport === arrivalAirport;
+      const actualFlight = flights.reduce((closest: any, current: any) => {
+        const closestDiff = Math.abs(closest.firstSeen - scheduledDepartureTime);
+        const currentDiff = Math.abs(current.firstSeen - scheduledDepartureTime);
+        return currentDiff < closestDiff ? current : closest;
+      }, flights[0]);
 
-  //           const flightDepartureTime = new Date(flight.firstSeen * 1000);
-  //           const flightArrivalTime = new Date(flight.lastSeen * 1000);
+      if (actualFlight) {
+        const flightPath = await this.loadFlightPath(actualFlight.icao24, actualFlight.firstSeen);
+        actualFlight.flightPath = flightPath;
 
-  //           const matchesTimeRange =
-  //             flightDepartureTime >= new Date(startTime * 1000) &&
-  //             flightArrivalTime <= new Date(endTime * 1000);
+        this.flight.actualFlight = actualFlight;
 
-  //           return matchesDepartureAirport && matchesArrivalAirport && matchesTimeRange;
-  //         });
+        await this.storageService.set(this.flight.flightId, this.flight);
 
-  //         if (matchingFlight) {
-  //           console.log('Matching Historical Flight Found:', matchingFlight);
-
-  //           this.flightPath = matchingFlight;
-  //           this.saveFlightPathToLocalStorage(matchingFlight);
-  //         } else {
-  //           console.error('No matching historical flight found.');
-  //         }
-  //       },
-  //       (error) => {
-  //         console.error('Error fetching historical flight path:', error);
-  //       }
-  //     );
-  // }
-
-  findHistoricalFlightPath() {
-    const departureAirport = this.flight.origin;
-    const arrivalAirport = this.flight.destination;
-    const scheduledOutUTC = new Date(this.flight.scheduled_out);
-
-    const startTime = Math.floor((scheduledOutUTC.getTime() - 2 * 60 * 60 * 1000) / 1000); // 2 hours before
-    const endTime = Math.floor((scheduledOutUTC.getTime() + 4 * 60 * 60 * 1000) / 1000); // 4 hours after
-
-    this.flightService
-      .getDeparturesWithArrival(departureAirport, startTime, endTime, arrivalAirport)
-      .subscribe((flights: any[]) => {
-        const matchingFlight = flights.find((flight) => {
-          const matchesDepartureAirport = flight.estDepartureAirport === departureAirport;
-          const matchesArrivalAirport = flight.estArrivalAirport === arrivalAirport;
-
-          return matchesDepartureAirport && matchesArrivalAirport;
-        });
-
-        if (matchingFlight) {
-          this.flightPath = matchingFlight.path || null;
-          this.saveFlightPathToLocalStorage(this.flightPath);
-        }
-      });
+        console.log('Updated flight with actual flight:', this.flight);
+      } else {
+        console.warn('No actual flight found.');
+      }
+    } catch (error) {
+      console.error('Error fetching actual flight:', error);
+    }
   }
+
+
 
   // loadFlightInfoFromOpenSky() {
   //   const departureAirport = this.flight.origin; 
@@ -289,38 +224,31 @@ export class FlightDetailsPage {
   //     );
   // }
 
-  loadFlightPathFromOpenSky() {
-    if (!this.openskyInfo || !this.openskyInfo.icao24) {
-      console.error('No icao24 information available for this flight.');
-      return;
-    }
+  async loadFlightPath(icao24: string, time: number) {
+    const pathKey = `path-${icao24}-${time}`;
 
-    const icao24 = this.openskyInfo.icao24.toLowerCase();
-    const time = this.openskyInfo.firstSeen;
-
-    const storedPath = this.getFlightPathFromLocalStorage();
+    const storedPath = await this.storageService.get(pathKey);
     if (storedPath) {
-      console.log('Using stored flight path from localStorage:', storedPath);
-      this.openskyInfo.path = storedPath;
-      return;
+      console.log('Using stored flight path:', storedPath);
+      return storedPath;
     }
 
-    this.flightService.getFlightPath(icao24, time).subscribe(
-      (data: any) => {
-        console.log('Flight Path Data:', data);
-
-        if (data && data.path) {
-          this.openskyInfo.path = data.path;
-          this.saveFlightPathToLocalStorage(data.path);
-        } else {
-          console.warn('No path data available for this flight.');
-        }
-      },
-      (error) => {
-        console.error('Error fetching flight path data:', error);
+    try {
+      const pathData = await this.flightService.getFlightPath(icao24, time).toPromise();
+      if (pathData?.path) {
+        await this.storageService.set(pathKey, pathData.path);
+        console.log('Flight path saved to storage:', pathData.path);
+        return pathData.path;
+      } else {
+        console.warn('No flight path data found.');
+        return null;
       }
-    );
+    } catch (error) {
+      console.error('Error fetching flight path:', error);
+      return null;
+    }
   }
+
   
   getAirlinePrefix(ident: string): string {
     return ident.replace(/[^\D]/g, '').toUpperCase();

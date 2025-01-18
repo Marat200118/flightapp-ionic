@@ -1,3 +1,5 @@
+//tab1.page.ts
+
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, ViewChild } from '@angular/core';
 import { NavController, IonicModule } from '@ionic/angular';
@@ -12,6 +14,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { StorageService } from '../services/storage.service';
+import { Flight } from '../models/flight.model';
 
 
 import {
@@ -49,9 +53,9 @@ import {
 export class Tab1Page {
   @ViewChild('modal') modal!: IonModal;
 
-  flights: any[] = [];
-  upcomingFlights: any[] = [];
-  previousFlights: any[] = [];
+  flights: Flight[] = [];
+  upcomingFlights: Flight[] = []; 
+  previousFlights: Flight[] = [];
   flightNumber = '';
   flightDate = '';
   origin = '';
@@ -60,56 +64,71 @@ export class Tab1Page {
   private apiBaseUrl = 'http://localhost:3000/api/schedules';
   private apiKey = 'wHf94IBGL2dxGFS13wlB5sbGS34bBfT3';
 
-  constructor(private navCtrl: NavController, private http: HttpClient) {}
+  constructor(private navCtrl: NavController, private http: HttpClient, private storageService: StorageService) {}
 
   cancel() {
     this.modal.dismiss(null, 'cancel');
   }
 
   async confirm() {
-    console.log("Flight Number:", this.flightNumber, "Date:", this.flightDate, "Origin:", this.origin, "Destination:", this.destination);
+  console.log("Flight Number:", this.flightNumber, "Date:", this.flightDate, "Origin:", this.origin, "Destination:", this.destination);
 
-    if (!this.flightNumber || !this.flightDate || !this.origin || !this.destination) {
-      alert('Please enter all details.');
-      return;
-    }
-
-    const selectedDate = new Date(this.flightDate); // Local time
-    const flightDateUTC = selectedDate.toISOString(); // Convert to UTC
-
-    const url = `http://localhost:3000/api/schedules`;
-
-    const params = {
-      dateStart: flightDateUTC.split('T')[0], 
-      dateEnd: this.getEndDate(flightDateUTC),
-      flightNumber: this.flightNumber,
-      origin: this.origin,
-      destination: this.destination,
-    };
-
-    console.log('Request Params:', params);
-
-    const headers = new HttpHeaders({ 'x-apikey': this.apiKey });
-      this.http.get(url, { headers, params }).subscribe(
-        (response: any) => {
-          console.log("API Response:", response);
-
-          if (response.scheduled && response.scheduled.length > 0) {
-            const flight = response.scheduled[0]; 
-            this.addFlightToStorage(flight);
-            this.flights.unshift(flight);
-            this.modal.dismiss();
-            console.log("Flight added to storage:", flight);
-          } else {
-            alert("No scheduled flights found for the provided details.");
-          }
-        },
-        (error) => {
-          console.error("Error fetching flight data:", error);
-          alert("Failed to fetch flight data. Please try again.");
-        }
-      );
+  if (!this.flightNumber || !this.flightDate || !this.origin || !this.destination) {
+    alert('Please enter all details.');
+    return;
   }
+
+  const selectedDate = new Date(this.flightDate); // Local time
+  const flightDateUTC = selectedDate.toISOString(); // Convert to UTC
+
+  const url = `http://localhost:3000/api/schedules`;
+
+  const params = {
+    dateStart: flightDateUTC.split('T')[0],
+    dateEnd: this.getEndDate(flightDateUTC),
+    flightNumber: this.flightNumber,
+    origin: this.origin,
+    destination: this.destination,
+  };
+
+  const headers = new HttpHeaders({ 'x-apikey': this.apiKey });
+  this.http.get(url, { headers, params }).subscribe(
+    async (response: any) => {
+      console.log("API Response:", response);
+
+      if (response.scheduled && response.scheduled.length > 0) {
+        const flight = response.scheduled[0];
+
+        // Check if flight already exists in storage
+        const existingFlight = await this.storageService.getFlightById(flight.fa_flight_id);
+        if (existingFlight) {
+          console.log('Flight already exists in storage:', existingFlight);
+          alert('This flight is already saved.');
+        } else {
+          const flightRecord: Flight = {
+            flightId: flight.fa_flight_id,
+            flightDetails: flight,
+            // previousFlightId: null,
+            // actualFlightPathId: null,
+          };
+
+
+          await this.storageService.addFlight(flightRecord);
+          this.flights.unshift(flightRecord);
+          await this.loadFlightsFromStorage();
+          this.modal.dismiss();
+          console.log("Flight added to storage:", flightRecord);
+        }
+      } else {
+        alert("No scheduled flights found for the provided details.");
+      }
+    },
+    (error) => {
+      console.error("Error fetching flight data:", error);
+      alert("Failed to fetch flight data. Please try again.");
+    }
+  );
+}
 
   addFlightToStorage(flight: any) {
     const storedFlights = JSON.parse(localStorage.getItem("flights") || "[]");
@@ -124,60 +143,61 @@ export class Tab1Page {
   }
 
   async loadFlightsFromStorage() {
-    const storedFlights = JSON.parse(localStorage.getItem('flights') || '[]');
+    this.flights = await this.storageService.getAllFlights();
     const today = new Date();
 
 
     const testFlight = {
-      id: Date.now(),
-      ident: 'LOT784',
-      ident_icao: 'LOT784',
-      ident_iata: 'LO784',
-      actual_ident: null,
-      actual_ident_icao: null,
-      actual_ident_iata: null,
-      aircraft_type: 'E75L',
-      scheduled_in: '2025-01-12T13:50:00Z',
-      scheduled_out: '2025-01-12T12:00:00Z',
-      origin: 'EVRA',
-      origin_icao: 'EVRA',
-      origin_iata: 'RIX',
-      origin_lid: null,
-      destination: 'EPWA',
-      destination_icao: 'EPWA',
-      destination_iata: 'WAW',
-      destination_lid: null,
-      fa_flight_id: 'UAL784-1736491986-airline-250p',
-      meal_service: 'Business: Snack or brunch / Economy: Food for sale',
-      seats_cabin_business: 3,
-      seats_cabin_coach: 76,
-      seats_cabin_first: 0,
-      isTest: true,
+      flightId: 'UAL784-1736491986-airline-250p', // Unique identifier for the test flight
+      flightDetails: {
+        ident: 'LOT784',
+        ident_icao: 'LOT784',
+        ident_iata: 'LO784',
+        actual_ident: null,
+        actual_ident_icao: null,
+        actual_ident_iata: null,
+        aircraft_type: 'E75L',
+        scheduled_in: '2025-01-12T13:50:00Z',
+        scheduled_out: '2025-01-12T12:00:00Z',
+        origin: 'EVRA',
+        origin_icao: 'EVRA',
+        origin_iata: 'RIX',
+        origin_lid: null,
+        destination: 'EPWA',
+        destination_icao: 'EPWA',
+        destination_iata: 'WAW',
+        destination_lid: null,
+        fa_flight_id: 'UAL784-1736491986-airline-250p',
+        meal_service: 'Business: Snack or brunch / Economy: Food for sale',
+        seats_cabin_business: 3,
+        seats_cabin_coach: 76,
+        seats_cabin_first: 0,
+        isTest: true,
+      },
     };
 
-    this.upcomingFlights = storedFlights.filter((flight: any) => {
-      const scheduledDate = new Date(flight.scheduled_in);
-      return scheduledDate >= today;
-    });
-
-    this.previousFlights = storedFlights.filter((flight: any) => {
-      const scheduledDate = new Date(flight.scheduled_in);
-      return scheduledDate < today;
-    });
-
-
-    const isTestFlightAdded = storedFlights.some(
-      (flight: any) => flight.ident === testFlight.ident && flight.isTest
+    const isTestFlightAdded = this.flights.some(
+      (flight) => flight.flightId === testFlight.flightId
     );
 
+    // If not, add the test flight to the storage
     if (!isTestFlightAdded) {
-      storedFlights.unshift(testFlight);
-      localStorage.setItem('flights', JSON.stringify(storedFlights));
+      await this.storageService.addFlight(testFlight);
+      this.flights.unshift(testFlight); // Add it to the in-memory array as well
     }
 
 
+    this.upcomingFlights = this.flights.filter((flight) => {
+      const scheduledDate = new Date(flight.flightDetails.scheduled_out);
+      return scheduledDate >= today;
+    });
 
-    this.flights = storedFlights;
+    // Filter previous flights
+    this.previousFlights = this.flights.filter((flight) => {
+      const scheduledDate = new Date(flight.flightDetails.scheduled_out);
+      return scheduledDate < today;
+    });
+
     console.log('Loaded Flights from Storage:', this.flights);
   }
 
