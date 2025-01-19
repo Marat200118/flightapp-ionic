@@ -41,43 +41,43 @@ export class StorageService {
     await this._storage?.set('flights', flights);
   }
 
-  // Get all flights from the storage
   async getAllFlights(): Promise<Flight[]> {
     return (await this.get('flights')) || [];
   }
 
-  // Get a flight by its ID
   async getFlightById(flightId: string): Promise<Flight | undefined> {
     const flights = await this.getAllFlights();
     return flights.find((flight) => flight.flightId === flightId);
   }
 
-  // Update a flight in the storage
   async updateFlight(flight: Flight): Promise<void> {
-    const flights = await this.getAllFlights();
-    const index = flights.findIndex((f) => f.flightId === flight.flightId);
-    if (index !== -1) {
-      flights[index] = flight;
-      await this.set('flights', flights);
+    await this.ensureInitialized();
+    const flights: Flight[] = await this.getAllFlights();
+
+    const existingIndex = flights.findIndex((f) => f.flightId === flight.flightId);
+    if (existingIndex !== -1) {
+      flights[existingIndex] = flight;
+    } else {
+      flights.push(flight);
     }
+
+    await this.set('flights', flights); 
+    console.log('Updated Flights in Storage:', flights);
   }
 
-  // Get previous flight
+
   async getPreviousFlight(previousFlightId: string): Promise<Flight | undefined> {
     return await this.getFlightById(previousFlightId);
   }
 
-  // Clear all storage data
   async clear(): Promise<void> {
     await this._storage?.clear();
   }
 
-  // Set a value in the storage
   public async set(key: string, value: any): Promise<void> {
     await this._storage?.set(key, value);
   }
 
-  // Get a value from the storage
   public async get(key: string): Promise<any> {
     return await this._storage?.get(key);
   }

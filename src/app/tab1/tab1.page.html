@@ -47,7 +47,8 @@
       </ion-card>
     </div>
     <div *ngIf="upcomingFlights.length === 0" class="no-flights">
-      <p>No upcoming flights available.</p>
+      <ion-icon name="airplane-outline"></ion-icon>
+      <p>You don't have an upcoming flights</p>
     </div>
 
     <div *ngIf="previousFlights.length > 0" class="flights-section">

@@ -99,7 +99,6 @@ export class Tab1Page {
       if (response.scheduled && response.scheduled.length > 0) {
         const flight = response.scheduled[0];
 
-        // Check if flight already exists in storage
         const existingFlight = await this.storageService.getFlightById(flight.fa_flight_id);
         if (existingFlight) {
           console.log('Flight already exists in storage:', existingFlight);
@@ -148,7 +147,7 @@ export class Tab1Page {
 
 
     const testFlight = {
-      flightId: 'UAL784-1736491986-airline-250p', // Unique identifier for the test flight
+      flightId: 'UAL784-1736491986-airline-250p',
       flightDetails: {
         ident: 'LOT784',
         ident_icao: 'LOT784',
@@ -180,10 +179,9 @@ export class Tab1Page {
       (flight) => flight.flightId === testFlight.flightId
     );
 
-    // If not, add the test flight to the storage
     if (!isTestFlightAdded) {
       await this.storageService.addFlight(testFlight);
-      this.flights.unshift(testFlight); // Add it to the in-memory array as well
+      this.flights.unshift(testFlight);
     }
 
 
@@ -192,7 +190,6 @@ export class Tab1Page {
       return scheduledDate >= today;
     });
 
-    // Filter previous flights
     this.previousFlights = this.flights.filter((flight) => {
       const scheduledDate = new Date(flight.flightDetails.scheduled_out);
       return scheduledDate < today;

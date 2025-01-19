@@ -48,6 +48,9 @@ import { ActivatedRoute } from '@angular/router';
 
 export class FlightDetailsPage {
   flight: any; 
+  flights: any[] = []; 
+  upcomingFlights: any[] = []; 
+  previousFlights: any[] = [];
   flightPath: any = null;
   openskyInfo: any = null;
   previousFlight: any = null;
@@ -85,9 +88,11 @@ export class FlightDetailsPage {
         await this.findAndSaveActualFlight();
       }
 
-      if (this.flight.actualFlight) {
-        console.log('Fetching flight path...');
-        await this.loadFlightPath(this.flight.actualFlight.icao24, this.flight.actualFlight.firstSeen);
+      if (this.flight.actualFlight && !this.flight.actualFlight.flightPath) {
+        console.log('Fetching flight path for actual flight...');
+        await this.loadFlightPath(this.flight.actualFlight);
+      } else if (this.flight.actualFlight?.flightPath) {
+        console.log('Using existing flight path for actual flight:', this.flight.actualFlight?.flightPath);
       }
     }
   }
@@ -117,18 +122,19 @@ export class FlightDetailsPage {
 
 
       if (previousFlight) {
-        const flightPath = await this.loadFlightPath(previousFlight.icao24, previousFlight.firstSeen);
-        previousFlight.flightPath = flightPath;
-
-        this.flight.previousFlight = previousFlight;
-
-        await this.storageService.set(this.flight.flightId, this.flight);
-
-        console.log('Updated flight with previous flight:', this.flight);
-      } else {
-        console.warn('No previous flight found.');
-      }
-    } catch (error) {
+        if (!previousFlight.flightPath) {
+          console.log('Fetching flight path for previous flight...');
+          await this.loadFlightPath(previousFlight);
+        } else {
+          console.log('Using existing flight path for previous flight:', previousFlight.flightPath);
+        }
+          this.flight.previousFlight = previousFlight; 
+          await this.storageService.updateFlight(this.flight);
+          console.log('Updated flight with previous flight:', this.flight);
+        } else {
+          console.warn('No previous flight found.');
+        }
+      } catch (error) {
       console.error('Error fetching previous flight:', error);
     }
   }
@@ -153,13 +159,14 @@ export class FlightDetailsPage {
       }, flights[0]);
 
       if (actualFlight) {
-        const flightPath = await this.loadFlightPath(actualFlight.icao24, actualFlight.firstSeen);
-        actualFlight.flightPath = flightPath;
-
+        if (!actualFlight.flightPath) {
+          console.log('Fetching flight path for actual flight...');
+          await this.loadFlightPath(actualFlight);
+        } else {
+          console.log('Using existing flight path for actual flight:', actualFlight.flightPath);
+        }
         this.flight.actualFlight = actualFlight;
-
-        await this.storageService.set(this.flight.flightId, this.flight);
-
+        await this.storageService.updateFlight(this.flight);
         console.log('Updated flight with actual flight:', this.flight);
       } else {
         console.warn('No actual flight found.');
@@ -168,6 +175,7 @@ export class FlightDetailsPage {
       console.error('Error fetching actual flight:', error);
     }
   }
+
 
 
 
@@ -224,20 +232,19 @@ export class FlightDetailsPage {
   //     );
   // }
 
-  async loadFlightPath(icao24: string, time: number) {
-    const pathKey = `path-${icao24}-${time}`;
+  async loadFlightPath(flight: any) {
 
-    const storedPath = await this.storageService.get(pathKey);
-    if (storedPath) {
-      console.log('Using stored flight path:', storedPath);
-      return storedPath;
+    if (flight.flightPath) {
+      console.log('Flight already has a flightPath:', flight.flightPath);
+      return flight.flightPath;
     }
 
     try {
-      const pathData = await this.flightService.getFlightPath(icao24, time).toPromise();
+      const pathData = await this.flightService.getFlightPath(flight.icao24, flight.firstSeen).toPromise();
       if (pathData?.path) {
-        await this.storageService.set(pathKey, pathData.path);
-        console.log('Flight path saved to storage:', pathData.path);
+        console.log('Fetched flight path from API:', pathData.path);
+        flight.flightPath = pathData.path; 
+        await this.storageService.updateFlight(this.flight);
         return pathData.path;
       } else {
         console.warn('No flight path data found.');
@@ -247,6 +254,22 @@ export class FlightDetailsPage {
       console.error('Error fetching flight path:', error);
       return null;
     }
+  }
+
+  async loadFlightsFromStorage() {
+    this.flights = await this.storageService.getAllFlights();
+    console.log('Loaded Flights from Storage:', this.flights);
+
+    const today = new Date();
+    this.upcomingFlights = this.flights.filter((flight) => {
+      const scheduledDate = new Date(flight.flightDetails.scheduled_out);
+      return scheduledDate >= today;
+    });
+
+    this.previousFlights = this.flights.filter((flight) => {
+      const scheduledDate = new Date(flight.flightDetails.scheduled_out);
+      return scheduledDate < today;
+    });
   }
 
   
@@ -263,59 +286,59 @@ export class FlightDetailsPage {
     return normalizedCallsign.startsWith(normalizedPrefix);
   }
 
-  saveOpenSkyInfoToLocalStorage(flightData: any) {
-    const storedFlights = JSON.parse(localStorage.getItem('openskyInfo') || '[]');
-    const flightKey = `${this.flight.origin}-${this.flight.destination}-${this.flight.scheduled_out}`;
+  // saveOpenSkyInfoToLocalStorage(flightData: any) {
+  //   const storedFlights = JSON.parse(localStorage.getItem('openskyInfo') || '[]');
+  //   const flightKey = `${this.flight.origin}-${this.flight.destination}-${this.flight.scheduled_out}`;
 
-    if (!storedFlights.some((stored: any) => stored.flightKey === flightKey)) {
-      storedFlights.push({ ...flightData, flightKey });
-      localStorage.setItem('openskyInfo', JSON.stringify(storedFlights));
-      console.log('OpenSky info saved to localStorage:', flightData);
-    }
-  }
+  //   if (!storedFlights.some((stored: any) => stored.flightKey === flightKey)) {
+  //     storedFlights.push({ ...flightData, flightKey });
+  //     localStorage.setItem('openskyInfo', JSON.stringify(storedFlights));
+  //     console.log('OpenSky info saved to localStorage:', flightData);
+  //   }
+  // }
 
-  savePreviousFlightToLocalStorage(key: string, flightData: any) {
-    localStorage.setItem(key, JSON.stringify(flightData));
-    console.log('Previous flight saved to localStorage:', flightData);
-  }
+  // savePreviousFlightToLocalStorage(key: string, flightData: any) {
+  //   localStorage.setItem(key, JSON.stringify(flightData));
+  //   console.log('Previous flight saved to localStorage:', flightData);
+  // }
 
-  getPreviousFlightFromLocalStorage(key: string) {
-    const storedFlight = localStorage.getItem(key);
-    return storedFlight ? JSON.parse(storedFlight) : null;
-  }
+  // getPreviousFlightFromLocalStorage(key: string) {
+  //   const storedFlight = localStorage.getItem(key);
+  //   return storedFlight ? JSON.parse(storedFlight) : null;
+  // }
 
-  saveFlightPathToLocalStorage(path: any[]) {
-    const storedPaths = JSON.parse(localStorage.getItem('flightPaths') || '[]');
+  // saveFlightPathToLocalStorage(path: any[]) {
+  //   const storedPaths = JSON.parse(localStorage.getItem('flightPaths') || '[]');
     
-    const flightKey = `${this.flight.origin}-${this.flight.destination}-${this.flight.scheduled_out}`;
+  //   const flightKey = `${this.flight.origin}-${this.flight.destination}-${this.flight.scheduled_out}`;
 
-    if (!storedPaths.some((stored: any) => stored.flightKey === flightKey)) {
-      storedPaths.push({ path, flightKey });
-      localStorage.setItem('flightPaths', JSON.stringify(storedPaths));
-      console.log('Flight path saved to localStorage:', path);
-    }
-  }
-
-
-
-  getFlightPathFromLocalStorage() {
-    const storedPaths = JSON.parse(localStorage.getItem('flightPaths') || '[]');
-    const flightKey = `${this.flight.origin}-${this.flight.destination}-${this.flight.scheduled_out}`;
-
-    const storedPath = storedPaths.find((stored: any) => stored.flightKey === flightKey);
-
-    console.log('Retrieved flight path from localStorage:', storedPath?.path);
-    return storedPath?.path || null;
-  }
+  //   if (!storedPaths.some((stored: any) => stored.flightKey === flightKey)) {
+  //     storedPaths.push({ path, flightKey });
+  //     localStorage.setItem('flightPaths', JSON.stringify(storedPaths));
+  //     console.log('Flight path saved to localStorage:', path);
+  //   }
+  // }
 
 
-  getOpenSkyInfoFromLocalStorage() {
-    const storedFlights = JSON.parse(localStorage.getItem('openskyInfo') || '[]');
-    const flightKey = `${this.flight.origin}-${this.flight.destination}-${this.flight.scheduled_out}`;
 
-    const storedFlight = storedFlights.find((stored: any) => stored.flightKey === flightKey);
+  // getFlightPathFromLocalStorage() {
+  //   const storedPaths = JSON.parse(localStorage.getItem('flightPaths') || '[]');
+  //   const flightKey = `${this.flight.origin}-${this.flight.destination}-${this.flight.scheduled_out}`;
 
-    console.log('Retrieved OpenSky info from localStorage:', storedFlight);
-    return storedFlight || null;
-  }
+  //   const storedPath = storedPaths.find((stored: any) => stored.flightKey === flightKey);
+
+  //   console.log('Retrieved flight path from localStorage:', storedPath?.path);
+  //   return storedPath?.path || null;
+  // }
+
+
+  // getOpenSkyInfoFromLocalStorage() {
+  //   const storedFlights = JSON.parse(localStorage.getItem('openskyInfo') || '[]');
+  //   const flightKey = `${this.flight.origin}-${this.flight.destination}-${this.flight.scheduled_out}`;
+
+  //   const storedFlight = storedFlights.find((stored: any) => stored.flightKey === flightKey);
+
+  //   console.log('Retrieved OpenSky info from localStorage:', storedFlight);
+  //   return storedFlight || null;
+  // }
 }
