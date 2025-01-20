@@ -71,3 +71,13 @@ ion-card-content p {
   line-height: 1.6;
   color: var(--text-primary);
 }
+
+app-actual-flight-path-map {
+  // height: 20rem;
+  // width: 20rem;
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}

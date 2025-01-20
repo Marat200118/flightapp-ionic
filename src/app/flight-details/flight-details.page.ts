@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FlightService } from '../services/flight.service';
 import { StorageService } from '../services/storage.service';
+import { ActualFlightPathMapComponent } from '../components/actual-flight-path-map/actual-flight-path-map.component';
 import { Flight } from '../models/flight.model';
 import { airplaneOutline } from 'ionicons/icons';
 import { addIcons } from 'ionicons';
@@ -42,6 +43,7 @@ import { ActivatedRoute } from '@angular/router';
     IonCardContent,
     CommonModule,
     FormsModule,
+    ActualFlightPathMapComponent,
   ],
 })
 
@@ -83,9 +85,11 @@ export class FlightDetailsPage {
       const timeSinceDeparture = (now.getTime() - scheduledDeparture.getTime()) / (1000 * 60 * 60);
       console.log('Time since Departure (hours):', timeSinceDeparture);
 
-      if (timeSinceDeparture >= 12) {
+      if (timeSinceDeparture >= 12 && !this.flight.actualFlight) {
         console.log('Fetching actual flight...');
         await this.findAndSaveActualFlight();
+      } else if (this.flight.actualFlight) {
+        console.log('Using existing actual flight:', this.flight.actualFlight);
       }
 
       if (this.flight.actualFlight && !this.flight.actualFlight.flightPath) {
@@ -285,6 +289,20 @@ export class FlightDetailsPage {
 
     return normalizedCallsign.startsWith(normalizedPrefix);
   }
+
+  formatFlightPath(flightPath: any[]): { latitude: number; longitude: number }[] {
+  return flightPath
+      .map((point) => ({
+        latitude: point[1],
+        longitude: point[2], 
+      }))
+      .filter(
+        (point) =>
+          typeof point.latitude === 'number' &&
+          typeof point.longitude === 'number'
+      );
+  }
+
 
   // saveOpenSkyInfoToLocalStorage(flightData: any) {
   //   const storedFlights = JSON.parse(localStorage.getItem('openskyInfo') || '[]');
