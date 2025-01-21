@@ -30,6 +30,7 @@ export class StorageService {
 
   private async ensureInitialized(): Promise<void> {
     if (!this._storage) {
+      console.warn('Storage not initialized; initializing now...');
       await this.init();
     }
   }
@@ -42,7 +43,10 @@ export class StorageService {
   }
 
   async getAllFlights(): Promise<Flight[]> {
-    return (await this.get('flights')) || [];
+    await this.ensureInitialized();
+    const flights = (await this.get('flights')) || [];
+    console.log('Fetched flights:', flights);
+    return flights;
   }
 
   async getFlightById(flightId: string): Promise<Flight | undefined> {

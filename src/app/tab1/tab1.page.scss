@@ -100,8 +100,10 @@ ion-card-header ion-card-title {
   bottom: 32px;
   right: 32px;
   z-index: 100;
-  border-radius: 50px;
+  // border-radius: 50px;
   --background: #007aff;
+  background-color: #007aff !important;
+  color: white !important;
   --color: white;
   font-size: 16px;
   font-weight: 600;

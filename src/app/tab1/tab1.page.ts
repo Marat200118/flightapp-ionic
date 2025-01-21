@@ -16,7 +16,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { StorageService } from '../services/storage.service';
 import { Flight } from '../models/flight.model';
-
+ 
 
 import {
   IonButton,
@@ -26,10 +26,18 @@ import {
   IonItem,
   IonModal,
   IonIcon,
+  IonImg,
+  IonHeader,
   IonTitle,
   IonToolbar,
+  IonCard,
+  IonCardHeader,
+  IonCardTitle,
+  IonList,
+  IonCardContent,
   IonDatetime,
 } from '@ionic/angular/standalone';
+import { add } from 'ionicons/icons';
 
 @Component({
   standalone: true,
@@ -39,7 +47,23 @@ import {
   imports: [
     CommonModule,
     FormsModule,
-    IonicModule,
+    IonButton,
+    IonCard,
+    IonList,
+    IonCardHeader,
+    IonCardContent,
+    IonCardTitle,
+    IonButtons,
+    IonContent,
+    IonHeader,
+    IonInput,
+    IonItem,
+    IonTitle,
+    IonModal,
+    IonIcon,
+    IonImg,
+    IonToolbar,
+    IonDatetime,
     MatCardModule,
     MatButtonModule,
     MatIconModule,

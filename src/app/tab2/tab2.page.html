@@ -1,8 +1,6 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>
-      Flight
-    </ion-title>
+    <ion-title>Flight</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -13,5 +11,49 @@
     </ion-toolbar>
   </ion-header>
 
-  <app-explore-container name="Flight page"></app-explore-container>
+  <!-- Flight Details -->
+  <div *ngIf="flight; else noFlight">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>{{ flight.flightDetails.ident }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p><strong>Origin:</strong> {{ flight.flightDetails.origin }}</p>
+        <p><strong>Destination:</strong> {{ flight.flightDetails.destination }}</p>
+        <p><strong>Departure:</strong> {{ flight.flightDetails.scheduled_out | date: 'yyyy-MM-dd HH:mm' }}</p>
+        <p><strong>Arrival:</strong> {{ flight.flightDetails.scheduled_in | date: 'yyyy-MM-dd HH:mm' }}</p>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Conditional Flight Path Information -->
+    <div *ngIf="flight.previousFlight; else noPath">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Flight Path</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <p><strong>Previous Flight ID:</strong> {{ flight.previousFlight.flightId }}</p>
+          <p><strong>Origin:</strong> {{ flight.previousFlight.origin }}</p>
+          <p><strong>Destination:</strong> {{ flight.previousFlight.destination }}</p>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- No Flight Path Message -->
+    <ng-template #noPath>
+      <div class="no-path-message">
+        <p>Your estimated flight path is not known yet.</p>
+      </div>
+    </ng-template>
+  </div>
+
+  <!-- No Flight Available -->
+  <ng-template #noFlight>
+    <div class="no-flight-message">
+      <p>{{ message }}</p>
+    </div>
+  </ng-template>
+
+  <!-- Back Button -->
+  <ion-button expand="full" (click)="goBackToMain()">Go Back</ion-button>
 </ion-content>

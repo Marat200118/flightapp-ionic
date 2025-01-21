@@ -38,7 +38,7 @@
         <ion-card-content>
           <div class="flight-details">
             <div class="route"><ion-icon name="airplane-outline"></ion-icon>{{ flight.flightDetails.origin_iata }} → {{ flight.flightDetails.destination_iata }}</div>
-            <div class="date">Scheduled: {{ flight.flightDetails.scheduled_in | date: 'yyyy-MM-dd HH:mm' }}</div>
+            <div class="date">Scheduled: {{ flight.flightDetails.scheduled_out | date: 'yyyy-MM-dd HH:mm' }}</div>
             <!-- <p *ngIf="flight.flightDetails.codeshares && flight.flightDetails.codeshares.length > 0">
               Codeshares:{{ getCodeshares(flight.flightDetails.codeshares) }}
             </p> -->
@@ -72,7 +72,13 @@
     </div>
   </div>
 
+  <!-- <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button id="open-add-flight-modal" class="add-flight-button">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab> -->
   <ion-button id="open-add-flight-modal" class="add-flight-button" expand="block">Add Flight</ion-button>
+  <!-- <button mat-flat-button id="open-add-flight-modal" class="add-flight-button" expand="block">Add Flight</button> -->
 
   <ion-modal #modal trigger="open-add-flight-modal">
     <ng-template>
