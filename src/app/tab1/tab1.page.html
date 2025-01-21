@@ -1,3 +1,5 @@
+<!-- tab1.page.html -->
+
 <ion-header [translucent]="true">
   <ion-toolbar class="tab-header">
     <ion-title>Home</ion-title>
@@ -29,23 +31,24 @@
       </mat-card>
     </div> -->
     <div *ngIf="upcomingFlights.length > 0" class="flights-section">
-      <h2>Upcoming Flights</h2>
-      <ion-list>
-        <ion-card *ngFor="let flight of upcomingFlights" (click)="openFlightDetails(flight)">
-          <ion-card-header>
-            <ion-card-title>{{ flight.actual_ident ? flight.actual_ident : flight.ident_iata }}</ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            <div class="flight-details">
-              <div class="route">{{ flight.origin_iata }} → {{ flight.destination_iata }}</div>
-              <div class="date">Scheduled: {{ flight.scheduled_in | date: 'yyyy-MM-dd HH:mm' }}</div>
-              <p *ngIf="flight.codeshares && flight.codeshares.length > 0">
-                Codeshares: {{ getCodeshares(flight.codeshares) }}
-              </p>
-            </div>
-          </ion-card-content>
-        </ion-card>
-      </ion-list>
+      <ion-card *ngFor="let flight of upcomingFlights" (click)="openFlightDetails(flight)">
+        <ion-card-header>
+          <ion-card-title>{{ flight.flightDetails.ident_iata }}</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <div class="flight-details">
+            <div class="route"><ion-icon name="airplane-outline"></ion-icon>{{ flight.flightDetails.origin_iata }} → {{ flight.flightDetails.destination_iata }}</div>
+            <div class="date">Scheduled: {{ flight.flightDetails.scheduled_in | date: 'yyyy-MM-dd HH:mm' }}</div>
+            <!-- <p *ngIf="flight.flightDetails.codeshares && flight.flightDetails.codeshares.length > 0">
+              Codeshares:{{ getCodeshares(flight.flightDetails.codeshares) }}
+            </p> -->
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+    <div *ngIf="upcomingFlights.length === 0" class="no-flights">
+      <ion-icon name="airplane-outline"></ion-icon>
+      <p>You don't have an upcoming flights</p>
     </div>
 
     <div *ngIf="previousFlights.length > 0" class="flights-section">
@@ -53,15 +56,15 @@
       <ion-list>
         <ion-card *ngFor="let flight of previousFlights" (click)="openFlightDetails(flight)">
           <ion-card-header>
-            <ion-card-title>{{ flight.ident_iata }}</ion-card-title>
+            <ion-card-title>{{ flight.flightDetails.ident_iata }}</ion-card-title>
           </ion-card-header>
           <ion-card-content>
             <div class="flight-details">
-              <div class="route"><ion-icon name="airplane-outline"></ion-icon>{{ flight.origin_iata }} → {{ flight.destination_iata }}</div>
-              <div class="date">Scheduled: {{ flight.scheduled_in | date: 'yyyy-MM-dd HH:mm' }}</div>
-              <p *ngIf="flight.codeshares && flight.codeshares.length > 0">
-                Codeshares:{{ getCodeshares(flight.codeshares) }}
-              </p>
+              <div class="route"><ion-icon name="airplane-outline"></ion-icon>{{ flight.flightDetails.origin_iata }} → {{ flight.flightDetails.destination_iata }}</div>
+              <div class="date">Scheduled: {{ flight.flightDetails.scheduled_in | date: 'yyyy-MM-dd HH:mm' }}</div>
+              <!-- <p *ngIf="flight.flightDetails.codeshares && flight.flightDetails.codeshares.length > 0">
+                Codeshares:{{ getCodeshares(flight.flightDetails.codeshares) }}
+              </p> -->
             </div>
           </ion-card-content>
         </ion-card>

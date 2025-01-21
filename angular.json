@@ -24,6 +24,9 @@
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
+            "allowedCommonJsDependencies": [
+              "localforage"
+            ],
             "assets": [
               {
                 "glob": "**/*",
@@ -33,6 +36,7 @@
             ],
             "styles": [
               "src/global.scss", 
+              "node_modules/leaflet/dist/leaflet.css",
               "src/theme/variables.scss",
               "node_modules/@angular/material/prebuilt-themes/indigo-pink.css"
             ],

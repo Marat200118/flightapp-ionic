@@ -112,3 +112,17 @@ ion-card-header ion-card-title {
 ion-datetime {
   margin: 2rem auto;
 }
+
+.no-flights ion-icon {
+  font-size: 10rem;
+  transform: rotate(-45deg);
+  color: var(--text-secondary);
+}
+
+
+.no-flights {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}

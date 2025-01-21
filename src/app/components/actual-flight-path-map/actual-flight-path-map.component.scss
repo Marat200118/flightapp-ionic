@@ -1,0 +1,13 @@
+/* actual-flight-path.component.scss */
+#map {
+  height: 100%;
+  width: 100%;  
+  min-height: 500px;
+  display: block;
+  position: relative;
+  z-index: 1;
+}
+
+.leaflet-tile  {
+  border-radius: 16px;
+}
