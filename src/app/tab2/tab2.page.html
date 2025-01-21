@@ -11,7 +11,6 @@
     </ion-toolbar>
   </ion-header>
 
-  <!-- Flight Details -->
   <div *ngIf="flight; else noFlight">
     <ion-card>
       <ion-card-header>
@@ -25,21 +24,18 @@
       </ion-card-content>
     </ion-card>
 
-    <!-- Conditional Flight Path Information -->
     <div *ngIf="flight.previousFlight; else noPath">
       <ion-card>
         <ion-card-header>
-          <ion-card-title>Flight Path</ion-card-title>
+          <ion-card-title>Estimated flight path</ion-card-title>
         </ion-card-header>
         <ion-card-content>
-          <p><strong>Previous Flight ID:</strong> {{ flight.previousFlight.flightId }}</p>
-          <p><strong>Origin:</strong> {{ flight.previousFlight.origin }}</p>
-          <p><strong>Destination:</strong> {{ flight.previousFlight.destination }}</p>
+          <app-actual-flight-path-map *ngIf="flight.previousFlight?.flightPath" [flightPath]="formatFlightPath(flight.previousFlight.flightPath!)">
+          </app-actual-flight-path-map>
         </ion-card-content>
       </ion-card>
     </div>
 
-    <!-- No Flight Path Message -->
     <ng-template #noPath>
       <div class="no-path-message">
         <p>Your estimated flight path is not known yet.</p>
@@ -47,13 +43,11 @@
     </ng-template>
   </div>
 
-  <!-- No Flight Available -->
   <ng-template #noFlight>
     <div class="no-flight-message">
       <p>{{ message }}</p>
     </div>
   </ng-template>
 
-  <!-- Back Button -->
   <ion-button expand="full" (click)="goBackToMain()">Go Back</ion-button>
 </ion-content>

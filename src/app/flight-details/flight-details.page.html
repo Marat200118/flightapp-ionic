@@ -44,6 +44,17 @@
       </p>
     </ion-card-content>
   </ion-card>
+
+  <ion-card *ngIf="flight.previousFlight">
+    <ion-card-header>
+      <ion-card-title>Previous Flight</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p><strong>Flight ID:</strong> {{ flight.previousFlight.callsign }}</p>
+      <p><strong>Origin:</strong> {{ flight.previousFlight.estDepartureAirport }}</p>
+      <p><strong>Destination:</strong> {{ flight.previousFlight.estArrivalAirport }}</p>
+    </ion-card-content>
+  </ion-card>
   
   <ion-card *ngIf="flight.actualFlight">
     <ion-card-header>
@@ -57,22 +68,11 @@
       <p><strong>Arrival Time:</strong> {{ flight.actualFlight.lastSeen * 1000 | date: 'yyyy-MM-dd HH:mm:ss' }}</p>
     </ion-card-content>
   </ion-card>
+
+  <div *ngIf="flight.previousFlight?.flightPath">
+    <app-actual-flight-path-map [flightPath]="formatFlightPath(flight.previousFlight.flightPath)"></app-actual-flight-path-map>
+  </div>
   
-  <!-- <ion-card *ngIf="flight.actualFlight?.flightPath">
-    <ion-card-header>
-      <ion-card-title>Flight Path</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <ul>
-        <li *ngFor="let waypoint of flight.actualFlight.flightPath">
-          <strong>Time:</strong> {{ waypoint[0] * 1000 | date: 'yyyy-MM-dd HH:mm:ss' }}<br />
-          <strong>Latitude:</strong> {{ waypoint[1] }}<br />
-          <strong>Longitude:</strong> {{ waypoint[2] }}<br />
-          <strong>Altitude:</strong> {{ waypoint[3] || 'N/A' }} meters<br />
-        </li>
-      </ul>
-    </ion-card-content>
-  </ion-card> -->
   <div *ngIf="flight.actualFlight?.flightPath">
     <app-actual-flight-path-map [flightPath]="formatFlightPath(flight.actualFlight.flightPath)"></app-actual-flight-path-map>
   </div>

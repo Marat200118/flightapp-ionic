@@ -5,6 +5,7 @@ import { NavController } from '@ionic/angular';
 import { StorageService } from '../services/storage.service';
 import { Flight } from '../models/flight.model';
 import { CommonModule, DatePipe } from '@angular/common';
+import { ActualFlightPathMapComponent } from '../components/actual-flight-path-map/actual-flight-path-map.component';
 import {
   IonButton,
   IonButtons,
@@ -33,6 +34,7 @@ import {
   providers: [DatePipe],
   imports: [
     CommonModule,
+    ActualFlightPathMapComponent,
     IonButton,
     IonCard,
     IonList,
@@ -54,6 +56,7 @@ import {
 })
 export class Tab2Page implements OnInit {
   flight: Flight | null = null; 
+  flightPath: any = null;
   message: string = ''; 
 
   constructor(private storageService: StorageService, private navCtrl: NavController) {}
@@ -66,7 +69,7 @@ export class Tab2Page implements OnInit {
     const upcomingFlight = flights.find((flight: Flight) => {
       const scheduledDeparture = new Date(flight.flightDetails.scheduled_out);
       const timeToDeparture = (scheduledDeparture.getTime() - now.getTime()) / (1000 * 60 * 60);
-      return timeToDeparture > 0 && timeToDeparture <= 24; 
+      return timeToDeparture > 0 && timeToDeparture <= 12; 
     });
 
     if (upcomingFlight) {
@@ -84,5 +87,18 @@ export class Tab2Page implements OnInit {
 
   goBackToMain() {
     this.navCtrl.navigateBack('/tabs/tab1');
+  }
+
+  formatFlightPath(flightPath: any[]): { latitude: number; longitude: number }[] {
+  return flightPath
+      .map((point) => ({
+        latitude: point[1],
+        longitude: point[2], 
+      }))
+      .filter(
+        (point) =>
+          typeof point.latitude === 'number' &&
+          typeof point.longitude === 'number'
+      );
   }
 }

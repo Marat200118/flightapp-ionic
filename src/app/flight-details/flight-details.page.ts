@@ -92,6 +92,13 @@ export class FlightDetailsPage {
         console.log('Using existing actual flight:', this.flight.actualFlight);
       }
 
+      if (this.flight.previousFlight && !this.flight.previousFlight.flightPath) {
+        console.log('Fetching flight path for previous flight...');
+        await this.loadFlightPath(this.flight.previousFlight);
+      } else if (this.flight.previousFlight?.flightPath) {
+        console.log('Using existing flight path for previous flight:', this.flight.previousFlight?.flightPath);
+      }
+
       if (this.flight.actualFlight && !this.flight.actualFlight.flightPath) {
         console.log('Fetching flight path for actual flight...');
         await this.loadFlightPath(this.flight.actualFlight);
@@ -103,42 +110,67 @@ export class FlightDetailsPage {
 
 
   async findPreviousFlight() {
+    if (this.flight.previousFlight) {
+      console.log('Previous flight is already available:', this.flight.previousFlight);
+
+      if (!this.flight.previousFlight.flightPath) {
+        console.log('Fetching flight path for previous flight...');
+        await this.loadFlightPath(this.flight.previousFlight);
+      } else {
+        console.log('Using existing flight path for previous flight:', this.flight.previousFlight.flightPath);
+      }
+      return;
+    }
+
+    console.log('No previous flight found in flight data. Attempting to fetch...');
     const { origin, destination, scheduled_out } = this.flight.flightDetails;
     const scheduledDepartureUTC = new Date(scheduled_out);
     const startTime = Math.floor((scheduledDepartureUTC.getTime() - 48 * 60 * 60 * 1000) / 1000); // 48 hours before
     const endTime = Math.floor(scheduledDepartureUTC.getTime() / 1000); // Scheduled departure
 
     try {
-      const flights = await this.flightService
+      let flights = await this.flightService
         .getDeparturesWithArrival(origin, startTime, endTime, destination)
         .toPromise();
 
-        console.log('Fetched flights:', flights);
+      console.log('Fetched flights (origin to destination):', flights);
 
-      const previousFlight = flights.find((flight: any) => {
-      console.log(
-        `Checking flight: ${flight.callsign}, origin: ${flight.estDepartureAirport}, destination: ${flight.estArrivalAirport}`
-      );
-      return (
-        flight.estDepartureAirport === origin && flight.estArrivalAirport === destination
-      );
-    });
+      let previousFlight = flights.find((flight: any) => {
+        return (
+          flight.estDepartureAirport === origin && flight.estArrivalAirport === destination
+        );
+      });
 
+      if (!previousFlight) {
+        console.warn('No previous flight found from origin to destination. Trying reverse direction...');
+        flights = await this.flightService
+          .getDeparturesWithArrival(destination, startTime, endTime, origin)
+          .toPromise();
+
+        console.log('Fetched flights (destination to origin):', flights);
+
+        previousFlight = flights.find((flight: any) => {
+          return (
+            flight.estDepartureAirport === destination && flight.estArrivalAirport === origin
+          );
+        });
+      }
 
       if (previousFlight) {
+        console.log('Previous flight found:', previousFlight);
+
         if (!previousFlight.flightPath) {
           console.log('Fetching flight path for previous flight...');
           await this.loadFlightPath(previousFlight);
-        } else {
-          console.log('Using existing flight path for previous flight:', previousFlight.flightPath);
         }
-          this.flight.previousFlight = previousFlight; 
-          await this.storageService.updateFlight(this.flight);
-          console.log('Updated flight with previous flight:', this.flight);
-        } else {
-          console.warn('No previous flight found.');
-        }
-      } catch (error) {
+
+        this.flight.previousFlight = previousFlight;
+        await this.storageService.updateFlight(this.flight);
+        console.log('Updated flight with previous flight:', this.flight);
+      } else {
+        console.warn('No previous flight found.');
+      }
+    } catch (error) {
       console.error('Error fetching previous flight:', error);
     }
   }
