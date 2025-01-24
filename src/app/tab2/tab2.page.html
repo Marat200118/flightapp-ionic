@@ -1,15 +1,20 @@
+<!-- tab2.page.html -->
+
 <ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>Flight</ion-title>
+  <ion-toolbar class="tab-header">
+    <ion-title>Flights</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Flight</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <div class="fancy-header">
+    <div class="header-content">
+      <div>
+        <h1>Hello, User!</h1>
+        <p>Here are your flights</p>
+      </div>
+    </div>
+  </div>
 
   <div *ngIf="flight; else noFlight">
     <ion-card>
@@ -21,20 +26,18 @@
         <p><strong>Destination:</strong> {{ flight.flightDetails.destination }}</p>
         <p><strong>Departure:</strong> {{ flight.flightDetails.scheduled_out | date: 'yyyy-MM-dd HH:mm' }}</p>
         <p><strong>Arrival:</strong> {{ flight.flightDetails.scheduled_in | date: 'yyyy-MM-dd HH:mm' }}</p>
+        <p><strong>Status:</strong> {{ status }}</p>
       </ion-card-content>
     </ion-card>
 
-    <div *ngIf="flight.previousFlight; else noPath">
-      <ion-card>
-        <ion-card-header>
-          <ion-card-title>Estimated flight path</ion-card-title>
-        </ion-card-header>
-        <ion-card-content>
-          <app-actual-flight-path-map *ngIf="flight.previousFlight?.flightPath" [flightPath]="formatFlightPath(flight.previousFlight.flightPath!)">
-          </app-actual-flight-path-map>
-        </ion-card-content>
-      </ion-card>
-    </div>
+    <ion-card *ngIf="flightPath.length">
+      <ion-card-header>
+        <ion-card-title>Live Flight Path</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <app-live-flight-path-map [flightPath]="flightPath" [planePosition]="currentAproximatePosition"></app-live-flight-path-map>
+      </ion-card-content>
+    </ion-card>
 
     <ng-template #noPath>
       <div class="no-path-message">

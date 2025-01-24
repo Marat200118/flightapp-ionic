@@ -154,6 +154,11 @@ export class FlightDetailsPage {
             flight.estDepartureAirport === destination && flight.estArrivalAirport === origin
           );
         });
+
+        if (previousFlight.flightPath) {
+          console.log('Reversing flight path for swapped origin and destination.');
+          previousFlight.flightPath = previousFlight.flightPath.reverse();
+        }
       }
 
       if (previousFlight) {
@@ -183,16 +188,45 @@ export class FlightDetailsPage {
     const startTime = scheduledDepartureTime;
     const endTime = Math.floor((scheduledDepartureUTC.getTime() + 12 * 60 * 60 * 1000) / 1000);
 
+    if (this.flight.actualFlight) {
+      console.log('Previous flight is already available:', this.flight.actualFlight);
+
+      if (!this.flight.actualFlight.flightPath) {
+        console.log('Fetching flight path for previous flight...');
+        await this.loadFlightPath(this.flight.actualFlight);
+      } else {
+        console.log('Using existing flight path for actual flight:', this.flight.actualFlight.flightPath);
+      }
+      return;
+    }
+
     try {
-      const flights = await this.flightService
+      let flights = await this.flightService
         .getDeparturesWithArrival(origin, startTime, endTime, destination)
         .toPromise();
 
-      const actualFlight = flights.reduce((closest: any, current: any) => {
+      let actualFlight = flights.reduce((closest: any, current: any) => {
         const closestDiff = Math.abs(closest.firstSeen - scheduledDepartureTime);
         const currentDiff = Math.abs(current.firstSeen - scheduledDepartureTime);
         return currentDiff < closestDiff ? current : closest;
       }, flights[0]);
+
+      if (!actualFlight) {
+        console.warn('No actual flight found from origin to destination. Trying reverse direction...');
+
+       
+        flights = await this.flightService
+          .getDeparturesWithArrival(destination, startTime, endTime, origin)
+          .toPromise();
+
+        console.log('Fetched flights (destination to origin):', flights);
+
+        actualFlight = flights.reduce((closest: any, current: any) => {
+          const closestDiff = Math.abs(closest.firstSeen - scheduledDepartureTime);
+          const currentDiff = Math.abs(current.firstSeen - scheduledDepartureTime);
+          return currentDiff < closestDiff ? current : closest;
+        }, flights[0]);
+      }
 
       if (actualFlight) {
         if (!actualFlight.flightPath) {
