@@ -8,8 +8,10 @@ import * as L from 'leaflet';
   styleUrls: ['./live-flight-map.component.scss'],
 })
 export class LiveFlightPathMapComponent implements OnInit, OnChanges, OnDestroy {
-  @Input() flightPath: { latitude: number; longitude: number }[] = [];
+  @Input() flightPath: { latitude: number; longitude: number; timestamp: number }[] = [];
   @Input() planePosition: { latitude: number; longitude: number } | null = null;
+  @Input() scheduledDeparture: number | null = null; // Input for scheduledDeparture
+  @Input() previousFlightDuration: number | null = null; // Input for previousFlightDuration
 
   private map: L.Map | undefined;
   private planeMarker: L.Marker | undefined;
@@ -25,12 +27,8 @@ export class LiveFlightPathMapComponent implements OnInit, OnChanges, OnDestroy 
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    console.log('Changes detected:', changes);
     if (changes['flightPath']) {
       console.log('Updated Flight Path:', this.flightPath);
-    }
-    if (changes['planePosition']) {
-      console.log('Updated Plane Position:', this.planePosition);
     }
     if (changes['planePosition'] && this.planePosition) {
       this.updatePlaneMarker();
@@ -71,25 +69,58 @@ export class LiveFlightPathMapComponent implements OnInit, OnChanges, OnDestroy 
   }
 
   private updatePlaneMarker(): void {
-    console.log('Updating plane marker:', this.planePosition);
-
     if (!this.map || !this.planePosition) return;
 
-    if (this.planeMarker) {
-      this.map.removeLayer(this.planeMarker);
+    const bearing = this.calculateBearing();
+
+    const planeIcon = L.divIcon({
+      html: `<div style="transform: rotate(${bearing - 90}deg);">
+              <img src="assets/airplane-outline.svg" style="width: 32px; height: 32px;">
+            </div>`,
+      className: '',
+      iconSize: [32, 32],
+      iconAnchor: [16, 16],
+    });
+
+    if (!this.planeMarker) {
+      this.planeMarker = L.marker([this.planePosition.latitude, this.planePosition.longitude], {
+        icon: planeIcon,
+      }).addTo(this.map);
+    } else {
+      this.planeMarker.setLatLng([this.planePosition.latitude, this.planePosition.longitude]);
+      this.planeMarker.setIcon(planeIcon);
     }
 
-    this.planeMarker = L.marker(
-      [this.planePosition.latitude, this.planePosition.longitude],
-      {
-        icon: L.icon({
-          iconUrl: 'assets/airplane-outline.svg',
-          iconSize: [32, 32],
-        }),
-      }
-    ).addTo(this.map);
+    // Optionally, move the map to follow the plane
+    this.map.setView([this.planePosition.latitude, this.planePosition.longitude], 10, { animate: true });
+  }
 
-    this.map.setView([this.planePosition.latitude, this.planePosition.longitude], 10);
+   private calculateBearing(): number {
+    if (!this.planePosition || this.flightPath.length < 2) return 0;
+
+    const nextIndex = this.flightPath.findIndex(
+      (point) =>
+        point.latitude === this.planePosition?.latitude &&
+        point.longitude === this.planePosition?.longitude
+    );
+
+    if (nextIndex === -1 || nextIndex >= this.flightPath.length - 1) return 0;
+
+    const current = this.planePosition;
+    const next = this.flightPath[nextIndex + 1];
+
+    const lat1 = (current.latitude * Math.PI) / 180;
+    const lon1 = (current.longitude * Math.PI) / 180;
+    const lat2 = (next.latitude * Math.PI) / 180;
+    const lon2 = (next.longitude * Math.PI) / 180;
+
+    const y = Math.sin(lon2 - lon1) * Math.cos(lat2);
+    const x =
+      Math.cos(lat1) * Math.sin(lat2) -
+      Math.sin(lat1) * Math.cos(lat2) * Math.cos(lon2 - lon1);
+    const bearing = (Math.atan2(y, x) * 180) / Math.PI;
+
+    return (bearing + 360) % 360; // Normalize bearing to 0-360
   }
 
   ngOnDestroy(): void {

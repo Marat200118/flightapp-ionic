@@ -35,7 +35,7 @@
         <ion-card-title>Live Flight Path</ion-card-title>
       </ion-card-header>
       <ion-card-content>
-        <app-live-flight-path-map [flightPath]="flightPath" [planePosition]="currentAproximatePosition"></app-live-flight-path-map>
+        <app-live-flight-path-map [flightPath]="flightPath" [planePosition]="currentAproximatePosition" [scheduledDeparture]="flightDetails.scheduled_out" [previousFlightDuration]="previousFlightDuration"></app-live-flight-path-map>
       </ion-card-content>
     </ion-card>
 

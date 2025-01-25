@@ -5,6 +5,7 @@ import { NavController } from '@ionic/angular';
 import { StorageService } from '../services/storage.service';
 import { Flight } from '../models/flight.model';
 import { CommonModule, DatePipe } from '@angular/common';
+
 import { LiveFlightPathMapComponent } from '../components/live-flight-map/live-flight-map.component';
 import {
   IonButton,
@@ -62,6 +63,9 @@ export class Tab2Page implements OnInit {
   message: string = ''; 
   private intervalId: any;
 
+  flightDetails: any = null; 
+  previousFlightDuration: number | null = null; 
+
   constructor(private storageService: StorageService, private navCtrl: NavController) {}
 
   async ngOnInit() {
@@ -73,21 +77,28 @@ export class Tab2Page implements OnInit {
     const upcomingFlight = flights.find((flight: Flight) => {
       const scheduledArrival = new Date(flight.flightDetails.scheduled_in);
       const timeToDeparture = (scheduledArrival.getTime() - now.getTime()) / (1000 * 60 * 60);
-      return timeToDeparture > 0 && timeToDeparture <= 12; 
+      return timeToDeparture > 0 && timeToDeparture <= 12;
     });
 
     if (upcomingFlight) {
       this.flight = upcomingFlight;
+      this.flightDetails = upcomingFlight.flightDetails;
       console.log('Upcoming flight:', this.flight);
 
-    if (this.flight.previousFlight?.flightPath) {
-      console.log('Previous Flight Path:', this.flight.previousFlight.flightPath);
-      this.flightPath = this.formatFlightPath(this.flight.previousFlight.flightPath);
-      this.startLiveUpdates();
-    } else {
-      console.warn('No previous flight path available:', this.flight.previousFlight);
-    }
+      if (this.flight.previousFlight?.flightPath) {
+        console.log('Previous Flight Path:', this.flight.previousFlight.flightPath);
+        this.flightPath = this.formatFlightPath(this.flight.previousFlight.flightPath);
 
+        const firstPoint = this.flightPath[0];
+        const lastPoint = this.flightPath[this.flightPath.length - 1];
+        this.previousFlightDuration = lastPoint.timestamp - firstPoint.timestamp;
+
+        console.log('Previous Flight Duration (seconds):', this.previousFlightDuration);
+
+        this.startLiveUpdates();
+      } else {
+        console.warn('No previous flight path available:', this.flight.previousFlight);
+      }
     }
   }
 
@@ -102,68 +113,86 @@ export class Tab2Page implements OnInit {
   }
 
   updateFlightStatus() {
-    if (!this.flight || !this.flightPath.length) return;
+    if (!this.flight || !this.flightPath.length || !this.previousFlightDuration) return;
 
     const now = Date.now() / 1000; // Current time in seconds
-    const scheduledDeparture = new Date(this.flight.flightDetails.scheduled_out).getTime() / 1000;
-    const boardingStart = scheduledDeparture - 30 * 60;
+    const scheduledDeparture = Math.floor(
+      new Date(this.flight.flightDetails.scheduled_out).getTime() / 1000
+    );
 
-    if (now < boardingStart) {
+    const elapsedTime = now - scheduledDeparture;
+
+    if (elapsedTime < 0) {
       this.status = 'Waiting';
-    } else if (now >= boardingStart && now < scheduledDeparture) {
+    } else if (elapsedTime >= 0 && elapsedTime < 30 * 60) { // First 30 minutes
       this.status = 'Boarding';
+    } else if (elapsedTime >= 30 * 60 && elapsedTime < this.previousFlightDuration * 0.2) {
+      this.status = 'Climbing';
+    } else if (
+      elapsedTime >= this.previousFlightDuration * 0.2 &&
+      elapsedTime < this.previousFlightDuration * 0.8
+    ) {
+      this.status = 'Cruising';
+    } else if (
+      elapsedTime >= this.previousFlightDuration * 0.8 &&
+      elapsedTime < this.previousFlightDuration
+    ) {
+      this.status = 'Descending';
     } else {
-      const flightDuration =
-        this.flightPath[this.flightPath.length - 1].timestamp - this.flightPath[0].timestamp;
-      const elapsedTime = now - scheduledDeparture;
-      const progress = elapsedTime / flightDuration;
-
-      if (progress <= 0.2) {
-        this.status = 'Climbing';
-      } else if (progress > 0.2 && progress <= 0.8) {
-        this.status = 'Cruising';
-      } else if (progress > 0.8 && progress <= 1) {
-        this.status = 'Descending';
-      } else {
-        this.status = 'Landed';
-      }
+      this.status = 'Landed';
     }
   }
 
   updatePlanePosition() {
     if (!this.flight || !this.flightPath.length) return;
 
-    const now = Date.now() / 1000;
-    const scheduledDeparture = new Date(this.flight.flightDetails.scheduled_out).getTime() / 1000;
+    const now = Math.floor(Date.now() / 1000);
+    const scheduledDeparture = Math.floor(
+      new Date(this.flight.flightDetails.scheduled_out).getTime() / 1000
+    );
+
     const elapsedTime = now - scheduledDeparture;
 
-    const timestamps = this.flightPath.map((point) => point.timestamp);
-    const closestIndex = timestamps.findIndex((time) => time >= elapsedTime);
-
-    if (closestIndex === -1 || closestIndex >= timestamps.length) {
-      console.warn('Plane position is out of bounds:', elapsedTime);
-      this.currentAproximatePosition = null;
-      return;
-    }
-
-    if (closestIndex > 0) {
-      const start = this.flightPath[closestIndex - 1];
-      const end = this.flightPath[closestIndex];
-
-      const progress = (elapsedTime - start.timestamp) / (end.timestamp - start.timestamp);
-      this.currentAproximatePosition = {
-        latitude: start.latitude + progress * (end.latitude - start.latitude),
-        longitude: start.longitude + progress * (end.longitude - start.longitude),
-      };
-    } else {
-      this.currentAproximatePosition = {
-        latitude: this.flightPath[0].latitude,
-        longitude: this.flightPath[0].longitude,
-      };
-    }
-
+    this.currentAproximatePosition = this.calculateCurrentPosition(elapsedTime);
     console.log('Current Approximate Position:', this.currentAproximatePosition);
   }
+
+  private calculateCurrentPosition(elapsedTime: number): { latitude: number; longitude: number } | null {
+    if (!this.flightPath || this.flightPath.length < 2 || elapsedTime < 0) return null;
+
+    const totalDuration = this.previousFlightDuration!;
+    if (elapsedTime > totalDuration) {
+      // Plane has landed; return the last point in the flight path
+      const lastPoint = this.flightPath[this.flightPath.length - 1];
+      return { latitude: lastPoint.latitude, longitude: lastPoint.longitude };
+    }
+
+    const totalPathPoints = this.flightPath.length;
+    const relativeTime = elapsedTime / totalDuration;
+
+    const mappedIndex = Math.floor(relativeTime * (totalPathPoints - 1));
+    const nextIndex = Math.min(mappedIndex + 1, totalPathPoints - 1);
+
+    const start = this.flightPath[mappedIndex];
+    const end = this.flightPath[nextIndex];
+
+    if (!start || !end) return null;
+
+    const segmentDuration = end.timestamp - start.timestamp;
+    const segmentElapsedTime = elapsedTime - start.timestamp;
+
+    if (segmentDuration <= 0 || segmentElapsedTime < 0) {
+      return { latitude: start.latitude, longitude: start.longitude };
+    }
+
+    const segmentProgress = Math.min(1, Math.max(0, segmentElapsedTime / segmentDuration));
+
+    return {
+      latitude: start.latitude + segmentProgress * (end.latitude - start.latitude),
+      longitude: start.longitude + segmentProgress * (end.longitude - start.longitude),
+    };
+  }
+
 
 
   startLiveUpdates() {

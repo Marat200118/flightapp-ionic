@@ -55,6 +55,20 @@ export class FlightService {
     );
   }
 
+  getArrivalsAtAirport(
+    airport: string,
+    startTime: number,
+    endTime: number
+  ): Observable<any> {
+    const url = `${this.proxyBaseUrl}/opensky/arrivals?airport=${airport}&begin=${startTime}&end=${endTime}`;
+    return this.http.get(url).pipe(
+      catchError((error) => {
+        console.error('Error fetching arrivals:', error);
+        return throwError(() => new Error('Failed to fetch arrivals from OpenSky API.'));
+      })
+    );
+  }
+
   getHistoricalFlightTrack(flightId: string): Observable<any> {
     const url = `${this.proxyBaseUrl}/aeroapi/history/flights/${flightId}/track`;
 
