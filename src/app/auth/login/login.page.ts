@@ -4,15 +4,58 @@ import { Component } from '@angular/core';
 import { NavController } from '@ionic/angular';
 import { SupabaseService } from '../../services/supabase.service';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { 
+  IonContent,
+  IonHeader,
+  IonTitle,
+  IonToolbar,
+  IonButtons,
+  IonBackButton,
+  IonCard,
+  IonRow,
+  IonCol,
+  IonGrid,
+  IonCardHeader,
+  IonCardTitle,
+  IonCardContent,
+  IonIcon,
+  IonItem,
+  IonLabel,
+  IonInput,
+  IonButton,
+} from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
-  schemas: [
-    CUSTOM_ELEMENTS_SCHEMA,
-  ]
+  imports: [
+    IonContent,
+    IonHeader,
+    IonTitle,
+    IonToolbar,
+    IonButtons,
+    IonGrid,
+    IonCol,
+    IonRow,
+    IonBackButton,
+    FormsModule,
+    IonCard,
+    IonIcon,
+    IonCardHeader,
+    IonCardTitle,
+    IonCardContent,
+    IonItem,
+    IonLabel,
+    IonInput,
+    IonButton,
+
+  ],
+  // schemas: [
+  //   CUSTOM_ELEMENTS_SCHEMA,
+  // ]
 })
 export class LoginPage {
   email = '';
@@ -24,6 +67,7 @@ export class LoginPage {
   ) {}
 
   async login() {
+    console.log('Login button clicked');
     const loader = await this.supabase.createLoader();
     await loader.present();
 

@@ -26,7 +26,13 @@ export class SupabaseService {
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController
   ) {
-    this.supabase = createClient(environment.supabaseUrl, environment.supabaseKey);
+    this.supabase = createClient(environment.supabaseUrl, environment.supabaseKey, {
+    auth: {
+      persistSession: true,
+      detectSessionInUrl: true,
+      autoRefreshToken: false, // Prevents using LockManager
+    },
+  });
   }
 
   // Get user details
