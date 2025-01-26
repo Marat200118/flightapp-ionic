@@ -27,62 +27,116 @@
     </div>
   </div>
 
-  <ion-card>
+  <ion-card class="info-card">
     <ion-card-header>
       <ion-card-title>Flight Information</ion-card-title>
     </ion-card-header>
     <ion-card-content>
-      <p><strong>Airline:</strong> {{ flight.flightDetails.ident_icao || 'Unknown' }}</p>
-      <p><strong>Scheduled Departure:</strong> {{ flight.flightDetails.scheduled_out | date: 'yyyy-MM-dd HH:mm' }}</p>
-      <p><strong>Scheduled Arrival:</strong> {{ flight.flightDetails.scheduled_in | date: 'yyyy-MM-dd HH:mm' }}</p>
-      <p><strong>Aircraft Type:</strong> {{ flight.flightDetails.aircraft_type || 'Unknown' }}</p>
-      <p><strong>Meal Service:</strong> {{ flight.flightDetails.meal_service || 'None' }}</p>
-      <p>
-        <strong>Seats:</strong> Business: {{ flight.flightDetails.seats_cabin_business || 0 }},
-        Coach: {{ flight.flightDetails.seats_cabin_coach || 0 }},
-        First: {{ flight.flightDetails.seats_cabin_first || 0 }}
-      </p>
+      <ion-grid>
+        <ion-row>
+          <ion-col size="4"><strong>Airline:</strong></ion-col>
+          <ion-col>{{ flight.flightDetails.ident_icao || 'Unknown' }}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="4"><strong>Departure:</strong></ion-col>
+          <ion-col>{{ flight.flightDetails.scheduled_out | date: 'dd/MM/yyyy HH:mm' }}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="4"><strong>Arrival:</strong></ion-col>
+          <ion-col>{{ flight.flightDetails.scheduled_in | date: 'dd/MM/yyyy HH:mm' }}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="4"><strong>Aircraft:</strong></ion-col>
+          <ion-col>{{ flight.flightDetails.aircraft_type || 'Unknown' }}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="4"><strong>Meals:</strong></ion-col>
+          <ion-col>{{ flight.flightDetails.meal_service || 'None' }}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="4"><strong>Seats:</strong></ion-col>
+          <ion-col>
+            Business: {{ flight.flightDetails.seats_cabin_business || 0 }},
+            Coach: {{ flight.flightDetails.seats_cabin_coach || 0 }},
+            First: {{ flight.flightDetails.seats_cabin_first || 0 }}
+          </ion-col>
+        </ion-row>
+      </ion-grid>
     </ion-card-content>
   </ion-card>
-  
-  <ion-card *ngIf="flight.actualFlight">
+
+  <ion-card *ngIf="flight.previousFlight" class="info-card">
+    <ion-card-header>
+      <ion-card-title>Previous Flight</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-grid>
+        <ion-row>
+          <ion-col size="4"><strong>Flight ID:</strong></ion-col>
+          <ion-col>{{ flight.previousFlight.callsign }}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="4"><strong>Origin:</strong></ion-col>
+          <ion-col>{{ flight.previousFlight.estDepartureAirport }}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="4"><strong>Destination:</strong></ion-col>
+          <ion-col>{{ flight.previousFlight.estArrivalAirport }}</ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="flight.actualFlight" class="info-card">
     <ion-card-header>
       <ion-card-title>Actual Flight</ion-card-title>
     </ion-card-header>
     <ion-card-content>
-      <p><strong>Callsign:</strong> {{ flight.actualFlight.callsign }}</p>
-      <p><strong>Departure Airport:</strong> {{ flight.actualFlight.estDepartureAirport }}</p>
-      <p><strong>Arrival Airport:</strong> {{ flight.actualFlight.estArrivalAirport }}</p>
-      <p><strong>Departure Time:</strong> {{ flight.actualFlight.firstSeen * 1000 | date: 'yyyy-MM-dd HH:mm:ss' }}</p>
-      <p><strong>Arrival Time:</strong> {{ flight.actualFlight.lastSeen * 1000 | date: 'yyyy-MM-dd HH:mm:ss' }}</p>
+      <ion-grid>
+        <ion-row>
+          <ion-col size="4"><strong>Callsign:</strong></ion-col>
+          <ion-col>{{ flight.actualFlight.callsign }}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="4"><strong>Departure:</strong></ion-col>
+          <ion-col>{{ flight.actualFlight.estDepartureAirport }}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="4"><strong>Arrival:</strong></ion-col>
+          <ion-col>{{ flight.actualFlight.estArrivalAirport }}</ion-col>
+        </ion-row>
+        <!-- <ion-row>
+          <ion-col size="4"><strong>Dep. Time:</strong></ion-col>
+          <ion-col>{{ flight.actualFlight.firstSeen * 1000 | date: 'yyyy-MM-dd HH:mm:ss' }}</ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="4"><strong>Arr. Time:</strong></ion-col>
+          <ion-col>{{ flight.actualFlight.lastSeen * 1000 | date: 'yyyy-MM-dd HH:mm:ss' }}</ion-col>
+        </ion-row> -->
+      </ion-grid>
     </ion-card-content>
   </ion-card>
-  
-  <!-- <ion-card *ngIf="flight.actualFlight?.flightPath">
+
+  <ion-card *ngIf="flight.previousFlight?.flightPath">
     <ion-card-header>
-      <ion-card-title>Flight Path</ion-card-title>
+      <ion-card-title>Your estimated flight path</ion-card-title>
     </ion-card-header>
-    <ion-card-content>
-      <ul>
-        <li *ngFor="let waypoint of flight.actualFlight.flightPath">
-          <strong>Time:</strong> {{ waypoint[0] * 1000 | date: 'yyyy-MM-dd HH:mm:ss' }}<br />
-          <strong>Latitude:</strong> {{ waypoint[1] }}<br />
-          <strong>Longitude:</strong> {{ waypoint[2] }}<br />
-          <strong>Altitude:</strong> {{ waypoint[3] || 'N/A' }} meters<br />
-        </li>
-      </ul>
-    </ion-card-content>
-  </ion-card> -->
-  <div *ngIf="flight.actualFlight?.flightPath">
+    <app-actual-flight-path-map [flightPath]="formatFlightPath(flight.previousFlight.flightPath)"></app-actual-flight-path-map>
+  </ion-card>
+
+  <ion-card *ngIf="flight.actualFlight?.flightPath">
+    <ion-card-header>
+      <ion-card-title>Your flight route</ion-card-title>
+    </ion-card-header>
     <app-actual-flight-path-map [flightPath]="formatFlightPath(flight.actualFlight.flightPath)"></app-actual-flight-path-map>
-  </div>
-  
+  </ion-card>
+
   <ion-card *ngIf="!flight.actualFlight?.flightPath">
-    <ion-card-header>
-      <ion-card-title>No Flight Path Available</ion-card-title>
+    <ion-card-header class="no-path-header">
+      <ion-card-title class="no-path">
+        Your estimated flight path is not available yet! Path will be available 8 hours before the flight!
+      </ion-card-title>
+      <ion-icon class="no-path-icon" name="hourglass-outline"></ion-icon>
     </ion-card-header>
-    <ion-card-content>
-      <p>The flight path is not available at this time.</p>
-    </ion-card-content>
   </ion-card>
 </ion-content>

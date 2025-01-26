@@ -35,6 +35,8 @@ import {
   IonCardTitle,
   IonList,
   IonCardContent,
+  IonFab,
+  IonFabButton,
   IonDatetime,
 } from '@ionic/angular/standalone';
 import { add } from 'ionicons/icons';
@@ -56,6 +58,8 @@ import { add } from 'ionicons/icons';
     IonButtons,
     IonContent,
     IonHeader,
+    IonFab,
+    IonFabButton,
     IonInput,
     IonItem,
     IonTitle,
@@ -80,6 +84,7 @@ export class Tab1Page {
   flights: Flight[] = [];
   upcomingFlights: Flight[] = []; 
   previousFlights: Flight[] = [];
+  ongoingFlights: Flight[] = [];
   flightNumber = '';
   flightDate = '';
   origin = '';
@@ -153,11 +158,11 @@ export class Tab1Page {
   );
 }
 
-  addFlightToStorage(flight: any) {
-    const storedFlights = JSON.parse(localStorage.getItem("flights") || "[]");
-    storedFlights.unshift(flight);
-    localStorage.setItem("flights", JSON.stringify(storedFlights));
-  }
+  // addFlightToStorage(flight: any) {
+  //   const storedFlights = JSON.parse(localStorage.getItem("flights") || "[]");
+  //   storedFlights.unshift(flight);
+  //   localStorage.setItem("flights", JSON.stringify(storedFlights));
+  // }
 
   getEndDate(date: string): string {
     const startDate = new Date(date.split('T')[0]); 
@@ -168,6 +173,7 @@ export class Tab1Page {
   async loadFlightsFromStorage() {
     this.flights = await this.storageService.getAllFlights();
     const today = new Date();
+    const now = new Date();
 
 
     const testFlight = {
@@ -180,8 +186,8 @@ export class Tab1Page {
         actual_ident_icao: null,
         actual_ident_iata: null,
         aircraft_type: 'E75L',
-        scheduled_in: '2025-01-12T13:50:00Z',
-        scheduled_out: '2025-01-12T12:00:00Z',
+        scheduled_in: '2025-01-24T13:50:00Z',
+        scheduled_out: '2025-01-24T12:00:00Z',
         origin: 'EVRA',
         origin_icao: 'EVRA',
         origin_iata: 'RIX',
@@ -219,6 +225,13 @@ export class Tab1Page {
       return scheduledDate < today;
     });
 
+    this.ongoingFlights = this.flights.filter((flight) => {
+      const scheduledDeparture = new Date(flight.flightDetails.scheduled_out);
+      const scheduledArrival = new Date(flight.flightDetails.scheduled_in);
+      return scheduledDeparture <= now && scheduledArrival >= now;
+    });
+
+
     console.log('Loaded Flights from Storage:', this.flights);
   }
 
@@ -227,6 +240,12 @@ export class Tab1Page {
       return '';
     }
     return codeshares.map((codeshare) => codeshare.ident).join(', ');
+  }
+
+  navigateToTracking(flight: Flight) {
+    this.navCtrl.navigateForward('/tabs/tab2', {
+      state: { flight },
+    });
   }
 
   openFlightDetails(flight: any) {

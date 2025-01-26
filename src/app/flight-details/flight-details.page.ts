@@ -1,5 +1,3 @@
-//flight-details.page.ts
-
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -7,7 +5,7 @@ import { FlightService } from '../services/flight.service';
 import { StorageService } from '../services/storage.service';
 import { ActualFlightPathMapComponent } from '../components/actual-flight-path-map/actual-flight-path-map.component';
 import { Flight } from '../models/flight.model';
-import { airplaneOutline } from 'ionicons/icons';
+import { airplaneOutline, hourglassOutline } from 'ionicons/icons';
 import { addIcons } from 'ionicons';
 import {
   IonContent,
@@ -17,6 +15,9 @@ import {
   IonButtons,
   IonBackButton,
   IonCard,
+  IonRow,
+  IonCol,
+  IonGrid,
   IonCardHeader,
   IonCardTitle,
   IonCardContent,
@@ -35,6 +36,9 @@ import { ActivatedRoute } from '@angular/router';
     IonTitle,
     IonToolbar,
     IonButtons,
+    IonGrid,
+    IonCol,
+    IonRow,
     IonBackButton,
     IonCard,
     IonIcon,
@@ -92,6 +96,13 @@ export class FlightDetailsPage {
         console.log('Using existing actual flight:', this.flight.actualFlight);
       }
 
+      if (this.flight.previousFlight && !this.flight.previousFlight.flightPath) {
+        console.log('Fetching flight path for previous flight...');
+        await this.loadFlightPath(this.flight.previousFlight);
+      } else if (this.flight.previousFlight?.flightPath) {
+        console.log('Using existing flight path for previous flight:', this.flight.previousFlight?.flightPath);
+      }
+
       if (this.flight.actualFlight && !this.flight.actualFlight.flightPath) {
         console.log('Fetching flight path for actual flight...');
         await this.loadFlightPath(this.flight.actualFlight);
@@ -103,45 +114,77 @@ export class FlightDetailsPage {
 
 
   async findPreviousFlight() {
+    if (this.flight.previousFlight) {
+      console.log('Previous flight is already available:', this.flight.previousFlight);
+
+      if (!this.flight.previousFlight.flightPath) {
+        console.log('Fetching flight path for previous flight...');
+        await this.loadFlightPath(this.flight.previousFlight);
+      } else {
+        console.log('Using existing flight path for previous flight:', this.flight.previousFlight.flightPath);
+      }
+      return;
+    }
+
     const { origin, destination, scheduled_out } = this.flight.flightDetails;
     const scheduledDepartureUTC = new Date(scheduled_out);
-    const startTime = Math.floor((scheduledDepartureUTC.getTime() - 48 * 60 * 60 * 1000) / 1000); // 48 hours before
+    const startTime = Math.floor((scheduledDepartureUTC.getTime() - 5 * 24 * 60 * 60 * 1000) / 1000); // 5 days before
     const endTime = Math.floor(scheduledDepartureUTC.getTime() / 1000); // Scheduled departure
 
     try {
-      const flights = await this.flightService
+      // Step 1: Try fetching departures
+      let flights = await this.flightService
         .getDeparturesWithArrival(origin, startTime, endTime, destination)
         .toPromise();
 
-        console.log('Fetched flights:', flights);
+      console.log('Fetched flights (origin to destination):', flights);
 
-      const previousFlight = flights.find((flight: any) => {
-      console.log(
-        `Checking flight: ${flight.callsign}, origin: ${flight.estDepartureAirport}, destination: ${flight.estArrivalAirport}`
-      );
-      return (
-        flight.estDepartureAirport === origin && flight.estArrivalAirport === destination
-      );
-    });
+      let previousFlight = flights.reduce((closest: any, current: any) => {
+        const closestTimeDiff = Math.abs(closest.lastSeen - scheduledDepartureUTC.getTime() / 1000);
+        const currentTimeDiff = Math.abs(current.lastSeen - scheduledDepartureUTC.getTime() / 1000);
+        return currentTimeDiff < closestTimeDiff ? current : closest;
+      }, flights[0]);
 
+      // Step 2: If no previous flight is found, fallback to arrivals endpoint
+      if (!previousFlight) {
+        console.warn('No previous flight found from origin to destination. Trying arrivals endpoint...');
+        
+        flights = await this.flightService
+          .getArrivalsAtAirport(destination, startTime, endTime)
+          .toPromise();
 
+        console.log('Fetched flights (arrivals at destination):', flights);
+
+        previousFlight = flights
+          .filter((flight: any) => flight.estDepartureAirport === origin) // Check the departure airport
+          .reduce((closest: any, current: any) => {
+            const closestTimeDiff = Math.abs(closest.lastSeen - scheduledDepartureUTC.getTime() / 1000);
+            const currentTimeDiff = Math.abs(current.lastSeen - scheduledDepartureUTC.getTime() / 1000);
+            return currentTimeDiff < closestTimeDiff ? current : closest;
+          }, flights[0]);
+      }
+
+      // Step 3: Process the found flight
       if (previousFlight) {
+        console.log('Previous flight found:', previousFlight);
+
         if (!previousFlight.flightPath) {
           console.log('Fetching flight path for previous flight...');
           await this.loadFlightPath(previousFlight);
-        } else {
-          console.log('Using existing flight path for previous flight:', previousFlight.flightPath);
         }
-          this.flight.previousFlight = previousFlight; 
-          await this.storageService.updateFlight(this.flight);
-          console.log('Updated flight with previous flight:', this.flight);
-        } else {
-          console.warn('No previous flight found.');
-        }
-      } catch (error) {
+
+        this.flight.previousFlight = previousFlight;
+        await this.storageService.updateFlight(this.flight);
+        console.log('Updated flight with previous flight:', this.flight);
+      } else {
+        console.warn('No previous flight found after trying both departures and arrivals.');
+      }
+    } catch (error) {
       console.error('Error fetching previous flight:', error);
     }
   }
+
+
 
 
   async findAndSaveActualFlight() {
@@ -151,16 +194,45 @@ export class FlightDetailsPage {
     const startTime = scheduledDepartureTime;
     const endTime = Math.floor((scheduledDepartureUTC.getTime() + 12 * 60 * 60 * 1000) / 1000);
 
+    if (this.flight.actualFlight) {
+      console.log('Previous flight is already available:', this.flight.actualFlight);
+
+      if (!this.flight.actualFlight.flightPath) {
+        console.log('Fetching flight path for previous flight...');
+        await this.loadFlightPath(this.flight.actualFlight);
+      } else {
+        console.log('Using existing flight path for actual flight:', this.flight.actualFlight.flightPath);
+      }
+      return;
+    }
+
     try {
-      const flights = await this.flightService
+      let flights = await this.flightService
         .getDeparturesWithArrival(origin, startTime, endTime, destination)
         .toPromise();
 
-      const actualFlight = flights.reduce((closest: any, current: any) => {
+      let actualFlight = flights.reduce((closest: any, current: any) => {
         const closestDiff = Math.abs(closest.firstSeen - scheduledDepartureTime);
         const currentDiff = Math.abs(current.firstSeen - scheduledDepartureTime);
         return currentDiff < closestDiff ? current : closest;
       }, flights[0]);
+
+      if (!actualFlight) {
+        console.warn('No actual flight found from origin to destination. Trying reverse direction...');
+
+       
+        flights = await this.flightService
+          .getDeparturesWithArrival(destination, startTime, endTime, origin)
+          .toPromise();
+
+        console.log('Fetched flights (destination to origin):', flights);
+
+        actualFlight = flights.reduce((closest: any, current: any) => {
+          const closestDiff = Math.abs(closest.firstSeen - scheduledDepartureTime);
+          const currentDiff = Math.abs(current.firstSeen - scheduledDepartureTime);
+          return currentDiff < closestDiff ? current : closest;
+        }, flights[0]);
+      }
 
       if (actualFlight) {
         if (!actualFlight.flightPath) {

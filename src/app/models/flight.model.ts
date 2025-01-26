@@ -3,7 +3,12 @@
 export interface Flight {
   flightId: string;
   flightDetails: any; 
-  previousFlight?: Flight; 
+  previousFlight?: {
+    flightPath?: any[];
+    estDepartureAirport?: string;
+    estArrivalAirport?: string;
+    callsign?: string;
+  };
   actualFlightPathId?: string;
   origin?: string; 
   destination?: string; 
