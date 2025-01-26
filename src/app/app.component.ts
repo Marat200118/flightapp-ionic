@@ -2,6 +2,7 @@
 
 import { Component } from '@angular/core';
 import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
+// import { SupabaseService } from './supabase.service'
 
 @Component({
   selector: 'app-root',

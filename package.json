@@ -36,6 +36,7 @@
     "@ionic/angular": "^8.0.0",
     "@ionic/storage": "^4.0.0",
     "@ionic/storage-angular": "^4.0.0",
+    "@supabase/supabase-js": "^2.48.1",
     "@types/localforage": "^0.0.33",
     "cordova-sqlite-storage": "^6.1.0",
     "ionicons": "^7.2.1",

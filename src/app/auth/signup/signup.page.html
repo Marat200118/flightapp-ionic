@@ -1,0 +1,20 @@
+<!-- signup.page.html -->
+
+<ion-content class="auth-content">
+  <div class="auth-header">
+    <h1>Create Account</h1>
+    <p>Sign up to get started</p>
+  </div>
+
+  <form (ngSubmit)="signUp()">
+    <ion-item>
+      <ion-label position="stacked">Email</ion-label>
+      <ion-input type="email" [(ngModel)]="email" name="email"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="stacked">Password</ion-label>
+      <ion-input type="password" [(ngModel)]="password" name="password"></ion-input>
+    </ion-item>
+    <ion-button expand="block" type="submit">Sign Up</ion-button>
+  </form>
+</ion-content>
