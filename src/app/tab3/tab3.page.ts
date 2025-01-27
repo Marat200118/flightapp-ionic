@@ -58,11 +58,12 @@ import {
 export class Tab3Page implements OnInit {
   profile: Profile = {
     username: '',
-    website: '',
+    first_name: '',
     avatar_url: '',
   };
 
-  email = '';
+  email = ''; 
+
 
   constructor(private supabase: SupabaseService) {}
 
@@ -73,11 +74,10 @@ export class Tab3Page implements OnInit {
   
   async loadProfile() {
     try {
-      const user = await this.supabase.user; // Fetch current user
-      if (user) {
-        const { data: profile, error } = await this.supabase.getProfile(); // Call the `profile` method
-        if (error) throw error;
-        this.profile = profile || this.profile;
+      const profile = await this.supabase.getProfile(); 
+      if (profile) {
+        this.profile = { ...this.profile, ...profile }; 
+        console.log('Profile:', this.profile);
       }
     } catch (error: any) {
       console.error('Failed to load profile:', error.message);

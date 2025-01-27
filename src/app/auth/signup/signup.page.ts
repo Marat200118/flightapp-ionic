@@ -17,6 +17,7 @@ import {
   IonGrid,
   IonCardHeader,
   IonCardTitle,
+  IonAvatar,
   IonCardContent,
   IonIcon,
   IonItem,
@@ -40,6 +41,7 @@ import { FormsModule } from '@angular/forms';
     IonButtons,
     IonGrid,
     IonCol,
+    IonAvatar,
     IonRow,
     IonBackButton,
     IonCard,
@@ -57,22 +59,51 @@ import { FormsModule } from '@angular/forms';
 export class SignupPage {
   email = '';
   password = '';
+  firstName = '';
+  username = '';
+  avatarFile: File | null = null;
+  previewAvatar: string | ArrayBuffer | null = null;
 
   constructor(private navCtrl: NavController, private supabase: SupabaseService) {}
 
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    this.avatarFile = file;
+
+    // Generate a preview of the selected file
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      this.previewAvatar = e.target?.result ?? null; // Ensure null instead of undefined
+    };
+    reader.readAsDataURL(file);
+  }
+
+
   async signUp() {
     try {
-      const { data, error } = await this.supabase.signUp(this.email, this.password);
-      if (error) throw error;
+      // Upload avatar if provided
+      let avatarUrl = '';
+      if (this.avatarFile) {
+        avatarUrl = await this.supabase.uploadAvatar(this.avatarFile);
+      }
 
-      if (data?.user) {
-        this.supabase.createNotice('Signup successful! Please log in.');
-        this.navCtrl.navigateRoot('/auth/login');
+      // Sign up the user and create the profile
+      const user = await this.supabase.signUp(this.email, this.password, {
+        first_name: this.firstName,
+        username: this.username,
+        avatar_url: avatarUrl,
+      });
+
+      if (user) {
+        this.supabase.createNotice('Signup successful! You are logged in.');
+        this.navCtrl.navigateRoot('/tabs/tab1'); // Redirect to main page
       }
     } catch (error: any) {
+      console.error('Sign-up failed:', error.message);
       this.supabase.createNotice(error.message);
     }
   }
+
 
   goToLogin() {
     this.navCtrl.navigateForward('/auth/login');
