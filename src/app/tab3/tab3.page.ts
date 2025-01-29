@@ -3,6 +3,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ExploreContainerComponent } from '../explore-container/explore-container.component';
 import { CommonModule } from '@angular/common';
+import { NavController } from '@ionic/angular';
 import { SupabaseService, Profile } from '../services/supabase.service';
 import { FormsModule } from '@angular/forms';
 
@@ -17,6 +18,9 @@ import {
   IonRow,
   IonCol,
   IonGrid,
+  IonImg,
+  IonCardSubtitle,
+  IonList,
   IonCardHeader,
   IonCardTitle,
   IonCardContent,
@@ -39,6 +43,9 @@ import {
       IonToolbar,
       FormsModule,
       IonButtons,
+      IonImg,
+      IonCardSubtitle,
+      IonList,
       IonGrid,
       IonCol,
       IonRow,
@@ -65,7 +72,7 @@ export class Tab3Page implements OnInit {
   email = ''; 
 
 
-  constructor(private supabase: SupabaseService) {}
+  constructor(private supabase: SupabaseService, private navCtrl: NavController,) {}
 
   ngOnInit() {
     this.loadProfile();
@@ -75,10 +82,16 @@ export class Tab3Page implements OnInit {
   async loadProfile() {
     try {
       const profile = await this.supabase.getProfile(); 
+      const user = await this.supabase.user;
+      console.log('User:', user);
       if (profile) {
         this.profile = { ...this.profile, ...profile }; 
         console.log('Profile:', this.profile);
       }
+      if (user) {
+        this.email = user.email ?? '';
+      }
+
     } catch (error: any) {
       console.error('Failed to load profile:', error.message);
     }
@@ -86,5 +99,7 @@ export class Tab3Page implements OnInit {
 
   async signOut() {
     await this.supabase.signOut();
+    this.navCtrl.navigateRoot('/auth/login');
+
   }
 }

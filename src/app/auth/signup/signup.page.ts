@@ -70,10 +70,9 @@ export class SignupPage {
     const file = event.target.files[0];
     this.avatarFile = file;
 
-    // Generate a preview of the selected file
     const reader = new FileReader();
     reader.onload = (e) => {
-      this.previewAvatar = e.target?.result ?? null; // Ensure null instead of undefined
+      this.previewAvatar = e.target?.result ?? null; 
     };
     reader.readAsDataURL(file);
   }
@@ -81,13 +80,11 @@ export class SignupPage {
 
   async signUp() {
     try {
-      // Upload avatar if provided
       let avatarUrl = '';
       if (this.avatarFile) {
         avatarUrl = await this.supabase.uploadAvatar(this.avatarFile);
       }
 
-      // Sign up the user and create the profile
       const user = await this.supabase.signUp(this.email, this.password, {
         first_name: this.firstName,
         username: this.username,
@@ -95,14 +92,16 @@ export class SignupPage {
       });
 
       if (user) {
-        this.supabase.createNotice('Signup successful! You are logged in.');
-        this.navCtrl.navigateRoot('/tabs/tab1'); // Redirect to main page
+        this.supabase.createNotice('Signup successful! Logging you in...');
+        await this.supabase.restoreSession(); 
+        this.navCtrl.navigateRoot('/tabs/tab1'); 
       }
     } catch (error: any) {
       console.error('Sign-up failed:', error.message);
       this.supabase.createNotice(error.message);
     }
   }
+
 
 
   goToLogin() {

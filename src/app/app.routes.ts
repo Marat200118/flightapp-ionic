@@ -44,6 +44,13 @@ export const routes: Routes = [
     ],
   },
   {
+    path: 'flight-details',
+    loadComponent: () =>
+      import('./flight-details/flight-details.page').then(
+        (m) => m.FlightDetailsPage
+      ),
+  },
+  {
     path: '**', 
     redirectTo: 'auth/login',
   },

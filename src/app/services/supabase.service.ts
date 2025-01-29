@@ -1,14 +1,17 @@
 //supabase.service.ts
 
 import { Injectable } from '@angular/core';
+
 import {
   createClient,
   SupabaseClient,
   AuthChangeEvent,
   Session,
 } from '@supabase/supabase-js';
+
 import { environment } from '../../environments/environment';
 import { LoadingController, ToastController } from '@ionic/angular';
+import { Storage } from '@ionic/storage-angular';
 
 export interface Profile {
   username: string;
@@ -20,34 +23,52 @@ export interface Profile {
   providedIn: 'root',
 })
 export class SupabaseService {
+  
   private supabase: SupabaseClient;
 
   constructor(
     private loadingCtrl: LoadingController,
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
+    private storage: Storage,
   ) {
     this.supabase = createClient(environment.supabaseUrl, environment.supabaseKey, {
     auth: {
       persistSession: true,
       detectSessionInUrl: true,
-      autoRefreshToken: false, // Prevents using LockManager
+      autoRefreshToken: false,
     },
   });
+  console.log('Supabase URL:', environment.supabaseUrl);
+  console.log('Supabase Key:', environment.supabaseKey);
   }
 
-  // Get user details
   get user() {
     return this.supabase.auth.getUser().then(({ data }) => data?.user);
   }
 
-  // Sign in with email and password
-  signIn(email: string, password: string) {
-    return this.supabase.auth.signInWithPassword({ email, password });
+  async signIn(email: string, password: string) {
+    console.log('Attempting sign in with:', email);
+    const { data, error } = await this.supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      console.error('Sign-in error:', error.message);
+      throw error;
+    }
+
+    console.log('Login successful:', data.session);
+
+    if (data.session) {
+      await this.storage.set('supabase_session', JSON.stringify(data.session));
+      console.log('Session saved in storage.');
+    }
+
+    return data;
   }
 
-  // Sign out the current user
-  signOut() {
-    return this.supabase.auth.signOut();
+  async signOut() {
+    console.log('Signing out...');
+    await this.supabase.auth.signOut();
+    await this.storage.remove('supabase_session');
   }
 
   async signUp(email: string, password: string, profile: Partial<Profile>) {
@@ -61,7 +82,6 @@ export class SupabaseService {
       throw new Error('User was not created successfully');
     }
 
-    // Insert profile into the `profiles` table
     const { error: profileError } = await this.supabase
       .from('profiles')
       .insert([
@@ -78,7 +98,6 @@ export class SupabaseService {
       throw new Error(`Profile creation failed: ${profileError.message}`);
     }
 
-    // Manually log in the user if session is not created
     const { error: signInError } = await this.supabase.auth.signInWithPassword({
       email,
       password,
@@ -150,6 +169,27 @@ export class SupabaseService {
       avatar_url: data.avatar_url,
     };
   }
+
+  async restoreSession() {
+    await this.storage.create(); 
+
+    const storedSession = await this.storage.get('supabase_session');
+
+    if (storedSession) {
+      const session: Session = JSON.parse(storedSession);
+      console.log('Restoring session from storage:', session);
+
+      const { error } = await this.supabase.auth.setSession(session);
+      if (error) {
+        console.error('Failed to restore session:', error.message);
+      } else {
+        console.log('Session restored successfully.');
+      }
+    } else {
+      console.log('No session found in storage.');
+    }
+  }
+
 
   async createLoader() {
     const loader = await this.loadingCtrl.create();

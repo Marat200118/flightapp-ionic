@@ -68,25 +68,24 @@ export class LoginPage {
 
   async login() {
     console.log('Login button clicked');
-    const loader = await this.supabase.createLoader();
-    await loader.present();
+    // const loader = await this.supabase.createLoader();
+    // await loader.present();
+    console.log('Logging in with email:', this.email);
 
     try {
-      const { data, error } = await this.supabase.signIn(this.email, this.password);
-      if (error) {
-        throw new Error(error.message);
-      }
+      const data = await this.supabase.signIn(this.email, this.password);
+      console.log('Login successful:', data);
 
-      console.log('Login successful:', data.session);
       this.supabase.createNotice('Login successful!');
       this.navCtrl.navigateRoot('/tabs/tab1');
     } catch (err: any) {
       console.error('Login failed:', err.message);
       this.supabase.createNotice(err.message);
     } finally {
-      loader.dismiss();
+      // loader.dismiss();
     }
   }
+
 
   goToSignUp() {
     this.navCtrl.navigateForward('/auth/signup');

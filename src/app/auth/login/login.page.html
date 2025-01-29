@@ -6,16 +6,16 @@
     <p>Sign in to continue</p>
   </div>
 
-  <form (ngSubmit)="login()">
+  <form #loginForm="ngForm" (ngSubmit)="login()">
     <ion-item>
       <ion-label position="stacked">Email</ion-label>
-      <ion-input type="email" [(ngModel)]="email" name="email"></ion-input>
+      <ion-input type="email" [(ngModel)]="email" name="email" required></ion-input>
     </ion-item>
     <ion-item>
       <ion-label position="stacked">Password</ion-label>
-      <ion-input type="password" [(ngModel)]="password" name="password"></ion-input>
+      <ion-input type="password" [(ngModel)]="password" name="password" required></ion-input>
     </ion-item>
-    <ion-button expand="block" type="submit">Log In</ion-button>
+    <ion-button expand="block" type="submit" [disabled]="loginForm.invalid">Log In</ion-button>
   </form>
 
   <div class="auth-divider">OR</div>
