@@ -25,7 +25,9 @@
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "allowedCommonJsDependencies": [
-              "localforage"
+              "ws",
+              "leaflet",
+              "localforage-cordovasqlitedriver"
             ],
             "assets": [
               {

@@ -2,7 +2,8 @@
 
 <ion-header [translucent]="true">
   <ion-toolbar class="tab-header">
-    <ion-title>Home</ion-title>
+    <ion-img class="logo" src="assets/icon1.png"></ion-img>
+    <!-- <ion-title>Illuminator</ion-title> -->
   </ion-toolbar>
 </ion-header>
 
@@ -10,7 +11,7 @@
   <div class="fancy-header">
     <div class="header-content">
       <div>
-        <h1>Hello, User!</h1>
+        <h1>Hello, {{ profile?.first_name || 'User' }}!</h1>
         <p>Here are your flights</p>
       </div>
       <ion-img class="header-image" src="assets/airplane-side.png"></ion-img>

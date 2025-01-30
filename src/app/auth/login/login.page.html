@@ -1,0 +1,27 @@
+<!-- login.page.html -->
+
+<ion-content class="auth-content">
+  <div class="auth-header">
+    <h1>Welcome</h1>
+    <p>Sign in to continue</p>
+  </div>
+
+  <form #loginForm="ngForm" (ngSubmit)="login()">
+    <ion-item>
+      <ion-label position="stacked">Email</ion-label>
+      <ion-input type="email" [(ngModel)]="email" name="email" required></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="stacked">Password</ion-label>
+      <ion-input type="password" [(ngModel)]="password" name="password" required></ion-input>
+    </ion-item>
+    <ion-button expand="block" type="submit" [disabled]="loginForm.invalid">Log In</ion-button>
+  </form>
+
+  <div class="auth-divider">OR</div>
+  <!-- <ion-button expand="block" (click)="loginWithGoogle()">Log In with Google</ion-button> -->
+
+  <div class="auth-footer">
+    <p>Don't have an account? <a (click)="goToSignUp()">Sign Up</a></p>
+  </div>
+</ion-content>

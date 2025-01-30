@@ -1,0 +1,33 @@
+<ion-content class="auth-content">
+  <div class="auth-header">
+    <h1>Create Account</h1>
+    <p>Sign up to get started</p>
+  </div>
+
+  <form (ngSubmit)="signUp()">
+    <ion-item>
+      <ion-label position="stacked">Email</ion-label>
+      <ion-input type="email" [(ngModel)]="email" name="email" required></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="stacked">Password</ion-label>
+      <ion-input type="password" [(ngModel)]="password" name="password" required></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="stacked">First Name</ion-label>
+      <ion-input type="text" [(ngModel)]="firstName" name="firstName" required></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="stacked">Username</ion-label>
+      <ion-input type="text" [(ngModel)]="username" name="username" required></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="stacked">Profile Picture</ion-label>
+      <input type="file" (change)="onFileSelected($event)" />
+    </ion-item>
+    <ion-avatar>
+      <img [src]="previewAvatar || 'https://ionicframework.com/docs/img/demos/avatar.svg'" alt="Profile picture" />
+    </ion-avatar>
+    <ion-button expand="block" type="submit">Sign Up</ion-button>
+  </form>
+</ion-content>

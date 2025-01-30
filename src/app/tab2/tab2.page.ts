@@ -5,6 +5,8 @@ import { NavController } from '@ionic/angular';
 import { StorageService } from '../services/storage.service';
 import { Flight } from '../models/flight.model';
 import { CommonModule, DatePipe } from '@angular/common';
+// import { Network } from '@capacitor/network';
+// import { BluetoothLe } from '@capacitor-community/bluetooth-le';
 
 import { LiveFlightPathMapComponent } from '../components/live-flight-map/live-flight-map.component';
 import {

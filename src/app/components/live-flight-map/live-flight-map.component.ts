@@ -10,8 +10,8 @@ import * as L from 'leaflet';
 export class LiveFlightPathMapComponent implements OnInit, OnChanges, OnDestroy {
   @Input() flightPath: { latitude: number; longitude: number; timestamp: number }[] = [];
   @Input() planePosition: { latitude: number; longitude: number } | null = null;
-  @Input() scheduledDeparture: number | null = null; // Input for scheduledDeparture
-  @Input() previousFlightDuration: number | null = null; // Input for previousFlightDuration
+  @Input() scheduledDeparture: number | null = null;
+  @Input() previousFlightDuration: number | null = null;
 
   private map: L.Map | undefined;
   private planeMarker: L.Marker | undefined;
@@ -91,7 +91,6 @@ export class LiveFlightPathMapComponent implements OnInit, OnChanges, OnDestroy 
       this.planeMarker.setIcon(planeIcon);
     }
 
-    // Optionally, move the map to follow the plane
     this.map.setView([this.planePosition.latitude, this.planePosition.longitude], 10, { animate: true });
   }
 
@@ -120,7 +119,7 @@ export class LiveFlightPathMapComponent implements OnInit, OnChanges, OnDestroy 
       Math.sin(lat1) * Math.cos(lat2) * Math.cos(lon2 - lon1);
     const bearing = (Math.atan2(y, x) * 180) / Math.PI;
 
-    return (bearing + 360) % 360; // Normalize bearing to 0-360
+    return (bearing + 360) % 360; 
   }
 
   ngOnDestroy(): void {

@@ -1,7 +1,7 @@
 //tab1.page.ts
 
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, OnInit } from '@angular/core';
 import { NavController, IonicModule } from '@ionic/angular';
 import { OverlayEventDetail } from '@ionic/core/components';
 import { CommonModule } from '@angular/common';
@@ -16,6 +16,8 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { StorageService } from '../services/storage.service';
 import { Flight } from '../models/flight.model';
+import { SupabaseService } from '../services/supabase.service';
+import { Profile } from '../services/supabase.service';
  
 
 import {
@@ -82,6 +84,7 @@ export class Tab1Page {
   @ViewChild('modal') modal!: IonModal;
 
   flights: Flight[] = [];
+  profile: Profile | null = null;
   upcomingFlights: Flight[] = []; 
   previousFlights: Flight[] = [];
   ongoingFlights: Flight[] = [];
@@ -93,7 +96,20 @@ export class Tab1Page {
   private apiBaseUrl = 'http://localhost:3000/api/schedules';
   private apiKey = 'wHf94IBGL2dxGFS13wlB5sbGS34bBfT3';
 
-  constructor(private navCtrl: NavController, private http: HttpClient, private storageService: StorageService) {}
+  constructor(private navCtrl: NavController, private http: HttpClient, private storageService: StorageService, private supabase: SupabaseService) {}
+
+  async ngOnInit() {
+    await this.loadProfile();
+    console.log('Profile:', this.profile);
+  }
+
+  async loadProfile() {
+    try {
+      this.profile = await this.supabase.getProfile();
+    } catch (error: any) {
+      console.error('Failed to load profile:', error.message);
+    }
+  }
 
   cancel() {
     this.modal.dismiss(null, 'cancel');
