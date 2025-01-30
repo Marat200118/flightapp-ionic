@@ -65,7 +65,7 @@
     </ion-card-content>
   </ion-card>
 
-  <ion-card *ngIf="flight.previousFlight" class="info-card">
+  <ion-card *ngIf="flight.previousFlight && !isPastFlight()" class="info-card">
     <ion-card-header>
       <ion-card-title>Previous Flight</ion-card-title>
     </ion-card-header>
@@ -87,7 +87,7 @@
     </ion-card-content>
   </ion-card>
 
-  <ion-card *ngIf="flight.actualFlight" class="info-card">
+  <!-- <ion-card *ngIf="flight.actualFlight && isPastFlight()" class="info-card">
     <ion-card-header>
       <ion-card-title>Actual Flight</ion-card-title>
     </ion-card-header>
@@ -105,28 +105,20 @@
           <ion-col size="4"><strong>Arrival:</strong></ion-col>
           <ion-col>{{ flight.actualFlight.estArrivalAirport }}</ion-col>
         </ion-row>
-        <!-- <ion-row>
-          <ion-col size="4"><strong>Dep. Time:</strong></ion-col>
-          <ion-col>{{ flight.actualFlight.firstSeen * 1000 | date: 'yyyy-MM-dd HH:mm:ss' }}</ion-col>
-        </ion-row>
-        <ion-row>
-          <ion-col size="4"><strong>Arr. Time:</strong></ion-col>
-          <ion-col>{{ flight.actualFlight.lastSeen * 1000 | date: 'yyyy-MM-dd HH:mm:ss' }}</ion-col>
-        </ion-row> -->
       </ion-grid>
     </ion-card-content>
-  </ion-card>
+  </ion-card> -->
 
-  <ion-card *ngIf="flight.previousFlight?.flightPath">
+  <ion-card *ngIf="!isPastFlight() && flight.previousFlight?.flightPath" class="info-card">
     <ion-card-header>
-      <ion-card-title>Your estimated flight path</ion-card-title>
+      <ion-card-title>Your Estimated Flight Path</ion-card-title>
     </ion-card-header>
     <app-actual-flight-path-map [flightPath]="formatFlightPath(flight.previousFlight.flightPath)"></app-actual-flight-path-map>
   </ion-card>
 
-  <ion-card *ngIf="flight.actualFlight?.flightPath">
+  <ion-card *ngIf="isPastFlight() && flight.actualFlight?.flightPath" class="info-card">
     <ion-card-header>
-      <ion-card-title>Your flight route</ion-card-title>
+      <ion-card-title>Your Actual Flight Path</ion-card-title>
     </ion-card-header>
     <app-actual-flight-path-map [flightPath]="formatFlightPath(flight.actualFlight.flightPath)"></app-actual-flight-path-map>
   </ion-card>
@@ -134,7 +126,7 @@
   <ion-card *ngIf="!flight.actualFlight?.flightPath">
     <ion-card-header class="no-path-header">
       <ion-card-title class="no-path">
-        Your estimated flight path is not available yet! Path will be available 8 hours before the flight!
+        Your flight path is not available yet! Path will be available 8 hours before the flight!
       </ion-card-title>
       <ion-icon class="no-path-icon" name="hourglass-outline"></ion-icon>
     </ion-card-header>

@@ -64,6 +64,7 @@ import {
 })
 export class Tab3Page implements OnInit {
   profile: Profile = {
+    id: '',
     username: '',
     first_name: '',
     avatar_url: '',

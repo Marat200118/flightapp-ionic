@@ -1,6 +1,7 @@
 //supabase.service.ts
 
 import { Injectable } from '@angular/core';
+import { StorageService } from './storage.service';
 
 import {
   createClient,
@@ -14,6 +15,7 @@ import { LoadingController, ToastController } from '@ionic/angular';
 import { Storage } from '@ionic/storage-angular';
 
 export interface Profile {
+  id: string;
   username: string;
   first_name: string;
   avatar_url: string;
@@ -30,6 +32,7 @@ export class SupabaseService {
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
     private storage: Storage,
+    private storageService: StorageService,
   ) {
     this.supabase = createClient(environment.supabaseUrl, environment.supabaseKey, {
     auth: {
@@ -67,6 +70,7 @@ export class SupabaseService {
 
   async signOut() {
     console.log('Signing out...');
+    // await this.storageService.clear();
     await this.supabase.auth.signOut();
     await this.storage.remove('supabase_session');
   }

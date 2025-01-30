@@ -3,13 +3,18 @@
 export interface Flight {
   flightId: string;
   flightDetails: any; 
+  userId: string;
   previousFlight?: {
     flightPath?: any[];
     estDepartureAirport?: string;
     estArrivalAirport?: string;
     callsign?: string;
   };
-  actualFlightPathId?: string;
+  actualFlight?: {
+    firstSeen: number;
+    lastSeen: number;
+    flightPath: { latitude: number; longitude: number }[];
+  };
   origin?: string; 
   destination?: string; 
   

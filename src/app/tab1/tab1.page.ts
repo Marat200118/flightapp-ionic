@@ -93,19 +93,31 @@ export class Tab1Page {
   origin = '';
   destination = ''; 
 
+
   private apiBaseUrl = 'http://localhost:3000/api/schedules';
   private apiKey = 'wHf94IBGL2dxGFS13wlB5sbGS34bBfT3';
 
   constructor(private navCtrl: NavController, private http: HttpClient, private storageService: StorageService, private supabase: SupabaseService) {}
 
   async ngOnInit() {
+    await this.supabase.restoreSession();
     await this.loadProfile();
-    console.log('Profile:', this.profile);
+    if (this.profile?.id) {
+      console.log('Profile loaded successfully:', this.profile);
+      await this.loadFlightsFromStorage();
+    } else {
+      console.error('Failed to load profile or profile ID is missing.');
+    }
   }
 
-  async loadProfile() {
+  async loadProfile(): Promise<void> {
     try {
       this.profile = await this.supabase.getProfile();
+      if (this.profile) {
+        console.log('Profile loaded successfully:', this.profile);
+      } else {
+        console.error('Profile not loaded or missing.');
+      }
     } catch (error: any) {
       console.error('Failed to load profile:', error.message);
     }
@@ -144,7 +156,14 @@ export class Tab1Page {
       if (response.scheduled && response.scheduled.length > 0) {
         const flight = response.scheduled[0];
 
-        const existingFlight = await this.storageService.getFlightById(flight.fa_flight_id);
+        if (!this.profile) {
+          alert('User profile not loaded. Please try again.');
+          return;
+        }
+
+        const userId = this.profile.id;
+
+        const existingFlight = await this.storageService.getFlightById(flight.fa_flight_id, userId);
         if (existingFlight) {
           console.log('Flight already exists in storage:', existingFlight);
           alert('This flight is already saved.');
@@ -152,6 +171,7 @@ export class Tab1Page {
           const flightRecord: Flight = {
             flightId: flight.fa_flight_id,
             flightDetails: flight,
+            userId: userId,
             // previousFlightId: null,
             // actualFlightPathId: null,
           };
@@ -187,12 +207,21 @@ export class Tab1Page {
   }
 
   async loadFlightsFromStorage() {
-    this.flights = await this.storageService.getAllFlights();
-    const today = new Date();
-    const now = new Date();
+    console.log('User profile at start of loadFlightsFromStorage:', this.profile);
 
+    const userId = this.profile?.id;
 
-    const testFlight = {
+    if (!this.profile?.id) {
+      console.error('User ID is not available. Skipping flight storage loading.');
+      return;
+    }
+
+    this.flights = await this.storageService.getAllFlights(this.profile.id);
+    console.log('Fetched user-specific flights from storage:', this.flights);
+
+    // Define the test flight
+    const testFlight: Flight = {
+      userId: this.profile?.id ?? '',
       flightId: 'UAL784-1736491986-airline-250p',
       flightDetails: {
         ident: 'LOT784',
@@ -221,15 +250,22 @@ export class Tab1Page {
       },
     };
 
+    // Check if test flight already exists in storage
     const isTestFlightAdded = this.flights.some(
-      (flight) => flight.flightId === testFlight.flightId
+      (flight) => flight.flightId === testFlight.flightId && flight.userId === testFlight.userId
     );
 
     if (!isTestFlightAdded) {
+      console.log('Adding test flight to storage...');
       await this.storageService.addFlight(testFlight);
       this.flights.unshift(testFlight);
+    } else {
+      console.log('Test flight already exists. Skipping add.');
     }
 
+    // Organize flights
+    const today = new Date();
+    const now = new Date();
 
     this.upcomingFlights = this.flights.filter((flight) => {
       const scheduledDate = new Date(flight.flightDetails.scheduled_out);
@@ -247,9 +283,13 @@ export class Tab1Page {
       return scheduledDeparture <= now && scheduledArrival >= now;
     });
 
-
-    console.log('Loaded Flights from Storage:', this.flights);
+    console.log('Organized flights:', {
+      upcomingFlights: this.upcomingFlights,
+      previousFlights: this.previousFlights,
+      ongoingFlights: this.ongoingFlights,
+    });
   }
+
 
   getCodeshares(codeshares: any[]): string {
     if (!codeshares || codeshares.length === 0) {
@@ -270,8 +310,14 @@ export class Tab1Page {
     });
   }
 
-  ionViewWillEnter() {
-    this.loadFlightsFromStorage();
+  async ionViewWillEnter() {
+    if (!this.profile) {
+      console.warn('Profile is not available yet. Skipping flight load.');
+      return;
+    }
+
+    console.log('Profile available. Loading flights...');
+    await this.loadFlightsFromStorage();
   }
 
 }

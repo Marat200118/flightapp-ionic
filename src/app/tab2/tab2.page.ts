@@ -7,6 +7,7 @@ import { Flight } from '../models/flight.model';
 import { CommonModule, DatePipe } from '@angular/common';
 // import { Network } from '@capacitor/network';
 // import { BluetoothLe } from '@capacitor-community/bluetooth-le';
+import { SupabaseService } from '../services/supabase.service';
 
 import { LiveFlightPathMapComponent } from '../components/live-flight-map/live-flight-map.component';
 import {
@@ -68,10 +69,19 @@ export class Tab2Page implements OnInit {
   flightDetails: any = null; 
   previousFlightDuration: number | null = null; 
 
-  constructor(private storageService: StorageService, private navCtrl: NavController) {}
+  constructor(private storageService: StorageService, private navCtrl: NavController, private supabase: SupabaseService) {}
 
   async ngOnInit() {
-    const flights = await this.storageService.getAllFlights();
+
+    const profile = await this.supabase.getProfile();
+    if (!profile || !profile.id) {
+      console.error('User profile not found.');
+      return;
+    }
+
+    const userId = profile.id;
+
+     const flights = await this.storageService.getAllFlights(userId);
     console.log('Fetched flights from storage:', flights);
     console.log('Flight Path:', this.flightPath);
 

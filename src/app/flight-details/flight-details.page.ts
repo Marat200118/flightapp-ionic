@@ -112,6 +112,12 @@ export class FlightDetailsPage {
     }
   }
 
+  isPastFlight(): boolean {
+    const now = new Date();
+    const scheduledDeparture = new Date(this.flight.flightDetails.scheduled_out);
+    return scheduledDeparture < now;
+  }
+
 
   async findPreviousFlight() {
     if (this.flight.previousFlight) {
@@ -128,11 +134,10 @@ export class FlightDetailsPage {
 
     const { origin, destination, scheduled_out } = this.flight.flightDetails;
     const scheduledDepartureUTC = new Date(scheduled_out);
-    const startTime = Math.floor((scheduledDepartureUTC.getTime() - 5 * 24 * 60 * 60 * 1000) / 1000); // 5 days before
-    const endTime = Math.floor(scheduledDepartureUTC.getTime() / 1000); // Scheduled departure
+    const startTime = Math.floor((scheduledDepartureUTC.getTime() - 5 * 24 * 60 * 60 * 1000) / 1000); 
+    const endTime = Math.floor(scheduledDepartureUTC.getTime() / 1000);
 
     try {
-      // Step 1: Try fetching departures
       let flights = await this.flightService
         .getDeparturesWithArrival(origin, startTime, endTime, destination)
         .toPromise();
@@ -145,7 +150,6 @@ export class FlightDetailsPage {
         return currentTimeDiff < closestTimeDiff ? current : closest;
       }, flights[0]);
 
-      // Step 2: If no previous flight is found, fallback to arrivals endpoint
       if (!previousFlight) {
         console.warn('No previous flight found from origin to destination. Trying arrivals endpoint...');
         
@@ -156,7 +160,7 @@ export class FlightDetailsPage {
         console.log('Fetched flights (arrivals at destination):', flights);
 
         previousFlight = flights
-          .filter((flight: any) => flight.estDepartureAirport === origin) // Check the departure airport
+          .filter((flight: any) => flight.estDepartureAirport === origin) 
           .reduce((closest: any, current: any) => {
             const closestTimeDiff = Math.abs(closest.lastSeen - scheduledDepartureUTC.getTime() / 1000);
             const currentTimeDiff = Math.abs(current.lastSeen - scheduledDepartureUTC.getTime() / 1000);
@@ -333,7 +337,7 @@ export class FlightDetailsPage {
   }
 
   async loadFlightsFromStorage() {
-    this.flights = await this.storageService.getAllFlights();
+    this.flights = await this.storageService.getAllFlights(this.flight.userId);
     console.log('Loaded Flights from Storage:', this.flights);
 
     const today = new Date();

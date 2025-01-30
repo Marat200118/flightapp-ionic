@@ -37,6 +37,11 @@ export const routes: Routes = [
           import('./tab3/tab3.page').then((m) => m.Tab3Page),
       },
       {
+        path: 'statistics',
+        loadComponent: () =>
+          import('./statistics/statistics.page').then((m) => m.StatisticsPage),
+      },
+      {
         path: '',
         redirectTo: 'tab1',
         pathMatch: 'full',
@@ -53,5 +58,9 @@ export const routes: Routes = [
   {
     path: '**', 
     redirectTo: 'auth/login',
+  },
+  {
+    path: 'statistics',
+    loadComponent: () => import('./statistics/statistics.page').then( m => m.StatisticsPage)
   },
 ];
