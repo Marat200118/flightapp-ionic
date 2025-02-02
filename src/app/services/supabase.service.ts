@@ -8,6 +8,7 @@ import {
   SupabaseClient,
   AuthChangeEvent,
   Session,
+  User,
 } from '@supabase/supabase-js';
 
 import { environment } from '../../environments/environment';
@@ -20,6 +21,15 @@ export interface Profile {
   first_name: string;
   avatar_url: string;
 }
+
+// export interface User {
+//   id: string;
+//   email: string;
+//   user_metadata: {
+//     avatar_url: string;
+//     [key: string]: any;
+//   };
+// }
 
 @Injectable({
   providedIn: 'root',
@@ -45,9 +55,10 @@ export class SupabaseService {
   console.log('Supabase Key:', environment.supabaseKey);
   }
 
-  get user() {
-    return this.supabase.auth.getUser().then(({ data }) => data?.user);
-  }
+  get user(): Promise<User | null> {
+  return this.supabase.auth.getUser().then(({ data }) => data?.user ?? null);
+}
+
 
   async signIn(email: string, password: string) {
     console.log('Attempting sign in with:', email);
@@ -68,12 +79,66 @@ export class SupabaseService {
     return data;
   }
 
+  async signInWithGoogle() {
+    const { error } = await this.supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin + '/auth/callback',
+      },
+    });
+
+    if (error) {
+      console.error('Google sign-in failed:', error.message);
+      throw error;
+    }
+
+    console.log('Redirecting to Google OAuth...');
+  }
+
   async signOut() {
     console.log('Signing out...');
-    // await this.storageService.clear();
     await this.supabase.auth.signOut();
     await this.storage.remove('supabase_session');
   }
+
+  async handleOAuthCallback() {
+    try {
+      const { data, error } = await this.supabase.auth.exchangeCodeForSession(window.location.href);
+
+      if (error) {
+        console.error('Error handling OAuth callback:', error.message);
+        return { error };
+      }
+
+      console.log('OAuth callback successful. Session:', data);
+      return { data };
+    } catch (err) {
+      console.error('Unexpected error during callback:', err);
+      throw err;
+    }
+  }
+
+
+  async setSession(sessionData: {
+    access_token: string;
+    refresh_token: string;
+    expires_in: number;
+    token_type: string;
+  }) {
+    const { data, error } = await this.supabase.auth.setSession({
+      access_token: sessionData.access_token,
+      refresh_token: sessionData.refresh_token,
+    });
+
+    if (error) {
+      console.error('Failed to set session:', error);
+      return { error };
+    }
+
+    console.log('Session set successfully:', data);
+    return { data };
+  }
+
 
   async signUp(email: string, password: string, profile: Partial<Profile>) {
     const { data, error } = await this.supabase.auth.signUp({ email, password });
@@ -175,7 +240,7 @@ export class SupabaseService {
   }
 
   async restoreSession() {
-    await this.storage.create(); 
+    await this.storage.create();
 
     const storedSession = await this.storage.get('supabase_session');
 
@@ -183,9 +248,18 @@ export class SupabaseService {
       const session: Session = JSON.parse(storedSession);
       console.log('Restoring session from storage:', session);
 
-      const { error } = await this.supabase.auth.setSession(session);
-      if (error) {
-        console.error('Failed to restore session:', error.message);
+      const { data, error } = await this.supabase.auth.getUser();
+
+      if (data?.user) {
+        console.log('Restoring storage for user:', data.user.id);
+        await this.storageService.checkAndPrepareStorage(data.user.id); 
+      } else if (error) {
+        console.error('Error retrieving user:', error);
+      }
+
+      const { error: sessionError } = await this.supabase.auth.setSession(session);
+      if (sessionError) {
+        console.error('Failed to restore session:', sessionError.message);
       } else {
         console.log('Session restored successfully.');
       }
@@ -193,6 +267,8 @@ export class SupabaseService {
       console.log('No session found in storage.');
     }
   }
+
+
 
 
   async createLoader() {

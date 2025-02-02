@@ -58,6 +58,7 @@
     </div>
 
     <div *ngIf="upcomingFlights.length > 0" class="flights-section">
+      <!-- <ion-badge slot="start">{{ upcomingFlights.length}}</ion-badge> -->
       <h2>Upcoming Flights</h2>
       <ion-list>
         <ion-card *ngFor="let flight of upcomingFlights" class="flight-upcoming" (click)="openFlightDetails(flight)">

@@ -62,6 +62,9 @@ import {
       CommonModule,
     ],
 })
+
+
+
 export class Tab3Page implements OnInit {
   profile: Profile = {
     id: '',
@@ -69,6 +72,8 @@ export class Tab3Page implements OnInit {
     first_name: '',
     avatar_url: '',
   };
+
+  
 
   email = ''; 
 
@@ -82,17 +87,23 @@ export class Tab3Page implements OnInit {
   
   async loadProfile() {
     try {
-      const profile = await this.supabase.getProfile(); 
+      const profile = await this.supabase.getProfile();
       const user = await this.supabase.user;
+
       console.log('User:', user);
+      console.log('Profile:', profile);
+
       if (profile) {
-        this.profile = { ...this.profile, ...profile }; 
-        console.log('Profile:', this.profile);
-      }
-      if (user) {
-        this.email = user.email ?? '';
+        this.profile = { ...this.profile, ...profile };
       }
 
+      if (user) {
+        this.email = user.email ?? '';
+        // Access user_metadata with proper type checking
+        if (user.user_metadata?.['avatar_url']) {
+          this.profile.avatar_url = user.user_metadata['avatar_url'];
+        }
+      }
     } catch (error: any) {
       console.error('Failed to load profile:', error.message);
     }

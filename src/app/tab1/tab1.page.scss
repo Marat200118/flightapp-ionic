@@ -24,6 +24,12 @@
   width: 100%;
 }
 
+.flights-header {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+}
+
 .header-content {
   display: flex;
   justify-content: space-between;

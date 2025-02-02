@@ -3,6 +3,7 @@ import { StorageService } from '../services/storage.service';
 import { Flight } from '../models/flight.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { SupabaseService } from '../services/supabase.service';
 
 
 import {
@@ -56,21 +57,29 @@ import {
       IonDatetime,
   ]})
 export class StatisticsPage implements OnInit {
-  profileId: string = '';    // Store the user's profile ID
-  flights: Flight[] = [];    // All flights
-  totalDistance: number = 0; // Total kilometers traveled
-  totalFlightTime: number = 0; // Total time spent in air (hours)
-  totalFlights: number = 0;  // Number of completed flights
+  profileId: string = '';   
+  flights: Flight[] = [];   
+  totalDistance: number = 0; 
+  totalFlightTime: number = 0; 
+  totalFlights: number = 0; 
 
-  constructor(private storageService: StorageService) {}
+  constructor(private storageService: StorageService, private supabase: SupabaseService) {}
 
   async ngOnInit() {
-    this.profileId = 'user-profile-id-placeholder'; 
+    const profile = await this.supabase.getProfile();
+    if (!profile || !profile.id) {
+      console.error('Profile not found.');
+      return;
+    }
 
-    // Load flights and calculate statistics
+    this.profileId = profile.id;
+
+    await this.storageService.checkAndPrepareStorage(this.profileId);
+
     await this.loadFlights();
     this.calculateStatistics();
   }
+
 
   async loadFlights() {
     this.flights = await this.storageService.getAllFlights(this.profileId);
@@ -78,7 +87,6 @@ export class StatisticsPage implements OnInit {
   }
 
   calculateStatistics() {
-    // Filter only past flights that have actualFlight data
     const completedFlights = this.flights.filter(
       (flight) => flight.actualFlight && new Date(flight.flightDetails.scheduled_out) < new Date()
     );
@@ -89,20 +97,43 @@ export class StatisticsPage implements OnInit {
       if (flight.actualFlight) {
         const flightPath = flight.actualFlight.flightPath;
 
-        // Calculate total distance traveled using the flight path
-        if (flightPath && flightPath.length > 1) {
-          this.totalDistance += this.calculateFlightDistance(flightPath);
+        console.log('Flight Path:', flightPath);
+
+        const validPath = flightPath
+          .map(point => this.convertFlightPathPoint(point)) 
+          .filter(point => point.latitude !== undefined && point.longitude !== undefined);
+
+        console.log('Valid Path Points:', validPath);
+
+        if (validPath.length > 1) {
+          this.totalDistance += this.calculateFlightDistance(validPath);
         }
 
-        // Calculate flight time (in hours)
-        const flightTime = (flight.actualFlight.lastSeen - flight.actualFlight.firstSeen) / 3600; // Convert seconds to hours
-        this.totalFlightTime += flightTime;
+        if (flight.actualFlight.lastSeen && flight.actualFlight.firstSeen) {
+          const flightTime = (flight.actualFlight.lastSeen - flight.actualFlight.firstSeen) / 3600;
+          this.totalFlightTime += flightTime;
+        }
       }
     });
 
     console.log('Total Distance:', this.totalDistance, 'km');
-    console.log('Total Flight Time:', this.totalFlightTime, 'hours');
+    console.log('Total Flight Time:', this.formatFlightTime(this.totalFlightTime));
     console.log('Total Flights:', this.totalFlights);
+  }
+
+  convertFlightPathPoint(point: any): { latitude: number; longitude: number } {
+    if (Array.isArray(point) && point.length >= 3) {
+      return { latitude: point[1], longitude: point[2] };
+    }
+    return point;
+  }
+
+
+  formatFlightTime(hours: number): string {
+    const totalMinutes = Math.floor(hours * 60);
+    const displayHours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return `${displayHours} hours, ${minutes} minutes`;
   }
 
   calculateFlightDistance(flightPath: { latitude: number; longitude: number }[]): number {
@@ -118,6 +149,7 @@ export class StatisticsPage implements OnInit {
   }
 
   calculateDistanceBetweenPoints(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    console.log('Calculating distance between points:', lat1, lon1, lat2, lon2);
     const R = 6371; // Radius of the Earth in km
     const dLat = this.degreesToRadians(lat2 - lat1);
     const dLon = this.degreesToRadians(lon2 - lon1);

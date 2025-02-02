@@ -11,6 +11,7 @@ import { Flight } from '../models/flight.model';
 })
 export class StorageService {
   private _storage: Storage | null = null;
+  private currentUserId: string | null = null;
 
   constructor(private storage: Storage) {
     this.init();
@@ -35,11 +36,30 @@ export class StorageService {
     }
   }
 
+  async checkAndPrepareStorage(userId: string) {
+    await this.ensureInitialized();
+
+    if (this.currentUserId !== userId) {
+      console.log('New user detected, resetting storage for user:', userId);
+
+      // Clear old data and set new key for the current user
+      if (this.currentUserId) {
+        await this.storage.remove(this.currentUserId);
+      }
+
+      this.currentUserId = userId;
+    }
+  }
+
   async addFlight(flight: Flight): Promise<void> {
     await this.ensureInitialized();
 
-    const key = 'all_flights';
-    const existingFlights = (await this.storage.get(key)) || [];
+    if (!this.currentUserId) {
+      throw new Error('No user logged in. Cannot add flight.');
+    }
+
+    const key = this.currentUserId;
+    const existingFlights: Flight[] = (await this.storage.get(key)) || [];
 
     if (!existingFlights.some((f: Flight) => f.flightId === flight.flightId)) {
       existingFlights.push(flight);
@@ -52,33 +72,13 @@ export class StorageService {
 
   async getAllFlights(userId: string): Promise<Flight[]> {
     await this.ensureInitialized();
-    const key = 'all_flights';
+    await this.checkAndPrepareStorage(userId);
 
-    const storedFlights = (await this.storage.get(key)) || [];
+    const key = userId;
+    const storedFlights: Flight[] = (await this.storage.get(key)) || [];
+    console.log(`Fetched flights for user "${userId}":`, storedFlights);
 
-    console.log('Fetched raw flights data from storage:', storedFlights, 'Type:', typeof storedFlights);
-
-    // Ensure data is an array
-    let flights: Flight[] = [];
-
-    if (typeof storedFlights === 'string') {
-      try {
-        flights = JSON.parse(storedFlights);
-      } catch (error) {
-        console.error('Error parsing stored flights data:', error, 'Raw data:', storedFlights);
-        await this.storage.remove('flights'); // Clear corrupted data if necessary
-        return [];
-      }
-    } else if (Array.isArray(storedFlights)) {
-      flights = storedFlights;
-    } else {
-      console.warn('Unexpected storage data. Resetting flights data.');
-      await this.storage.remove('flights');
-      return [];
-    }
-
-    // Return filtered flights
-    return flights.filter((flight: Flight) => flight.userId === userId);
+    return storedFlights;
   }
 
 
@@ -91,7 +91,11 @@ export class StorageService {
   async updateFlight(flight: Flight): Promise<void> {
     await this.ensureInitialized();
 
-    const key = 'all_flights';
+    if (!this.currentUserId) {
+      throw new Error('No user logged in. Cannot update flight.');
+    }
+
+    const key = this.currentUserId;
     const existingFlights: Flight[] = (await this.storage.get(key)) || [];
 
     const flightIndex = existingFlights.findIndex(
@@ -106,7 +110,7 @@ export class StorageService {
     }
 
     await this.storage.set(key, existingFlights);
-    console.log('Updated all flights in storage:', existingFlights);
+    console.log('Updated flights for user:', existingFlights);
   }
 
 
@@ -115,7 +119,10 @@ export class StorageService {
   }
 
   async clear(): Promise<void> {
-    await this._storage?.clear();
+    if (this.currentUserId) {
+      await this.storage.remove(this.currentUserId);
+      console.log(`Cleared storage for user: ${this.currentUserId}`);
+    }
   }
 
   public async set(key: string, value: any): Promise<void> {

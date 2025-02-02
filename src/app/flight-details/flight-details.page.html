@@ -123,12 +123,21 @@
     <app-actual-flight-path-map [flightPath]="formatFlightPath(flight.actualFlight.flightPath)"></app-actual-flight-path-map>
   </ion-card>
 
-  <ion-card *ngIf="!flight.actualFlight?.flightPath">
+  <ion-card *ngIf="isPastFlight() && !flight.actualFlight?.flightPath">
+    <ion-card-header class="no-path-header">
+      <ion-card-title class="no-path">
+        Your flight path is not available yet! Path will be available 12 hours before the flight!
+      </ion-card-title>
+      <ion-icon class="no-path-icon" name="hourglass-outline"></ion-icon>
+    </ion-card-header>
+  </ion-card>
+
+  <!-- <ion-card *ngIf="!isPastFlight() && !flight.actualFlight?.flightPath">
     <ion-card-header class="no-path-header">
       <ion-card-title class="no-path">
         Your flight path is not available yet! Path will be available 8 hours before the flight!
       </ion-card-title>
       <ion-icon class="no-path-icon" name="hourglass-outline"></ion-icon>
     </ion-card-header>
-  </ion-card>
+  </ion-card> -->
 </ion-content>

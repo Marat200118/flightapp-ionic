@@ -86,6 +86,15 @@ export class LoginPage {
     }
   }
 
+  async loginWithGoogle() {
+    try {
+      await this.supabase.signInWithGoogle();
+      console.log('Google login successful!');
+    } catch (error) {
+      console.error('Google login failed:', error);
+    }
+  }
+
 
   goToSignUp() {
     this.navCtrl.navigateForward('/auth/signup');

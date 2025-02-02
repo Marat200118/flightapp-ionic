@@ -1,3 +1,5 @@
+<!-- statistics.page.html -->
+
 <ion-header>
   <ion-toolbar>
     <ion-title>Flight Statistics</ion-title>
@@ -10,9 +12,9 @@
       <ion-card-title>Flight Summary</ion-card-title>
     </ion-card-header>
     <ion-card-content>
-      <p><strong>Total Flights:</strong> {{ totalFlights }}</p>
+      <p><strong>Total Flights Completed:</strong> {{ totalFlights }}</p>
       <p><strong>Total Distance Traveled:</strong> {{ totalDistance | number }} km</p>
-      <p><strong>Total Time in Air:</strong> {{ totalFlightTime | number:'1.0-2' }} hours</p>
+      <p><strong>Total Time in Air:</strong> {{ formatFlightTime(totalFlightTime) }}</p>
     </ion-card-content>
   </ion-card>
 
@@ -22,7 +24,7 @@
     </ion-card-header>
     <ion-card-content>
       <p><strong>Flight Date:</strong> {{ flight.flightDetails.scheduled_out | date:'medium' }}</p>
-      <p *ngIf="flight.actualFlight"><strong>Flight Path Points:</strong> {{ flight.actualFlight.flightPath?.length || 0 }}</p>
+      <p *ngIf="flight.actualFlight"><strong>Flight Path Points:</strong> {{ flight.actualFlight.flightPath.length || 0 }}</p>
     </ion-card-content>
   </ion-card>
 </ion-content>

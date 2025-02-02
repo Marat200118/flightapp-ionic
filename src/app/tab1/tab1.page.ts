@@ -33,6 +33,7 @@ import {
   IonTitle,
   IonToolbar,
   IonCard,
+  IonBadge,
   IonCardHeader,
   IonCardTitle,
   IonList,
@@ -58,6 +59,7 @@ import { add } from 'ionicons/icons';
     IonCardContent,
     IonCardTitle,
     IonButtons,
+    IonBadge,
     IonContent,
     IonHeader,
     IonFab,
@@ -102,8 +104,11 @@ export class Tab1Page {
   async ngOnInit() {
     await this.supabase.restoreSession();
     await this.loadProfile();
+
     if (this.profile?.id) {
       console.log('Profile loaded successfully:', this.profile);
+      
+      await this.storageService.checkAndPrepareStorage(this.profile.id);
       await this.loadFlightsFromStorage();
     } else {
       console.error('Failed to load profile or profile ID is missing.');
@@ -219,7 +224,6 @@ export class Tab1Page {
     this.flights = await this.storageService.getAllFlights(this.profile.id);
     console.log('Fetched user-specific flights from storage:', this.flights);
 
-    // Define the test flight
     const testFlight: Flight = {
       userId: this.profile?.id ?? '',
       flightId: 'UAL784-1736491986-airline-250p',
@@ -250,7 +254,6 @@ export class Tab1Page {
       },
     };
 
-    // Check if test flight already exists in storage
     const isTestFlightAdded = this.flights.some(
       (flight) => flight.flightId === testFlight.flightId && flight.userId === testFlight.userId
     );
@@ -263,7 +266,6 @@ export class Tab1Page {
       console.log('Test flight already exists. Skipping add.');
     }
 
-    // Organize flights
     const today = new Date();
     const now = new Date();
 

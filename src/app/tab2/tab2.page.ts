@@ -127,19 +127,26 @@ export class Tab2Page implements OnInit {
   updateFlightStatus() {
     if (!this.flight || !this.flightPath.length || !this.previousFlightDuration) return;
 
-    const now = Date.now() / 1000; // Current time in seconds
+    const now = Date.now() / 1000;
     const scheduledDeparture = Math.floor(
       new Date(this.flight.flightDetails.scheduled_out).getTime() / 1000
     );
+    const scheduledArrival = Math.floor(
+      new Date(this.flight.flightDetails.scheduled_in).getTime() / 1000
+    );
 
     const elapsedTime = now - scheduledDeparture;
+    const timeToDeparture = scheduledDeparture - now;
+    const timeToArrival = scheduledArrival - now;
 
-    if (elapsedTime < 0) {
+    if (timeToDeparture > 3600) {
       this.status = 'Waiting';
-    } else if (elapsedTime >= 0 && elapsedTime < 30 * 60) { // First 30 minutes
+    } else if (timeToDeparture > 0) {
       this.status = 'Boarding';
-    } else if (elapsedTime >= 30 * 60 && elapsedTime < this.previousFlightDuration * 0.2) {
-      this.status = 'Climbing';
+    } else if (elapsedTime >= 0 && elapsedTime < 10 * 60) {
+      this.status = 'Preparing for takeoff';
+    } else if (elapsedTime >= 10 * 60 && elapsedTime < this.previousFlightDuration * 0.2) {
+      this.status = 'Ascending';
     } else if (
       elapsedTime >= this.previousFlightDuration * 0.2 &&
       elapsedTime < this.previousFlightDuration * 0.8
@@ -147,12 +154,16 @@ export class Tab2Page implements OnInit {
       this.status = 'Cruising';
     } else if (
       elapsedTime >= this.previousFlightDuration * 0.8 &&
-      elapsedTime < this.previousFlightDuration
+      timeToArrival > 0
     ) {
       this.status = 'Descending';
+    } else if (timeToArrival <= 0 && elapsedTime < this.previousFlightDuration + 600) {
+      this.status = 'Taxiing to gate';
     } else {
-      this.status = 'Landed';
+      this.status = 'Arrived at destination';
     }
+
+    console.log('Current Status:', this.status);
   }
 
   updatePlanePosition() {
@@ -166,6 +177,10 @@ export class Tab2Page implements OnInit {
     const elapsedTime = now - scheduledDeparture;
 
     this.currentAproximatePosition = this.calculateCurrentPosition(elapsedTime);
+
+    if (this.status === 'Waiting') {
+      this.currentAproximatePosition = this.flightPath[0];
+    }
     console.log('Current Approximate Position:', this.currentAproximatePosition);
   }
 
@@ -174,7 +189,7 @@ export class Tab2Page implements OnInit {
 
     const totalDuration = this.previousFlightDuration!;
     if (elapsedTime > totalDuration) {
-      // Plane has landed; return the last point in the flight path
+  
       const lastPoint = this.flightPath[this.flightPath.length - 1];
       return { latitude: lastPoint.latitude, longitude: lastPoint.longitude };
     }

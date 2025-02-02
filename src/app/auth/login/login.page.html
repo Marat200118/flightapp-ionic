@@ -19,7 +19,11 @@
   </form>
 
   <div class="auth-divider">OR</div>
-  <!-- <ion-button expand="block" (click)="loginWithGoogle()">Log In with Google</ion-button> -->
+  <div class="auth-divider">OR</div>
+  <ion-button expand="block" color="secondary" (click)="loginWithGoogle()">
+    <ion-icon name="logo-google" slot="start"></ion-icon>
+    Log In with Google
+  </ion-button>
 
   <div class="auth-footer">
     <p>Don't have an account? <a (click)="goToSignUp()">Sign Up</a></p>
