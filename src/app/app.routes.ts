@@ -1,7 +1,9 @@
+//app.routes.ts
+
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'auth/login', pathMatch: 'full' },
+  { path: '', redirectTo: 'auth/onboarding', pathMatch: 'full' },
   {
     path: 'auth',
     children: [
@@ -19,7 +21,11 @@ export const routes: Routes = [
         path: 'callback',
         loadComponent: () =>
           import('./auth/callback/callback.page').then((m) => m.AuthCallbackPage),
-      }
+      },
+      {
+        path: 'onboarding',
+        loadComponent: () => import('./auth/onboarding/onboarding.page').then( m => m.OnboardingPage)
+      },
     ],
   },
   {
@@ -60,10 +66,10 @@ export const routes: Routes = [
         (m) => m.FlightDetailsPage
       ),
   },
-  {
-    path: '**', 
-    redirectTo: 'auth/login',
-  },
+  // {
+  //   path: '**', 
+  //   redirectTo: 'auth/onboarding',
+  // },
   {
     path: 'statistics',
     loadComponent: () => import('./statistics/statistics.page').then( m => m.StatisticsPage)

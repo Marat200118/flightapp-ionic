@@ -95,6 +95,30 @@ export class SupabaseService {
     console.log('Redirecting to Google OAuth...');
   }
 
+  async signUpWithGoogle(): Promise<void> {
+  try {
+
+    const { error } = await this.supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin + '/auth/callback',
+      },
+    });
+
+    if (error) {
+      console.error('Google sign-up failed:', error.message);
+      throw error;
+    }
+
+    console.log('Redirecting to Google OAuth for sign-up...');
+    
+  } catch (error: any) {
+    console.error('Google sign-up error:', error.message);
+    this.createNotice(error.message);
+  }
+}
+
+
   async signOut() {
     console.log('Signing out...');
     await this.supabase.auth.signOut();

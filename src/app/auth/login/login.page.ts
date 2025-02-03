@@ -3,8 +3,8 @@
 import { Component } from '@angular/core';
 import { NavController } from '@ionic/angular';
 import { SupabaseService } from '../../services/supabase.service';
-import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { HeaderComponent } from 'src/app/components/header/header.component';
 import { 
   IonContent,
   IonHeader,
@@ -33,6 +33,7 @@ import {
   styleUrls: ['./login.page.scss'],
   imports: [
     IonContent,
+    HeaderComponent,
     IonHeader,
     IonTitle,
     IonToolbar,

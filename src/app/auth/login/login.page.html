@@ -1,6 +1,6 @@
-<!-- login.page.html -->
-
 <ion-content class="auth-content">
+  <app-header></app-header>
+
   <div class="auth-header">
     <h1>Welcome</h1>
     <p>Sign in to continue</p>
@@ -9,18 +9,30 @@
   <form #loginForm="ngForm" (ngSubmit)="login()">
     <ion-item>
       <ion-label position="stacked">Email</ion-label>
-      <ion-input type="email" [(ngModel)]="email" name="email" required></ion-input>
+      <ion-input type="email" [(ngModel)]="email" name="email" required email autocomplete="email"></ion-input>
     </ion-item>
+
+    <div class="error-message" *ngIf="loginForm.submitted && loginForm.controls.email?.invalid">
+      Please enter a valid email.
+    </div>
+
     <ion-item>
       <ion-label position="stacked">Password</ion-label>
-      <ion-input type="password" [(ngModel)]="password" name="password" required></ion-input>
+      <ion-input type="password" [(ngModel)]="password" name="password" required autocomplete="current-password"></ion-input>
     </ion-item>
-    <ion-button expand="block" type="submit" [disabled]="loginForm.invalid">Log In</ion-button>
+    
+    <div class="error-message" *ngIf="loginForm.submitted && loginForm.controls.password?.invalid">
+      Password is required.
+    </div>
+
+    <ion-button expand="block" type="submit" [disabled]="loginForm.invalid" class="signin-btn">
+      Sign In
+    </ion-button>
   </form>
 
   <div class="auth-divider">OR</div>
-  <div class="auth-divider">OR</div>
-  <ion-button expand="block" color="secondary" (click)="loginWithGoogle()">
+
+  <ion-button expand="block" color="secondary" (click)="loginWithGoogle()" class="google-btn">
     <ion-icon name="logo-google" slot="start"></ion-icon>
     Log In with Google
   </ion-button>

@@ -3,21 +3,20 @@
 
 :root {
   --ion-color-primary: #007aff; 
-  --ion-color-primary-rgb: 0, 122, 255;
-  --ion-color-secondary: #004ba8;
-  --ion-color-secondary-rgb: 0, 75, 168;
+  --ion-color-darkblue: #002C65;
   --ion-color-tertiary: #f4f4f9;
   --ion-color-logo: #009CDA;
 
   --header-background: var(--ion-color-primary);
-  --header-text-color: white;
+  --header-text-color: rgb(253, 253, 253);
+  --always-white: #ffffff;
   --card-color: #c1d8ff;
   --green: #1bb136;
   --text-primary: #282828;
   --text-secondary: rgb(82, 82, 82);
   --card-background: white;
   --card-text-color: var(--text-primary);
-  // --ion-background-color: #f4f4f9;
+  --ion-background-color: #f4f4f4;
 }
 
 
@@ -25,7 +24,7 @@
   :root {
 
     --ion-color-primary: #0056b3;
-    --ion-color-secondary: #002e73;
+    --ion-color-darkblue: #002C65;
     --ion-color-tertiary: #1e1e1e;
     --green: #1c802e;
     --card-color: #1f2d59;
@@ -34,7 +33,8 @@
     --ion-tab-bar-color: #d7d7d7 !important;
     --ion-tab-bar-color-selected: #ffffff !important;
 
-    --header-background: var(--ion-color-secondary);
+    --always-white: #ffffff;
+    --header-background: var(--ion-color-darkblue);
     --header-text-color: #e1e1e1;
     --text-primary: #f4f4f9;
     --text-secondary: #d0d0d0;

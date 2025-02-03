@@ -1,0 +1,79 @@
+ion-content {
+  --background: var(--ion-color-darkblue) !important;
+}
+
+ion-item {
+  --background: none;
+  max-width: 80%;
+  margin: 0 auto;
+  margin-top: 2rem;
+}
+
+ion-input, ion-label {
+  color: var(--always-white) !important;
+}
+
+.auth-header {
+  color: var(--always-white);
+  display: flex;
+  flex-direction: column;
+  margin-left: 2rem;
+  margin-top: 2rem;
+}
+
+.auth-header p {
+  margin: 0;
+}
+
+ion-input {
+  padding: 0.5rem;
+  margin-top: 0.2rem
+
+}
+
+ion-button {
+  margin: 1rem auto;
+  border-radius: 8px;
+  font-weight: bold;
+  max-width: 70%;
+}
+
+.signin-btn {
+  margin-top: 4rem;
+}
+
+.error-message {
+  color: #ff6961;
+  font-size: 0.8rem;
+  text-align: center;
+  margin: 0.5rem auto;
+  max-width: 90%;
+}
+
+
+.auth-divider {
+  text-align: center;
+  margin: 1.5rem 0;
+  color: var(--always-white);
+}
+
+ion-input input:-webkit-autofill,
+ion-input input:-webkit-autofill:hover,
+ion-input input:-webkit-autofill:focus,
+ion-input input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0px 1000px var(--ion-color-darkblue) inset !important;
+  -webkit-text-fill-color: var(--always-white) !important;
+}
+
+::ng-deep ion-input input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px var(--ion-color-darkblue) inset !important;
+  -webkit-text-fill-color: var(--always-white) !important;
+  transition: background-color 5000s ease-in-out 0s !important;
+}
+
+.auth-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+  color: var(--always-white);
+}
