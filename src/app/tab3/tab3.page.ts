@@ -99,7 +99,6 @@ export class Tab3Page implements OnInit {
 
       if (user) {
         this.email = user.email ?? '';
-        // Access user_metadata with proper type checking
         if (user.user_metadata?.['avatar_url']) {
           this.profile.avatar_url = user.user_metadata['avatar_url'];
         }

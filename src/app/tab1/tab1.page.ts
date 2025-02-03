@@ -18,6 +18,7 @@ import { StorageService } from '../services/storage.service';
 import { Flight } from '../models/flight.model';
 import { SupabaseService } from '../services/supabase.service';
 import { Profile } from '../services/supabase.service';
+import { AuthHeaderComponent } from '../components/auth-header/auth-header.component';
  
 
 import {
@@ -59,6 +60,7 @@ import { add } from 'ionicons/icons';
     IonCardContent,
     IonCardTitle,
     IonButtons,
+    AuthHeaderComponent,
     IonBadge,
     IonContent,
     IonHeader,

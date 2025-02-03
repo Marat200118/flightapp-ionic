@@ -15,7 +15,10 @@
 
 ion-button {
   width: 15rem;
+  color: var(--always-white);
 }
+
+
 
 .buttons-container {
   position: absolute;
@@ -31,7 +34,7 @@ ion-button {
 }
 
 .welcome-text {
-  color: var(--header-text-color);
+  color: var(--always-white);
   display: flex;
   flex-direction: column;
   align-items: center;

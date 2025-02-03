@@ -6,9 +6,10 @@
 .tab-header {
   --background: var(--header-background);
   --color: var(--header-text-color);
-  // display: flex;
-  // flex-direction: row;
-  // align-items: center;
+}
+
+ion-icon {
+  --ionicon-stroke-width: 1rem;
 }
 
 .fancy-header {
@@ -35,6 +36,10 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
+}
+
+ion-list {
+  background: none;
 }
 
 .header-content h1 {
@@ -73,78 +78,80 @@
 
 ion-card {
   border-radius: 16px;
-  background: var(--card-color);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-ion-card-header {
+.flight-card {
+  background-color: var(--ion-color-light);
+  color: var(--always-black);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.flight-card-container {
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.flight-upcoming {
-  background-color: var(--ion-color-primary);
-}
-
-.flight-ongoing {
-  background-color: var(--green);
-}
-
-ion-card ion-icon {
-  margin-right: .5rem;
-}
-
-ion-card-header ion-card-title {
+.flight-info {
   font-size: 1.2rem;
-  font-weight: bold;
-  color: var(--text-primary);
+  font-weight: 500;
 }
 
-.logo {
-  width: 4rem;
-  height: 4rem;
-  border-radius: 50%;
-  margin: 1rem;
-}
-
-.list-md {
-  background: none ;
-}
-
-.route {
+.flight-route {
   display: flex;
   align-items: center;
-  font-size: 20px;
+  justify-content: center;
+  gap: 8px;
+  font-size: 1.6rem;
   font-weight: 600;
-  color: var(--text-primary);
 }
 
-.date-container {
+.iata {
+  font-weight: bold;
+}
+
+.route-line {
+  flex: 1;
+  height: 1px;
+  background-color: var(--ion-color-medium);
+}
+
+.flight-time {
   display: flex;
   justify-content: space-between;
+  width: 100%;
+  margin-top: 12px;
+}
+
+.time-info {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  margin-top: 4px;
 }
 
 .time {
-  font-size: 1.2rem;
-  font-weight: 600;
+  font-size: 1.4rem;
+  font-weight: bold;
 }
 
-.day {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: var(--text-primary);
+.label {
+  font-size: 0.9rem;
+  color: var(--ion-color-medium);
 }
 
-.date {
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  color: var(--text-secondary);
+ion-card-content {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.duration {
+  font-size: 0.8rem;
+  color: var(--ion-color-primary);
+  font-weight: 500;
+  text-align: center;
 }
 
 .add-flight-button {
@@ -156,7 +163,21 @@ ion-card-header ion-card-title {
   font-size: 16px;
   font-weight: 600;
   --background: var(--green) !important;
-  // box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.date-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.date {
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  color: var(--always-black);
 }
 
 .date-icon {
@@ -164,6 +185,11 @@ ion-card-header ion-card-title {
   color: var(--text-secondary);
 }
 
+.day {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--always-black);
+}
 
 ion-datetime {
   margin: 2rem auto;
@@ -175,7 +201,6 @@ ion-datetime {
   color: var(--text-secondary);
 }
 
-
 .no-flights {
   display: flex;
   flex-direction: column;
@@ -183,4 +208,17 @@ ion-datetime {
   align-items: center;
   height: 30vh;
   color: var(--ion-color-medium);
+}
+
+
+.ongoing-flights {
+  background-color: var(--app-yellow);
+}
+
+.upcoming-flights {
+  background-color: var(--app-green);
+}
+
+.previous-flights {
+  background-color: var(--app-blue);
 }
