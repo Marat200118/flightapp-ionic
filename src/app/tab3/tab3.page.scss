@@ -7,13 +7,10 @@
 }
 
 .profile-card {
-  width: 100%;
-  max-width: 400px;
+  margin: 16px 1.6rem;
+  padding: 16px;
+  border-radius: 16px;
   text-align: center;
-  background: var(--card-background);
-  color: var(--card-text-color);
-  border-radius: 12px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .profile-avatar {
@@ -23,7 +20,7 @@
   margin-bottom: 12px;
 }
 
-.profile-avatar ion-img {
+.profile-avatar ion-img img {
   width: 100px;
   height: 100px;
   border-radius: 50% !important;
@@ -38,12 +35,12 @@
 ion-card-title {
   font-size: 1.4rem;
   font-weight: bold;
-  color: var(--text-primary);
+  color: var(--always-white);
 }
 
 ion-card-subtitle {
   font-size: 0.9rem;
-  color: var(--text-secondary);
+  color: var(--always-white);
 }
 
 ion-item {
@@ -67,5 +64,25 @@ ion-button {
   font-size: 1.1rem;
   font-weight: bold;
   border-radius: 8px;
-  max-width: 15rem;
+  width: 15rem;
+  position: absolute;
+  bottom: 20px;
+  left: calc(50% - 7.5rem);
+}
+
+
+.profile-overview {
+  background: var(--ion-color-darkblue);
+  color: var(--always-white);
+  border-bottom-left-radius: 30px;
+  border-bottom-right-radius: 30px;
+  padding: 40px;
+  text-align: center;
+}
+
+.profile-overview h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  margin-top: 0px;
 }

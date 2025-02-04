@@ -1,20 +1,16 @@
 <!-- tab1.page.html -->
 
 <ion-header [translucent]="true">
-  <ion-toolbar class="tab-header">
-    <ion-img class="logo" src="assets/icon1.png"></ion-img>
-    <!-- <ion-title>Illuminator</ion-title> -->
-  </ion-toolbar>
+  <auth-app-header></auth-app-header>
 </ion-header>
 
 <ion-content [fullscreen]="true" class="custom-content">
   <div class="fancy-header">
     <div class="header-content">
       <div>
-        <h1>Hello, {{ profile?.first_name || 'User' }}!</h1>
-        <p>Here are your flights</p>
+        <h1>Welcome Back, {{ profile?.first_name || 'User' }}!</h1>
+        <p>When is your next flight?</p>
       </div>
-      <ion-img class="header-image" src="assets/airplane-side.png"></ion-img>
     </div>
   </div>
 
@@ -22,28 +18,36 @@
     <div *ngIf="ongoingFlights.length > 0" class="flights-section">
       <h2>Ongoing Flights</h2>
       <ion-list>
-        <ion-card *ngFor="let flight of ongoingFlights" class="flight-ongoing" (click)="navigateToTracking(flight)">
-          <ion-card-header>
-            <ion-card-title>{{ flight.flightDetails.ident_iata }}</ion-card-title>
-          </ion-card-header>
+        <ion-card *ngFor="let flight of ongoingFlights" class="flight-card ongoing-flights" (click)="navigateToTracking(flight)">
           <ion-card-content>
-            <div class="flight-details">
-              <div class="route">
-                <ion-icon name="airplane-outline"></ion-icon>
-                {{ flight.flightDetails.origin_iata }} → {{ flight.flightDetails.destination_iata }}
+            <div class="flight-card-container">
+              <div class="flight-info">
+                <div class="flight-number">{{ flight.flightDetails.ident_iata }}</div>
               </div>
-              <div class="date-container">
-                <div class="date">
-                  <div class="time">
-                    {{ flight.flightDetails.scheduled_out | date: 'HH:mm' }}
-                  </div>
-                  Departure
+              <div class="codeshare-info" *ngIf="codesharesAsString(flight.flightDetails.codeshares)">
+                <span class="label">Codeshares:</span>
+                <span class="codeshares-text">{{ codesharesAsString(flight.flightDetails.codeshares) }}</span>
+              </div>
+
+              <div class="flight-route">
+                <span class="iata">{{ flight.flightDetails.origin_iata }}</span>
+                <span class="route-line"></span>
+                <ion-icon name="airplane-outline"></ion-icon>
+                <span class="route-line"></span>
+                <span class="iata">{{ flight.flightDetails.destination_iata }}</span>
+              </div>
+    
+              <div class="flight-time">
+                <div class="time-info left">
+                  <span class="label">Departure</span>
+                  <span class="date">{{ flight.flightDetails.scheduled_out | date: 'EEE dd MMM' }}</span>
+                  <span class="time">{{ flight.flightDetails.scheduled_out | date: 'HH:mm' }}</span>
                 </div>
-                <div class="date">
-                  <div class="time">
-                    {{ flight.flightDetails.scheduled_in | date: 'HH:mm' }}
-                  </div>
-                  Arrival
+                <div class="duration">1h 45min</div>
+                <div class="time-info right">
+                  <span class="label">Arrival</span>
+                  <span class="date">{{ flight.flightDetails.scheduled_in | date: 'EEE dd MMM' }}</span>
+                  <span class="time">{{ flight.flightDetails.scheduled_in | date: 'HH:mm' }}</span>
                 </div>
               </div>
             </div>
@@ -58,33 +62,38 @@
     </div>
 
     <div *ngIf="upcomingFlights.length > 0" class="flights-section">
-      <!-- <ion-badge slot="start">{{ upcomingFlights.length}}</ion-badge> -->
       <h2>Upcoming Flights</h2>
       <ion-list>
-        <ion-card *ngFor="let flight of upcomingFlights" class="flight-upcoming" (click)="openFlightDetails(flight)">
-          <ion-card-header>
-            <ion-card-title>{{ flight.flightDetails.ident_iata }}</ion-card-title>
-            <div class="day">{{ flight.flightDetails.scheduled_out | date: 'dd/MM' }}</div>
-          </ion-card-header>
+        <ion-card *ngFor="let flight of upcomingFlights" class="flight-card upcoming-flights" (click)="openFlightDetails(flight)">
           <ion-card-content>
-            <div class="flight-details">
-              <div class="route">
-                <!-- <ion-icon name="airplane-outline"></ion-icon> -->
-                {{ flight.flightDetails.origin_iata }} → {{ flight.flightDetails.destination_iata }}
+            <div class="flight-card-container">
+              <div class="flight-info">
+                <div class="flight-number">{{ flight.flightDetails.ident_iata }}</div>
               </div>
-              <div class="date-container">
-                <div class="date">
-                  <div class="time">
-                    {{ flight.flightDetails.scheduled_out | date: 'HH:mm' }}
-                  </div>
-                  Departure
+              <div class="codeshare-info" *ngIf="codesharesAsString(flight.flightDetails.codeshares)">
+                <span class="label">Codeshares:</span>
+                <span class="codeshares-text">{{ codesharesAsString(flight.flightDetails.codeshares) }}</span>
+              </div>
+    
+              <div class="flight-route">
+                <span class="iata">{{ flight.flightDetails.origin_iata }}</span>
+                <span class="route-line"></span>
+                <ion-icon name="airplane-outline"></ion-icon>
+                <span class="route-line"></span>
+                <span class="iata">{{ flight.flightDetails.destination_iata }}</span>
+              </div>
+    
+              <div class="flight-time">
+                <div class="time-info left">
+                  <span class="label">Departure</span>
+                  <span class="date">{{ flight.flightDetails.scheduled_out | date: 'EEE dd MMM' }}</span>
+                  <span class="time">{{ flight.flightDetails.scheduled_out | date: 'HH:mm' }}</span>
                 </div>
-                <ion-icon class="date-icon" name="airplane-outline"></ion-icon>
-                <div class="date">
-                  <div class="time">
-                    {{ flight.flightDetails.scheduled_in | date: 'HH:mm' }}
-                  </div>
-                  Arrival
+                <div class="duration">2h 30min</div>
+                <div class="time-info right">
+                  <span class="label">Arrival</span>
+                  <span class="date">{{ flight.flightDetails.scheduled_in | date: 'EEE dd MMM' }}</span>
+                  <span class="time">{{ flight.flightDetails.scheduled_in | date: 'HH:mm' }}</span>
                 </div>
               </div>
             </div>
@@ -96,30 +105,36 @@
     <div *ngIf="previousFlights.length > 0" class="flights-section">
       <h2>Previous Flights</h2>
       <ion-list>
-        <ion-card *ngFor="let flight of previousFlights" class="flight-card" (click)="openFlightDetails(flight)">
-          <ion-card-header>
-            <ion-card-title>{{ flight.flightDetails.ident_iata }}</ion-card-title>
-            <div class="day">{{ flight.flightDetails.scheduled_out | date: 'dd/MM' }}</div>
-          </ion-card-header>
+        <ion-card *ngFor="let flight of previousFlights" class="flight-card previous-flights" (click)="openFlightDetails(flight)">
           <ion-card-content>
-            <div class="flight-details">
-              <div class="route">
-                <!-- <ion-icon name="airplane-outline"></ion-icon> -->
-                {{ flight.flightDetails.origin_iata }} → {{ flight.flightDetails.destination_iata }}
+            <div class="flight-card-container">
+              <div class="flight-info">
+                <div class="flight-number">{{ flight.flightDetails.ident_iata }}</div>
               </div>
-              <div class="date-container">
-                <div class="date">
-                  <div class="time">
-                    {{ flight.flightDetails.scheduled_out | date: 'HH:mm' }}
-                  </div>
-                  Departure
+              <div class="codeshare-info" *ngIf="codesharesAsString(flight.flightDetails.codeshares)">
+                <span class="label">Codeshares:</span>
+                <span class="codeshares-text">{{ codesharesAsString(flight.flightDetails.codeshares) }}</span>
+              </div>
+
+              <div class="flight-route">
+                <span class="iata">{{ flight.flightDetails.origin_iata }}</span>
+                <span class="route-line"></span>
+                <ion-icon name="airplane-outline"></ion-icon>
+                <span class="route-line"></span>
+                <span class="iata">{{ flight.flightDetails.destination_iata }}</span>
+              </div>
+
+              <div class="flight-time">
+                <div class="time-info left">
+                  <span class="label">Departure</span>
+                  <span class="date">{{ flight.flightDetails.scheduled_out | date: 'EEE dd MMM' }}</span>
+                  <span class="time">{{ flight.flightDetails.scheduled_out | date: 'HH:mm' }}</span>
                 </div>
-                <ion-icon class="date-icon" name="airplane-outline"></ion-icon>
-                <div class="date">
-                  <div class="time">
-                    {{ flight.flightDetails.scheduled_in | date: 'HH:mm' }}
-                  </div>
-                  Arrival
+                <div class="duration">3h 15min</div>
+                <div class="time-info right">
+                  <span class="label">Arrival</span>
+                  <span class="date">{{ flight.flightDetails.scheduled_in | date: 'EEE dd MMM' }}</span>
+                  <span class="time">{{ flight.flightDetails.scheduled_in | date: 'HH:mm' }}</span>
                 </div>
               </div>
             </div>
@@ -129,18 +144,12 @@
     </div>
   </div>
 
-  <!-- <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button id="open-add-flight-modal" class="add-flight-button">
-      <ion-icon name="add"></ion-icon>
-    </ion-fab-button>
-  </ion-fab> -->
-  <!-- <ion-button id="open-add-flight-modal" class="add-flight-button" expand="block">Add Flight</ion-button> -->
+  
   <ion-fab>
     <ion-fab-button id="open-add-flight-modal" class="add-flight-button">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>
   </ion-fab>
-  <!-- <button mat-flat-button id="open-add-flight-modal" class="add-flight-button" expand="block">Add Flight</button> -->
 
   <ion-modal #modal trigger="open-add-flight-modal">
     <ng-template>
@@ -149,34 +158,40 @@
           <ion-buttons slot="start">
             <ion-button (click)="cancel()">Cancel</ion-button>
           </ion-buttons>
-          <ion-title>Add Flight</ion-title>
+          <ion-title>Add New Flight</ion-title>
         </ion-toolbar>
       </ion-header>
-      <ion-content class="ion-padding">
-
-        <ion-item>
-          <ion-input label="Flight Number" labelPlacement="stacked" type="text" placeholder="Enter flight number e.g., LO784" [(ngModel)]="flightNumber">
-          </ion-input>
+  
+      <ion-content class="ion-padding modal-content">
+        <div class="modal-header">
+          <ion-img src="assets/logo-white.svg" class="modal-icon"></ion-img>
+          <h2>Add Your Next Flight</h2>
+          <p>Fill in the details below to add your upcoming flight.</p>
+        </div>
+  
+        <ion-item class="input-item">
+          <ion-label position="stacked">Flight Number</ion-label>
+          <ion-input placeholder="e.g., LO784" [(ngModel)]="flightNumber" required></ion-input>
         </ion-item>
-
-        <ion-item>
-          <ion-input label="Origin (IATA or ICAO)" labelPlacement="stacked" type="text" placeholder="Enter origin airport e.g., RIX" [(ngModel)]="origin">
-          </ion-input>
+  
+        <ion-item class="input-item">
+          <ion-label position="stacked">Origin Airport (IATA/ICAO)</ion-label>
+          <ion-input placeholder="e.g., RIX" [(ngModel)]="origin" required></ion-input>
         </ion-item>
-
-        <ion-item>
-          <ion-input label="Destination (IATA or ICAO)" labelPlacement="stacked" type="text" placeholder="Enter destination airport e.g., WAW" [(ngModel)]="destination">
-          </ion-input>
+  
+        <ion-item class="input-item">
+          <ion-label position="stacked">Destination Airport (IATA/ICAO)</ion-label>
+          <ion-input placeholder="e.g., WAW" [(ngModel)]="destination" required></ion-input>
         </ion-item>
-
-        <ion-item>
-          <ion-datetime label="Date" labelPlacement="stacked" [(ngModel)]="flightDate" presentation="date" placeholder="Select departure date">
-            <span slot="title">Select a Departure Date</span>
-          </ion-datetime>
+  
+        <ion-item class="input-item">
+          <ion-label position="stacked">Departure Date & Time</ion-label>
+          <ion-datetime [(ngModel)]="flightDate" presentation="date" placeholder="Select date and time"></ion-datetime>
         </ion-item>
-
-        <ion-button expand="block" (click)="confirm()">Confirm</ion-button>
+  
+        <ion-button expand="block" color="success" class="confirm-button" (click)="confirm()">Add Flight</ion-button>
       </ion-content>
     </ng-template>
   </ion-modal>
+
 </ion-content>

@@ -381,6 +381,13 @@ export class FlightDetailsPage {
       );
   }
 
+  codesharesAsString(codeshares: Array<{ ident_iata: string }>): string {
+    if (!codeshares || codeshares.length === 0) {
+      return '';
+    }
+    return codeshares.map((code) => code.ident_iata).join(', ');
+  }
+
 
   // saveOpenSkyInfoToLocalStorage(flightData: any) {
   //   const storedFlights = JSON.parse(localStorage.getItem('openskyInfo') || '[]');

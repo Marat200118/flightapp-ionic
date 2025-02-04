@@ -4,7 +4,11 @@ import { Flight } from '../models/flight.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SupabaseService } from '../services/supabase.service';
+import { AuthHeaderComponent } from '../components/auth-header/auth-header.component';
 
+import { GaugeComponent } from '../components/gauge/gauge.component';
+import { ProgressBarComponent } from '../components/progress-bar/progress-bar.component';
+import { LineChartComponent } from '../components/line-chart/line-chart.component';
 
 import {
   IonButton,
@@ -19,8 +23,10 @@ import {
   IonTitle,
   IonToolbar,
   IonCard,
+  IonLabel,
   IonCardHeader,
   IonCardTitle,
+  IonNote,
   IonList,
   IonCardContent,
   IonFab,
@@ -42,6 +48,8 @@ import {
       IonCardHeader,
       IonCardContent,
       IonCardTitle,
+      AuthHeaderComponent,
+      IonNote,
       IonButtons,
       IonContent,
       IonHeader,
@@ -49,10 +57,14 @@ import {
       IonFabButton,
       IonInput,
       IonItem,
+      IonLabel,
       IonTitle,
       IonModal,
       IonIcon,
       IonImg,
+      GaugeComponent,
+      ProgressBarComponent,
+      LineChartComponent,
       IonToolbar,
       IonDatetime,
   ]})
@@ -62,6 +74,8 @@ export class StatisticsPage implements OnInit {
   totalDistance: number = 0; 
   totalFlightTime: number = 0; 
   totalFlights: number = 0; 
+  monthlyFlightHours: { month: string; hours: number }[] = [];
+  achievements: string[] = [];
 
   constructor(private storageService: StorageService, private supabase: SupabaseService) {}
 
@@ -93,32 +107,52 @@ export class StatisticsPage implements OnInit {
 
     this.totalFlights = completedFlights.length;
 
+    const monthlyHours: { [key: string]: number } = {};
+
     completedFlights.forEach((flight) => {
       if (flight.actualFlight) {
-        const flightPath = flight.actualFlight.flightPath;
+        const flightDate = new Date(flight.flightDetails.scheduled_out);
+        const monthKey = `${flightDate.getFullYear()}-${flightDate.getMonth() + 1}`;
 
-        console.log('Flight Path:', flightPath);
-
-        const validPath = flightPath
-          .map(point => this.convertFlightPathPoint(point)) 
-          .filter(point => point.latitude !== undefined && point.longitude !== undefined);
-
-        console.log('Valid Path Points:', validPath);
-
-        if (validPath.length > 1) {
-          this.totalDistance += this.calculateFlightDistance(validPath);
+        if (!monthlyHours[monthKey]) {
+          monthlyHours[monthKey] = 0;
         }
 
         if (flight.actualFlight.lastSeen && flight.actualFlight.firstSeen) {
           const flightTime = (flight.actualFlight.lastSeen - flight.actualFlight.firstSeen) / 3600;
           this.totalFlightTime += flightTime;
+          monthlyHours[monthKey] += flightTime;
+        }
+
+        if (flight.actualFlight.flightPath && flight.actualFlight.flightPath.length > 1) {
+          const flightDistance = this.calculateFlightDistance(flight.actualFlight.flightPath);
+          this.totalDistance += flightDistance;
+          console.log(`Distance for flight ${flight.flightDetails.ident_iata}:`, flightDistance, 'km');
         }
       }
     });
 
-    console.log('Total Distance:', this.totalDistance, 'km');
-    console.log('Total Flight Time:', this.formatFlightTime(this.totalFlightTime));
-    console.log('Total Flights:', this.totalFlights);
+    this.monthlyFlightHours = Object.entries(monthlyHours).map(([key, hours]) => ({
+      month: key,
+      hours: parseFloat(hours.toFixed(2)), 
+    }));
+
+    console.log('Monthly Flight Hours Data:', this.monthlyFlightHours);
+
+    this.setAchievements();
+  }
+
+
+  setAchievements() {
+    if (this.totalFlights >= 10) {
+      this.achievements.push('10 Flights Completed');
+    }
+    if (this.totalDistance >= 10000) {
+      this.achievements.push('10,000 km Traveled');
+    }
+    if (this.totalFlightTime >= 100) {
+      this.achievements.push('100 Hours in Air');
+    }
   }
 
   convertFlightPathPoint(point: any): { latitude: number; longitude: number } {
@@ -136,20 +170,32 @@ export class StatisticsPage implements OnInit {
     return `${displayHours} hours, ${minutes} minutes`;
   }
 
-  calculateFlightDistance(flightPath: { latitude: number; longitude: number }[]): number {
+  calculateFlightDistance(flightPath: any[]): number {
     let distance = 0;
 
-    for (let i = 0; i < flightPath.length - 1; i++) {
-      const pointA = flightPath[i];
-      const pointB = flightPath[i + 1];
-      distance += this.calculateDistanceBetweenPoints(pointA.latitude, pointA.longitude, pointB.latitude, pointB.longitude);
+    const validPath = flightPath
+      .map((point) => this.convertFlightPathPoint(point))
+      .filter((point) => point.latitude !== undefined && point.longitude !== undefined);
+
+    // console.log('Valid Path Points:', validPath);
+
+    for (let i = 0; i < validPath.length - 1; i++) {
+      const pointA = validPath[i];
+      const pointB = validPath[i + 1];
+
+      if (pointA && pointB) {
+        distance += this.calculateDistanceBetweenPoints(pointA.latitude, pointA.longitude, pointB.latitude, pointB.longitude);
+      } else {
+        console.warn('Invalid points detected:', pointA, pointB);
+      }
     }
 
+    console.log('Total Distance Calculated:', distance);
     return distance;
   }
 
   calculateDistanceBetweenPoints(lat1: number, lon1: number, lat2: number, lon2: number): number {
-    console.log('Calculating distance between points:', lat1, lon1, lat2, lon2);
+    // console.log('Calculating distance between points:', lat1, lon1, lat2, lon2);
     const R = 6371; // Radius of the Earth in km
     const dLat = this.degreesToRadians(lat2 - lat1);
     const dLon = this.degreesToRadians(lon2 - lon1);

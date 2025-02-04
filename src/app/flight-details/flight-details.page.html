@@ -11,103 +11,36 @@
 
 <ion-content class="custom-content">
   <div class="flight-summary">
-    <p class="flight-time">{{ flight.flightDetails.ident_iata }}</p>
+    <div class="flight-info">
+      <div class="flight-number">{{ flight.flightDetails.ident_iata }}</div>
+    </div>
+    <div class="codeshare-info" *ngIf="codesharesAsString(flight.flightDetails.codeshares)">
+      <span class="label">Codeshares:</span>
+      <span class="codeshares-text">{{ codesharesAsString(flight.flightDetails.codeshares) }}</span>
+    </div>
+    
     <div class="flight-route">
-      <div>
-        <p class="airport-code">{{ flight.flightDetails.origin_iata }}</p>
-        <p class="airport-name">Departure</p>
-        <p class="outbound-time">{{ flight.flightDetails.scheduled_out | date: 'HH:mm' }}</p>
-      </div>
+      <span class="iata">{{ flight.flightDetails.origin_iata }}</span>
+      <span class="route-line"></span>
       <ion-icon name="airplane-outline"></ion-icon>
-      <div>
-        <p class="airport-code">{{ flight.flightDetails.destination_iata }}</p>
-        <p class="airport-name">Arrival</p>
-        <p class="inbound-time">{{ flight.flightDetails.scheduled_in | date: 'HH:mm' }}</p>
+      <span class="route-line"></span>
+      <span class="iata">{{ flight.flightDetails.destination_iata }}</span>
+    </div>
+    
+    <div class="flight-time">
+      <div class="time-info left">
+        <span class="label">Departure</span>
+        <span class="date">{{ flight.flightDetails.scheduled_out | date: 'EEE dd MMM' }}</span>
+        <span class="time">{{ flight.flightDetails.scheduled_out | date: 'HH:mm' }}</span>
+      </div>
+      <div class="duration">1h 45min</div>
+      <div class="time-info right">
+        <span class="label">Arrival</span>
+        <span class="date">{{ flight.flightDetails.scheduled_in | date: 'EEE dd MMM' }}</span>
+        <span class="time">{{ flight.flightDetails.scheduled_in | date: 'HH:mm' }}</span>
       </div>
     </div>
   </div>
-
-  <ion-card class="info-card">
-    <ion-card-header>
-      <ion-card-title>Flight Information</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-grid>
-        <ion-row>
-          <ion-col size="4"><strong>Airline:</strong></ion-col>
-          <ion-col>{{ flight.flightDetails.ident_icao || 'Unknown' }}</ion-col>
-        </ion-row>
-        <ion-row>
-          <ion-col size="4"><strong>Departure:</strong></ion-col>
-          <ion-col>{{ flight.flightDetails.scheduled_out | date: 'dd/MM/yyyy HH:mm' }}</ion-col>
-        </ion-row>
-        <ion-row>
-          <ion-col size="4"><strong>Arrival:</strong></ion-col>
-          <ion-col>{{ flight.flightDetails.scheduled_in | date: 'dd/MM/yyyy HH:mm' }}</ion-col>
-        </ion-row>
-        <ion-row>
-          <ion-col size="4"><strong>Aircraft:</strong></ion-col>
-          <ion-col>{{ flight.flightDetails.aircraft_type || 'Unknown' }}</ion-col>
-        </ion-row>
-        <ion-row>
-          <ion-col size="4"><strong>Meals:</strong></ion-col>
-          <ion-col>{{ flight.flightDetails.meal_service || 'None' }}</ion-col>
-        </ion-row>
-        <ion-row>
-          <ion-col size="4"><strong>Seats:</strong></ion-col>
-          <ion-col>
-            Business: {{ flight.flightDetails.seats_cabin_business || 0 }},
-            Coach: {{ flight.flightDetails.seats_cabin_coach || 0 }},
-            First: {{ flight.flightDetails.seats_cabin_first || 0 }}
-          </ion-col>
-        </ion-row>
-      </ion-grid>
-    </ion-card-content>
-  </ion-card>
-
-  <ion-card *ngIf="flight.previousFlight && !isPastFlight()" class="info-card">
-    <ion-card-header>
-      <ion-card-title>Previous Flight</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-grid>
-        <ion-row>
-          <ion-col size="4"><strong>Flight ID:</strong></ion-col>
-          <ion-col>{{ flight.previousFlight.callsign }}</ion-col>
-        </ion-row>
-        <ion-row>
-          <ion-col size="4"><strong>Origin:</strong></ion-col>
-          <ion-col>{{ flight.previousFlight.estDepartureAirport }}</ion-col>
-        </ion-row>
-        <ion-row>
-          <ion-col size="4"><strong>Destination:</strong></ion-col>
-          <ion-col>{{ flight.previousFlight.estArrivalAirport }}</ion-col>
-        </ion-row>
-      </ion-grid>
-    </ion-card-content>
-  </ion-card>
-
-  <!-- <ion-card *ngIf="flight.actualFlight && isPastFlight()" class="info-card">
-    <ion-card-header>
-      <ion-card-title>Actual Flight</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-grid>
-        <ion-row>
-          <ion-col size="4"><strong>Callsign:</strong></ion-col>
-          <ion-col>{{ flight.actualFlight.callsign }}</ion-col>
-        </ion-row>
-        <ion-row>
-          <ion-col size="4"><strong>Departure:</strong></ion-col>
-          <ion-col>{{ flight.actualFlight.estDepartureAirport }}</ion-col>
-        </ion-row>
-        <ion-row>
-          <ion-col size="4"><strong>Arrival:</strong></ion-col>
-          <ion-col>{{ flight.actualFlight.estArrivalAirport }}</ion-col>
-        </ion-row>
-      </ion-grid>
-    </ion-card-content>
-  </ion-card> -->
 
   <ion-card *ngIf="!isPastFlight() && flight.previousFlight?.flightPath" class="info-card">
     <ion-card-header>
@@ -126,18 +59,18 @@
   <ion-card *ngIf="isPastFlight() && !flight.actualFlight?.flightPath">
     <ion-card-header class="no-path-header">
       <ion-card-title class="no-path">
-        Your flight path is not available yet! Path will be available 12 hours before the flight!
+        Your flight path is not available yet! Path will be available 12 hours after the flight!
       </ion-card-title>
       <ion-icon class="no-path-icon" name="hourglass-outline"></ion-icon>
     </ion-card-header>
   </ion-card>
 
-  <!-- <ion-card *ngIf="!isPastFlight() && !flight.actualFlight?.flightPath">
+  <ion-card *ngIf="!isPastFlight() && !flight.previousFlight?.flightPath">
     <ion-card-header class="no-path-header">
       <ion-card-title class="no-path">
-        Your flight path is not available yet! Path will be available 8 hours before the flight!
+        Your Estimated flight path is not available yet! Path will be available 8 hours before the flight!
       </ion-card-title>
       <ion-icon class="no-path-icon" name="hourglass-outline"></ion-icon>
     </ion-card-header>
-  </ion-card> -->
+  </ion-card>
 </ion-content>

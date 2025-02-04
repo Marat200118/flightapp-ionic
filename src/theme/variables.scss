@@ -3,21 +3,30 @@
 
 :root {
   --ion-color-primary: #007aff; 
-  --ion-color-primary-rgb: 0, 122, 255;
-  --ion-color-secondary: #004ba8;
-  --ion-color-secondary-rgb: 0, 75, 168;
+  --ion-color-darkblue: #002C65;
   --ion-color-tertiary: #f4f4f9;
   --ion-color-logo: #009CDA;
 
   --header-background: var(--ion-color-primary);
-  --header-text-color: white;
-  --card-color: #c1d8ff;
+  --header-text-color: rgb(253, 253, 253);
+  --always-white: #ffffff;
+  --always-black: #000000;
+  --card-color: #C1D8FF;
   --green: #1bb136;
-  --text-primary: #282828;
   --text-secondary: rgb(82, 82, 82);
   --card-background: white;
   --card-text-color: var(--text-primary);
-  // --ion-background-color: #f4f4f9;
+  --ion-background-color: #FCFCFC;
+
+  --ion-tab-bar-background: #002C65 !important;
+  --ion-tab-bar-color: #d2d2d2bd !important;
+  --ion-tab-bar-color-selected: #ffffff !important;
+
+  --text-primary: #282828;
+  --app-background: #FCFCFC;
+  --app-yellow: #FFEA95;
+  --app-green: #C1FFC3;
+  --app-blue: #C1D8FF;
 }
 
 
@@ -25,20 +34,25 @@
   :root {
 
     --ion-color-primary: #0056b3;
-    --ion-color-secondary: #002e73;
+    --ion-color-darkblue: #002C65;
     --ion-color-tertiary: #1e1e1e;
     --green: #1c802e;
-    --card-color: #1f2d59;
-    --ion-background-color: #04042c !important;
+    --card-color: #C1D8FF;
+    --ion-background-color: #080B26 !important;
     --ion-tab-bar-background: #20622c !important;
     --ion-tab-bar-color: #d7d7d7 !important;
     --ion-tab-bar-color-selected: #ffffff !important;
 
-    --header-background: var(--ion-color-secondary);
+    --always-white: #ffffff;
+    --always-black: #000000;
+    --header-background: var(--ion-color-darkblue);
     --header-text-color: #e1e1e1;
     --text-primary: #f4f4f9;
     --text-secondary: #d0d0d0;
     --card-background: #1e1e1e;
     --card-text-color: var(--text-primary);
+
+    --text-primary: #f4f4f9;
+    --app-background: #080B26;
   }
 }

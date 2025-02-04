@@ -18,6 +18,7 @@ import { StorageService } from '../services/storage.service';
 import { Flight } from '../models/flight.model';
 import { SupabaseService } from '../services/supabase.service';
 import { Profile } from '../services/supabase.service';
+import { AuthHeaderComponent } from '../components/auth-header/auth-header.component';
  
 
 import {
@@ -34,6 +35,7 @@ import {
   IonToolbar,
   IonCard,
   IonBadge,
+  IonLabel,
   IonCardHeader,
   IonCardTitle,
   IonList,
@@ -57,8 +59,10 @@ import { add } from 'ionicons/icons';
     IonList,
     IonCardHeader,
     IonCardContent,
+    IonLabel,
     IonCardTitle,
     IonButtons,
+    AuthHeaderComponent,
     IonBadge,
     IonContent,
     IonHeader,
@@ -96,7 +100,7 @@ export class Tab1Page {
   destination = ''; 
 
 
-  private apiBaseUrl = 'http://localhost:3000/api/schedules';
+  private apiBaseUrl = 'https://flight-api-backend.vercel.app/api/schedules';
   private apiKey = 'wHf94IBGL2dxGFS13wlB5sbGS34bBfT3';
 
   constructor(private navCtrl: NavController, private http: HttpClient, private storageService: StorageService, private supabase: SupabaseService) {}
@@ -133,71 +137,71 @@ export class Tab1Page {
   }
 
   async confirm() {
-  console.log("Flight Number:", this.flightNumber, "Date:", this.flightDate, "Origin:", this.origin, "Destination:", this.destination);
+    console.log("Flight Number:", this.flightNumber, "Date:", this.flightDate, "Origin:", this.origin, "Destination:", this.destination);
 
-  if (!this.flightNumber || !this.flightDate || !this.origin || !this.destination) {
-    alert('Please enter all details.');
-    return;
-  }
-
-  const selectedDate = new Date(this.flightDate); // Local time
-  const flightDateUTC = selectedDate.toISOString(); // Convert to UTC
-
-  const url = `http://localhost:3000/api/schedules`;
-
-  const params = {
-    dateStart: flightDateUTC.split('T')[0],
-    dateEnd: this.getEndDate(flightDateUTC),
-    flightNumber: this.flightNumber,
-    origin: this.origin,
-    destination: this.destination,
-  };
-
-  const headers = new HttpHeaders({ 'x-apikey': this.apiKey });
-  this.http.get(url, { headers, params }).subscribe(
-    async (response: any) => {
-      console.log("API Response:", response);
-
-      if (response.scheduled && response.scheduled.length > 0) {
-        const flight = response.scheduled[0];
-
-        if (!this.profile) {
-          alert('User profile not loaded. Please try again.');
-          return;
-        }
-
-        const userId = this.profile.id;
-
-        const existingFlight = await this.storageService.getFlightById(flight.fa_flight_id, userId);
-        if (existingFlight) {
-          console.log('Flight already exists in storage:', existingFlight);
-          alert('This flight is already saved.');
-        } else {
-          const flightRecord: Flight = {
-            flightId: flight.fa_flight_id,
-            flightDetails: flight,
-            userId: userId,
-            // previousFlightId: null,
-            // actualFlightPathId: null,
-          };
-
-
-          await this.storageService.addFlight(flightRecord);
-          this.flights.unshift(flightRecord);
-          await this.loadFlightsFromStorage();
-          this.modal.dismiss();
-          console.log("Flight added to storage:", flightRecord);
-        }
-      } else {
-        alert("No scheduled flights found for the provided details.");
-      }
-    },
-    (error) => {
-      console.error("Error fetching flight data:", error);
-      alert("Failed to fetch flight data. Please try again.");
+    if (!this.flightNumber || !this.flightDate || !this.origin || !this.destination) {
+      alert('Please enter all details.');
+      return;
     }
-  );
-}
+
+    const selectedDate = new Date(this.flightDate); // Local time
+    const flightDateUTC = selectedDate.toISOString(); // Convert to UTC
+
+    const url = this.apiBaseUrl;
+
+    const params = {
+      dateStart: flightDateUTC.split('T')[0],
+      dateEnd: this.getEndDate(flightDateUTC),
+      flightNumber: this.flightNumber,
+      origin: this.origin,
+      destination: this.destination,
+    };
+
+    const headers = new HttpHeaders({ 'x-apikey': this.apiKey });
+    this.http.get(url, { headers, params }).subscribe(
+      async (response: any) => {
+        console.log("API Response:", response);
+
+        if (response.scheduled && response.scheduled.length > 0) {
+          const flight = response.scheduled[0];
+
+          if (!this.profile) {
+            alert('User profile not loaded. Please try again.');
+            return;
+          }
+
+          const userId = this.profile.id;
+
+          const existingFlight = await this.storageService.getFlightById(flight.fa_flight_id, userId);
+          if (existingFlight) {
+            console.log('Flight already exists in storage:', existingFlight);
+            alert('This flight is already saved.');
+          } else {
+            const flightRecord: Flight = {
+              flightId: flight.fa_flight_id,
+              flightDetails: flight,
+              userId: userId,
+              // previousFlightId: null,
+              // actualFlightPathId: null,
+            };
+
+
+            await this.storageService.addFlight(flightRecord);
+            this.flights.unshift(flightRecord);
+            await this.loadFlightsFromStorage();
+            this.modal.dismiss();
+            console.log("Flight added to storage:", flightRecord);
+          }
+        } else {
+          alert("No scheduled flights found for the provided details.");
+        }
+      },
+      (error) => {
+        console.error("Error fetching flight data:", error);
+        alert("Failed to fetch flight data. Please try again.");
+      }
+    );
+  }
 
   // addFlightToStorage(flight: any) {
   //   const storedFlights = JSON.parse(localStorage.getItem("flights") || "[]");
@@ -320,6 +324,13 @@ export class Tab1Page {
 
     console.log('Profile available. Loading flights...');
     await this.loadFlightsFromStorage();
+  }
+
+  codesharesAsString(codeshares: Array<{ ident_iata: string }>): string {
+    if (!codeshares || codeshares.length === 0) {
+      return '';
+    }
+    return codeshares.map((code) => code.ident_iata).join(', ');
   }
 
 }

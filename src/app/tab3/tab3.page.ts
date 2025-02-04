@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { NavController } from '@ionic/angular';
 import { SupabaseService, Profile } from '../services/supabase.service';
 import { FormsModule } from '@angular/forms';
+import { AuthHeaderComponent } from '../components/auth-header/auth-header.component';
 
 import {
   IonContent,
@@ -43,6 +44,7 @@ import {
       IonToolbar,
       FormsModule,
       IonButtons,
+      AuthHeaderComponent,
       IonImg,
       IonCardSubtitle,
       IonList,
@@ -99,7 +101,6 @@ export class Tab3Page implements OnInit {
 
       if (user) {
         this.email = user.email ?? '';
-        // Access user_metadata with proper type checking
         if (user.user_metadata?.['avatar_url']) {
           this.profile.avatar_url = user.user_metadata['avatar_url'];
         }

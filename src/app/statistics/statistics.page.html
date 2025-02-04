@@ -1,30 +1,55 @@
-<!-- statistics.page.html -->
-
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Flight Statistics</ion-title>
-  </ion-toolbar>
+<ion-header [translucent]="true">
+  <auth-app-header></auth-app-header>
 </ion-header>
 
 <ion-content>
+  <div class="statistics-overview">
+    <h2>Statistics Overview</h2>
+    <app-progress-bar [value]="totalDistance" [goal]="50000" label="Distance Traveled (km)"></app-progress-bar>
+    <app-gauge [value]="totalFlights" [max]="50" label="Total Flights"></app-gauge>
+  </div>
+
   <ion-card>
     <ion-card-header>
-      <ion-card-title>Flight Summary</ion-card-title>
+      <ion-card-title>Total Summary</ion-card-title>
     </ion-card-header>
     <ion-card-content>
-      <p><strong>Total Flights Completed:</strong> {{ totalFlights }}</p>
-      <p><strong>Total Distance Traveled:</strong> {{ totalDistance | number }} km</p>
-      <p><strong>Total Time in Air:</strong> {{ formatFlightTime(totalFlightTime) }}</p>
+      <ion-list>
+        <ion-item>
+          <ion-label><strong>Total Flights:</strong></ion-label>
+          <ion-label>{{ totalFlights }}</ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-label><strong>Total Distance:</strong></ion-label>
+          <ion-label> {{ totalDistance | number:'1.0-0' }}  km</ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-label><strong>Time in Air:</strong></ion-label>
+          <ion-label>{{ formatFlightTime(totalFlightTime) }}</ion-label>
+        </ion-item>
+      </ion-list>
     </ion-card-content>
   </ion-card>
 
-  <ion-card *ngFor="let flight of flights">
+  <ion-card>
     <ion-card-header>
-      <ion-card-title>{{ flight.flightDetails.ident }} ({{ flight.flightDetails.origin }} → {{ flight.flightDetails.destination }})</ion-card-title>
+      <ion-card-title>Flight Time Per Month</ion-card-title>
     </ion-card-header>
     <ion-card-content>
-      <p><strong>Flight Date:</strong> {{ flight.flightDetails.scheduled_out | date:'medium' }}</p>
-      <p *ngIf="flight.actualFlight"><strong>Flight Path Points:</strong> {{ flight.actualFlight.flightPath.length || 0 }}</p>
+      <app-line-chart [data]="monthlyFlightHours" label="Hours per Month"></app-line-chart>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Achievements</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-list>
+        <ion-item *ngFor="let achievement of achievements">
+          <ion-label>{{ achievement }}</ion-label>
+        </ion-item>
+      </ion-list>
     </ion-card-content>
   </ion-card>
 </ion-content>

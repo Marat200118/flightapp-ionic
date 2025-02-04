@@ -21,6 +21,14 @@
   width: 100%;
 }
 
+ion-card {
+  box-shadow: none;
+}
+
+ion-chip {
+  margin-bottom: 1rem;
+}
+
 .header-content {
   display: flex;
   justify-content: space-between;
@@ -39,4 +47,112 @@
   font-size: 14px;
   margin: 4px 0 0 0;
   color: var(--header-text-color);
+}
+
+.flight-summary {
+  background: var(--ion-color-darkblue);
+  color: var(--header-text-color);
+  border-bottom-left-radius: 30px;
+  border-bottom-right-radius: 30px;
+  padding: 40px;
+  text-align: center;
+}
+
+
+.flight-route {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+.flight-route ion-icon {
+  font-size: 3rem;
+  --ionicon-stroke-width: 1.6rem;
+}
+
+.iata {
+  font-weight: 500;
+}
+
+.route-line {
+  flex: 1;
+  border-top: 2px dotted var(--always-white);
+  margin: 0 8px;
+}
+
+.flight-time {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 12px;
+}
+
+.time-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.time {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.duration {
+  font-size: 0.8rem;
+  color: var(--always-white);
+  font-weight: 400;
+  text-align: center;
+}
+
+.date-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.label {
+  font-size: 0.9rem;
+}
+
+.date {
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+.flight-info {
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-bottom: .5rem;
+}
+
+.left {
+  align-items: flex-start;
+}
+
+.right {
+  align-items: flex-end;
+}
+
+.codeshare-info {
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+  align-items: baseline;
+  gap: .3rem;
+  color: var(--always-white);
+}
+
+.codeshares-text {
+  font-weight: 600;
+  color: var(--always-white);
 }

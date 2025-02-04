@@ -4,6 +4,8 @@ import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { NavController } from '@ionic/angular';
 import { SupabaseService } from '../../services/supabase.service';
+import { HeaderComponent } from 'src/app/components/header/header.component';
+import { CommonModule } from '@angular/common';
 import {
   IonContent,
   IonHeader,
@@ -37,7 +39,9 @@ import { FormsModule } from '@angular/forms';
     IonContent,
     IonHeader,
     IonTitle,
+    CommonModule,
     IonToolbar,
+    HeaderComponent,
     IonButtons,
     IonGrid,
     IonCol,
@@ -80,11 +84,7 @@ export class SignupPage {
 
   async signUp() {
     try {
-      let avatarUrl = '';
-      if (this.avatarFile) {
-        avatarUrl = await this.supabase.uploadAvatar(this.avatarFile);
-      }
-
+      const avatarUrl = '';
       const user = await this.supabase.signUp(this.email, this.password, {
         first_name: this.firstName,
         username: this.username,
@@ -93,8 +93,8 @@ export class SignupPage {
 
       if (user) {
         this.supabase.createNotice('Signup successful! Logging you in...');
-        await this.supabase.restoreSession(); 
-        this.navCtrl.navigateRoot('/tabs/tab1'); 
+        await this.supabase.restoreSession();
+        this.navCtrl.navigateRoot('/tabs/tab1');
       }
     } catch (error: any) {
       console.error('Sign-up failed:', error.message);
@@ -102,6 +102,14 @@ export class SignupPage {
     }
   }
 
+  async signUpWithGoogle() {
+    try {
+      await this.supabase.signUpWithGoogle();
+      // Note: After the OAuth flow completes, the user will be redirected.
+    } catch (error) {
+      console.error('Error during Google sign-up:', error);
+    }
+  }
 
 
   goToLogin() {

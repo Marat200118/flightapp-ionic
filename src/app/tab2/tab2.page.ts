@@ -8,6 +8,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 // import { Network } from '@capacitor/network';
 // import { BluetoothLe } from '@capacitor-community/bluetooth-le';
 import { SupabaseService } from '../services/supabase.service';
+import { AuthHeaderComponent } from '../components/auth-header/auth-header.component';
 
 import { LiveFlightPathMapComponent } from '../components/live-flight-map/live-flight-map.component';
 import {
@@ -16,6 +17,7 @@ import {
   IonContent,
   IonInput,
   IonItem,
+  IonChip,
   IonModal,
   IonIcon,
   IonImg,
@@ -45,8 +47,10 @@ import {
     IonCardHeader,
     IonCardContent,
     IonCardTitle,
+    AuthHeaderComponent,
     IonButtons,
     IonContent,
+    IonChip,
     IonHeader,
     IonInput,
     IonItem,

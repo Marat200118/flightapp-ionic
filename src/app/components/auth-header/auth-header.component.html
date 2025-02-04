@@ -1,0 +1,17 @@
+<ion-header>
+  <ion-toolbar>
+    <div class="header-container">
+      <div class="header-left">
+        <ion-img src="assets/logo-white.svg" class="logo-white"></ion-img>
+      </div>
+      <div class="header-center">
+        <h1 class="app-title">Illuminator</h1>
+      </div>
+      <div class="header-right">
+        <ion-avatar>
+          <ion-img [src]="avatarUrl" (ionError)="setDefaultAvatar()"></ion-img>
+        </ion-avatar>
+      </div>
+    </div>
+  </ion-toolbar>
+</ion-header>
