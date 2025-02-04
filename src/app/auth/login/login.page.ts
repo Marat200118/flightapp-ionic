@@ -5,6 +5,7 @@ import { NavController } from '@ionic/angular';
 import { SupabaseService } from '../../services/supabase.service';
 import { FormsModule } from '@angular/forms';
 import { HeaderComponent } from 'src/app/components/header/header.component';
+import { CommonModule } from '@angular/common';
 import { 
   IonContent,
   IonHeader,
@@ -51,6 +52,7 @@ import {
     IonItem,
     IonLabel,
     IonInput,
+    CommonModule,
     IonButton,
 
   ],
