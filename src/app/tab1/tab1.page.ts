@@ -35,6 +35,7 @@ import {
   IonToolbar,
   IonCard,
   IonBadge,
+  IonLabel,
   IonCardHeader,
   IonCardTitle,
   IonList,
@@ -58,6 +59,7 @@ import { add } from 'ionicons/icons';
     IonList,
     IonCardHeader,
     IonCardContent,
+    IonLabel,
     IonCardTitle,
     IonButtons,
     AuthHeaderComponent,
@@ -322,6 +324,13 @@ export class Tab1Page {
 
     console.log('Profile available. Loading flights...');
     await this.loadFlightsFromStorage();
+  }
+
+  codesharesAsString(codeshares: Array<{ ident_iata: string }>): string {
+    if (!codeshares || codeshares.length === 0) {
+      return '';
+    }
+    return codeshares.map((code) => code.ident_iata).join(', ');
   }
 
 }

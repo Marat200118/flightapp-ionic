@@ -13,13 +13,17 @@
   --always-black: #000000;
   --card-color: #C1D8FF;
   --green: #1bb136;
-  --text-primary: #282828;
   --text-secondary: rgb(82, 82, 82);
   --card-background: white;
   --card-text-color: var(--text-primary);
-  --ion-background-color: #f4f4f4;
-  
+  --ion-background-color: #FCFCFC;
 
+  --ion-tab-bar-background: #002C65 !important;
+  --ion-tab-bar-color: #d2d2d2bd !important;
+  --ion-tab-bar-color-selected: #ffffff !important;
+
+  --text-primary: #282828;
+  --app-background: #FCFCFC;
   --app-yellow: #FFEA95;
   --app-green: #C1FFC3;
   --app-blue: #C1D8FF;
@@ -34,7 +38,7 @@
     --ion-color-tertiary: #1e1e1e;
     --green: #1c802e;
     --card-color: #C1D8FF;
-    --ion-background-color: #04042c !important;
+    --ion-background-color: #080B26 !important;
     --ion-tab-bar-background: #20622c !important;
     --ion-tab-bar-color: #d7d7d7 !important;
     --ion-tab-bar-color-selected: #ffffff !important;
@@ -47,5 +51,8 @@
     --text-secondary: #d0d0d0;
     --card-background: #1e1e1e;
     --card-text-color: var(--text-primary);
+
+    --text-primary: #f4f4f9;
+    --app-background: #080B26;
   }
 }

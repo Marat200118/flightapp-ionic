@@ -3,6 +3,8 @@
   background: var(--ion-color-tertiary) !important;
 }
 
+
+
 .tab-header {
   --background: var(--header-background);
   --color: var(--header-text-color);
@@ -13,8 +15,8 @@ ion-icon {
 }
 
 .fancy-header {
-  background: var(--header-background);
-  color: var(--header-text-color);
+  background: var(--ion-color-darkblue);
+  color: var(--always-white);
   padding: 40px 20px;
   border-bottom-left-radius: 30px;
   border-bottom-right-radius: 30px;
@@ -43,7 +45,7 @@ ion-list {
 }
 
 .header-content h1 {
-  color: var(--header-text-color);
+  color: var(--always-white);
   font-size: clamp(1.5rem, 4vw, 2.5rem);
   font-weight: bold;
   margin: 0;
@@ -70,6 +72,7 @@ ion-list {
 }
 
 .flights-section h2 {
+  color: var(--text-primary);
   font-size: 1.3rem;
   font-weight: bold;
   margin-left: 1rem;
@@ -92,7 +95,7 @@ ion-card {
 .flight-card-container {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  // gap: 12px;
 }
 
 .flight-info {
@@ -109,8 +112,18 @@ ion-card {
   font-weight: 600;
 }
 
+.flight-route ion-icon {
+  font-size: 3rem;
+  --ionicon-stroke-width: 1.6rem;
+}
+
+.add-flight-button ion-icon {
+  --ionicon-stroke-width: 2.5rem;
+}
+
+
 .iata {
-  font-weight: bold;
+  font-weight: 500;
 }
 
 .route-line {
@@ -133,13 +146,13 @@ ion-card {
 }
 
 .time {
-  font-size: 1.4rem;
+  font-size: 22px;
   font-weight: bold;
 }
 
 .label {
   font-size: 0.9rem;
-  color: var(--ion-color-medium);
+  color: var(--always-black);
 }
 
 ion-card-content {
@@ -149,8 +162,8 @@ ion-card-content {
 
 .duration {
   font-size: 0.8rem;
-  color: var(--ion-color-primary);
-  font-weight: 500;
+  color: var(--always-black);
+  font-weight: 400;
   text-align: center;
 }
 
@@ -173,7 +186,8 @@ ion-card-content {
 }
 
 .date {
-  font-size: 14px;
+  font-size: 18px;
+  font-weight: 600;
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -221,4 +235,85 @@ ion-datetime {
 
 .previous-flights {
   background-color: var(--app-blue);
+}
+
+
+.left {
+  align-items: flex-start;
+}
+
+.right {
+  align-items: flex-end;
+}
+
+.modal-content {
+  --background: var(--ion-color-darkblue);
+  --ion-safe-area-top: 0px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.modal-header {
+  text-align: center;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--ion-color-medium);
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.modal-header h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--always-white);
+}
+
+.modal-header p {
+  color: var(--always-white);
+  font-size: 0.9rem;
+}
+
+.input-item {
+  margin-bottom: 12px;
+  border-radius: 8px;
+  background-color: var(--ion-color-light);
+  --highlight-color-focused: var(--ion-color-primary);
+}
+
+ion-label {
+  font-size: 1rem;
+  color: var(--ion-color-dark);
+}
+
+.confirm-button {
+  margin-top: 20px;
+  font-weight: bold;
+  --background: var(--app-green);
+}
+
+ion-modal ion-toolbar {
+  --background: var(--ion-color-darkblue);
+  color: var(--always-white);
+}
+
+.modal-icon {
+  width: 3rem;
+  margin-bottom: 12px;
+}
+
+.codeshare-info {
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  color: var(--ion-color-dark);
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: .3rem;
+}
+
+.codeshares-text {
+  font-weight: 600;
+  color: var(--ion-color-darkblue);
 }
