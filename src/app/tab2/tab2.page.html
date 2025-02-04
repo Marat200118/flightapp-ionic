@@ -1,34 +1,39 @@
 <!-- tab2.page.html -->
 
 <ion-header [translucent]="true">
-  <ion-toolbar class="tab-header">
-    <ion-title>Flights</ion-title>
-  </ion-toolbar>
+  <auth-app-header></auth-app-header>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <div class="fancy-header">
-    <div class="header-content">
-      <div>
-        <h1>Hello, User!</h1>
-        <p>Here are your flights</p>
+<ion-content [fullscreen]="true" class="custom-content">
+  <div class="flight-summary">
+    <div class="flight-info">
+      <ion-chip color="warning">Aproximate Location</ion-chip>
+      <div class="flight-number">{{ flight?.flightDetails?.ident_iata }}</div>
+    </div>
+  
+    <div class="flight-route">
+      <span class="iata">{{ flight?.flightDetails?.origin_iata }}</span>
+      <span class="route-line"></span>
+      <ion-icon name="airplane-outline"></ion-icon>
+      <span class="route-line"></span>
+      <span class="iata">{{ flight?.flightDetails?.destination_iata }}</span>
+    </div>
+  
+    <div class="flight-time">
+      <div class="time-info left">
+        <span class="label">Departure</span>
+        <span class="date">{{ flight?.flightDetails?.scheduled_out | date: 'EEE dd MMM' }}</span>
+        <span class="time">{{ flight?.flightDetails?.scheduled_out | date: 'HH:mm' }}</span>
+      </div>
+      <div class="duration">1h 45min</div>
+      <div class="time-info right">
+        <span class="label">Arrival</span>
+        <span class="date">{{ flight?.flightDetails?.scheduled_in | date: 'EEE dd MMM' }}</span>
+        <span class="time">{{ flight?.flightDetails?.scheduled_in | date: 'HH:mm' }}</span>
       </div>
     </div>
   </div>
 
-  <div *ngIf="flight; else noFlight">
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>{{ flight.flightDetails.ident }}</ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <p><strong>Origin:</strong> {{ flight.flightDetails.origin }}</p>
-        <p><strong>Destination:</strong> {{ flight.flightDetails.destination }}</p>
-        <p><strong>Departure:</strong> {{ flight.flightDetails.scheduled_out | date: 'yyyy-MM-dd HH:mm' }}</p>
-        <p><strong>Arrival:</strong> {{ flight.flightDetails.scheduled_in | date: 'yyyy-MM-dd HH:mm' }}</p>
-        <p><strong>Status:</strong> {{ status }}</p>
-      </ion-card-content>
-    </ion-card>
 
     <ion-card *ngIf="flightPath.length">
       <ion-card-header>
@@ -44,7 +49,6 @@
         <p>Your estimated flight path is not known yet.</p>
       </div>
     </ng-template>
-  </div>
 
   <ng-template #noFlight>
     <div class="no-flight-message">
@@ -52,5 +56,5 @@
     </div>
   </ng-template>
 
-  <ion-button expand="full" (click)="goBackToMain()">Go Back</ion-button>
+  <!-- <ion-button expand="full" (click)="goBackToMain()">Go Back</ion-button> -->
 </ion-content>

@@ -1,20 +1,20 @@
 .custom-content {
   --ion-safe-area-top: 0px;
-  background: var(--ion-color-tertiary);
+  background: var(--ion-color-darkblue);
   padding: 0;
 }
 
 .details-header {
-  --background: var(--header-background);
-  --color: var(--header-text-color);
+  --background: var(--ion-color-darkblue);
+  --color: var(--always-white);
 }
 
 .flight-summary {
-  background: var(--header-background);
+  background: var(--ion-color-darkblue);
   color: var(--header-text-color);
   border-bottom-left-radius: 30px;
   border-bottom-right-radius: 30px;
-  padding: 24px;
+  padding: 40px;
   text-align: center;
 }
 
@@ -58,7 +58,7 @@ ion-card {
   border-radius: 16px;
   background: none;
   color: var(--card-text-color);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: none;
 }
 
 ion-card-header ion-card-title {
@@ -99,4 +99,102 @@ app-actual-flight-path-map {
 .no-path-icon {
   font-size: 4rem;
   color: var(--text-secondary);
+}
+
+.flight-route {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+.flight-route ion-icon {
+  font-size: 3rem;
+  --ionicon-stroke-width: 1.6rem;
+}
+
+.iata {
+  font-weight: 500;
+}
+
+.route-line {
+  flex: 1;
+  border-top: 2px dotted var(--always-white);
+  margin: 0 8px;
+}
+
+.flight-time {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 12px;
+}
+
+.time-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.time {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.duration {
+  font-size: 0.8rem;
+  color: var(--always-white);
+  font-weight: 400;
+  text-align: center;
+}
+
+.date-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.label {
+  font-size: 0.9rem;
+}
+
+.date {
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+.flight-info {
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-bottom: .5rem;
+}
+
+.left {
+  align-items: flex-start;
+}
+
+.right {
+  align-items: flex-end;
+}
+
+.codeshare-info {
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+  align-items: baseline;
+  gap: .3rem;
+  color: var(--always-white);
+}
+
+.codeshares-text {
+  font-weight: 600;
+  color: var(--always-white);
 }
