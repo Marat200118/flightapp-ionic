@@ -9,7 +9,8 @@ import { Observable, throwError } from 'rxjs';
   providedIn: 'root',
 })
 export class FlightService {
-  private proxyBaseUrl = 'http://localhost:3000/api';
+  // private proxyBaseUrl = 'http://localhost:3000/api';
+   private proxyBaseUrl = 'https://flight-api-backend.vercel.app/api';
 
   constructor(private http: HttpClient) {}
 
