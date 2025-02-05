@@ -6,6 +6,10 @@ import { SupabaseService } from '../../services/supabase.service';
 import { FormsModule } from '@angular/forms';
 import { HeaderComponent } from 'src/app/components/header/header.component';
 import { CommonModule } from '@angular/common';
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
+import { Capacitor } from '@capacitor/core';
+import { Provider } from '@supabase/supabase-js';
+
 import { 
   IonContent,
   IonHeader,
@@ -89,14 +93,32 @@ export class LoginPage {
     }
   }
 
+  // async loginWithGoogle() {
+  //   try {
+  //     await this.supabase.signInWithGoogle();
+  //     console.log('Google login successful!');
+  //   } catch (error) {
+  //     console.error('Google login failed:', error);
+  //   }
+  // }
+
   async loginWithGoogle() {
     try {
-      await this.supabase.signInWithGoogle();
-      console.log('Google login successful!');
+      const redirectTo = Capacitor.isNativePlatform()
+        ? 'myapp://auth/callback'
+        : window.location.origin + '/auth/callback';
+
+      const { data } = await this.supabase.signInWithOAuth({
+        provider: 'google' as Provider,
+        redirectTo,
+      });
+
+      console.log('Google login successful!', data);
     } catch (error) {
       console.error('Google login failed:', error);
     }
   }
+
 
 
   goToSignUp() {

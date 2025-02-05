@@ -69,6 +69,7 @@ export class Tab2Page implements OnInit {
   currentAproximatePosition: { latitude: number; longitude: number } | null = null;
   message: string = ''; 
   private intervalId: any;
+  flightDuration: string | null = null;
 
   flightDetails: any = null; 
   previousFlightDuration: number | null = null; 
@@ -100,6 +101,17 @@ export class Tab2Page implements OnInit {
       this.flight = upcomingFlight;
       this.flightDetails = upcomingFlight.flightDetails;
       console.log('Upcoming flight:', this.flight);
+
+      const departureTime = new Date(this.flightDetails.scheduled_out);
+      const arrivalTime = new Date(this.flightDetails.scheduled_in);
+      const durationInMs = arrivalTime.getTime() - departureTime.getTime();
+
+      const totalMinutes = Math.floor(durationInMs / (1000 * 60));
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+
+      this.flightDuration = `${hours}h ${minutes}min`;
+
 
       if (this.flight.previousFlight?.flightPath) {
         console.log('Previous Flight Path:', this.flight.previousFlight.flightPath);

@@ -8,7 +8,7 @@
 
 .profile-card {
   margin: 16px 1.6rem;
-  padding: 16px;
+  // padding: 16px;
   border-radius: 16px;
   text-align: center;
 }
@@ -60,6 +60,7 @@ ion-item ion-icon {
   width: 100%;
 }
 
+
 ion-button {
   font-size: 1.1rem;
   font-weight: bold;
@@ -68,6 +69,7 @@ ion-button {
   position: absolute;
   bottom: 20px;
   left: calc(50% - 7.5rem);
+  position: fixed;
 }
 
 

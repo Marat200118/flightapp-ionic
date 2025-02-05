@@ -106,7 +106,6 @@ export class Tab1Page {
   constructor(private navCtrl: NavController, private http: HttpClient, private storageService: StorageService, private supabase: SupabaseService) {}
 
   async ngOnInit() {
-    await this.supabase.restoreSession();
     await this.loadProfile();
 
     if (this.profile?.id) {

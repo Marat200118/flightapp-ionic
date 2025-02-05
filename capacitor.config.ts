@@ -10,6 +10,21 @@ const config: CapacitorConfig = {
       iosDatabaseLocation: 'Library/Databases',
       androidDatabaseLocation: 'default',
     },
+    GoogleAuth: {
+      scopes: ['profile', 'email'],
+      serverClientId: '469160136753-gagip836alvj08k0m07i8m5seq2artua.apps.googleusercontent.com', 
+      forceCodeForRefreshToken: true,
+    },
+    // DeepLinking: {
+    //   customURLScheme: 'myapp', 
+    //   deepLinks: [
+    //     {
+    //       scheme: 'myapp',
+    //       host: 'auth',
+    //       path: '/callback',
+    //     },
+    //   ],
+    // },
   },
 };
 

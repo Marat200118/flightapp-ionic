@@ -8,6 +8,7 @@
   <div class="flight-summary">
     <div class="flight-info">
       <ion-chip color="warning">Aproximate Location</ion-chip>
+      <ion-chip color="success">{{ status }}</ion-chip>
       <div class="flight-number">{{ flight?.flightDetails?.ident_iata }}</div>
     </div>
   
@@ -25,7 +26,7 @@
         <span class="date">{{ flight?.flightDetails?.scheduled_out | date: 'EEE dd MMM' }}</span>
         <span class="time">{{ flight?.flightDetails?.scheduled_out | date: 'HH:mm' }}</span>
       </div>
-      <div class="duration">1h 45min</div>
+      <div class="duration">{{ flightDuration }}</div>
       <div class="time-info right">
         <span class="label">Arrival</span>
         <span class="date">{{ flight?.flightDetails?.scheduled_in | date: 'EEE dd MMM' }}</span>

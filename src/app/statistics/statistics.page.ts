@@ -1,3 +1,5 @@
+//statistics.page.ts
+
 import { Component, OnInit } from '@angular/core';
 import { StorageService } from '../services/storage.service';
 import { Flight } from '../models/flight.model';
