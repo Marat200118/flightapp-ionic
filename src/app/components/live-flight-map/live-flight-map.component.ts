@@ -1,3 +1,5 @@
+//live-flight-map.component.ts
+
 import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
 import * as L from 'leaflet';
 

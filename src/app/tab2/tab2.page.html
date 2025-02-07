@@ -4,12 +4,28 @@
   <auth-app-header></auth-app-header>
 </ion-header>
 
+
 <ion-content [fullscreen]="true" class="custom-content">
   <div class="flight-summary">
-    <div class="flight-info">
+    <div *ngIf="!flight">
+      <div class="no-flight-message">
+        <p>No upcoming flights to show at the moment.</p>
+      </div>
+    </div>
+    <div class="flight-info" *ngIf="flight">
       <ion-chip color="warning">Aproximate Location</ion-chip>
       <ion-chip color="success">{{ status }}</ion-chip>
       <div class="flight-number">{{ flight?.flightDetails?.ident_iata }}</div>
+      <ion-card class="location-card">
+        <ion-card-header>
+          <ion-card-title>Current Location</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <p><strong>City:</strong> {{ locationInfo?.city || 'Loading...' }}</p>
+          <p><strong>Country:</strong> {{ locationInfo?.country || 'Loading...' }}</p>
+          <p *ngIf="locationInfo?.landmark?.length"><strong>Landmark:</strong> {{ locationInfo?.landmark || 'No landmark found' }}</p>
+        </ion-card-content>
+      </ion-card>
     </div>
   
     <div class="flight-route">

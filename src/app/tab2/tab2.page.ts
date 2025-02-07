@@ -9,6 +9,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 // import { BluetoothLe } from '@capacitor-community/bluetooth-le';
 import { SupabaseService } from '../services/supabase.service';
 import { AuthHeaderComponent } from '../components/auth-header/auth-header.component';
+import { GeocodingService } from '../services/geocoding.service';
 
 import { LiveFlightPathMapComponent } from '../components/live-flight-map/live-flight-map.component';
 import {
@@ -70,11 +71,12 @@ export class Tab2Page implements OnInit {
   message: string = ''; 
   private intervalId: any;
   flightDuration: string | null = null;
+  locationInfo: { city: string; country: string; landmark?: string } | null = null;
 
   flightDetails: any = null; 
   previousFlightDuration: number | null = null; 
 
-  constructor(private storageService: StorageService, private navCtrl: NavController, private supabase: SupabaseService) {}
+  constructor(private storageService: StorageService, private navCtrl: NavController, private supabase: SupabaseService, private geocodingService: GeocodingService,) {}
 
   async ngOnInit() {
 
@@ -110,6 +112,11 @@ export class Tab2Page implements OnInit {
       const hours = Math.floor(totalMinutes / 60);
       const minutes = totalMinutes % 60;
 
+      const scheduledDuration = Math.floor(
+        (arrivalTime.getTime() - departureTime.getTime()) / 1000
+      );
+
+    
       this.flightDuration = `${hours}h ${minutes}min`;
 
 
@@ -121,13 +128,17 @@ export class Tab2Page implements OnInit {
         const lastPoint = this.flightPath[this.flightPath.length - 1];
         this.previousFlightDuration = lastPoint.timestamp - firstPoint.timestamp;
 
+        
         console.log('Previous Flight Duration (seconds):', this.previousFlightDuration);
 
         this.startLiveUpdates();
       } else {
         console.warn('No previous flight path available:', this.flight.previousFlight);
       }
+      
     }
+
+    
   }
 
   ngOnDestroy() {
@@ -182,6 +193,7 @@ export class Tab2Page implements OnInit {
     console.log('Current Status:', this.status);
   }
 
+
   updatePlanePosition() {
     if (!this.flight || !this.flightPath.length) return;
 
@@ -194,18 +206,74 @@ export class Tab2Page implements OnInit {
 
     this.currentAproximatePosition = this.calculateCurrentPosition(elapsedTime);
 
-    if (this.status === 'Waiting') {
-      this.currentAproximatePosition = this.flightPath[0];
-    }
-    console.log('Current Approximate Position:', this.currentAproximatePosition);
+    // if (this.currentAproximatePosition) {
+    //   this.geocodingService.getLocationInfo(
+    //     this.currentAproximatePosition.latitude,
+    //     this.currentAproximatePosition.longitude
+    //   ).subscribe(
+    //     (data) => {
+    //       // Update location information with fetched data
+    //       this.locationInfo = {
+    //         city: data.city || 'Unknown City',
+    //         country: data.country || 'Unknown Country',
+    //         landmark: data.landmark || '',
+    //       };
+    //       console.log('Current location info:', this.locationInfo);
+    //     },
+    //     (error) => {
+    //       console.error('Failed to fetch location info:', error);
+    //       this.locationInfo = {
+    //         city: 'Unknown',
+    //         country: 'Unknown',
+    //         landmark: '',
+    //       };
+    //     }
+    //   );
+    // }
+  }
+
+  fetchLocationData() {
+    if (!this.currentAproximatePosition) return;
+
+    this.geocodingService.getLocationInfo(
+      this.currentAproximatePosition.latitude,
+      this.currentAproximatePosition.longitude
+    ).subscribe(
+      (data) => {
+        // Update location information with fetched data
+        this.locationInfo = {
+          city: data.city || 'Unknown City',
+          country: data.country || 'Unknown Country',
+          landmark: data.landmark || '',
+        };
+        console.log('Current location info:', this.locationInfo);
+      },
+      (error) => {
+        console.error('Failed to fetch location info:', error);
+        this.locationInfo = {
+          city: 'Unknown',
+          country: 'Unknown',
+          landmark: '',
+        };
+      }
+    );
   }
 
   private calculateCurrentPosition(elapsedTime: number): { latitude: number; longitude: number } | null {
     if (!this.flightPath || this.flightPath.length < 2 || elapsedTime < 0) return null;
 
-    const totalDuration = this.previousFlightDuration!;
+    const scheduledDuration = Math.floor(
+      (new Date(this.flightDetails.scheduled_in).getTime() -
+        new Date(this.flightDetails.scheduled_out).getTime()) /
+        1000
+    );
+    
+
+    const totalDuration = this.previousFlightDuration
+      ? Math.max(this.previousFlightDuration, scheduledDuration)
+      : scheduledDuration;
+
     if (elapsedTime > totalDuration) {
-  
       const lastPoint = this.flightPath[this.flightPath.length - 1];
       return { latitude: lastPoint.latitude, longitude: lastPoint.longitude };
     }
@@ -222,19 +290,29 @@ export class Tab2Page implements OnInit {
     if (!start || !end) return null;
 
     const segmentDuration = end.timestamp - start.timestamp;
-    const segmentElapsedTime = elapsedTime - start.timestamp;
+    const adjustedElapsed = elapsedTime - start.timestamp;
 
-    if (segmentDuration <= 0 || segmentElapsedTime < 0) {
-      return { latitude: start.latitude, longitude: start.longitude };
-    }
+    const segmentProgress = segmentDuration > 0
+      ? Math.min(1, Math.max(0, adjustedElapsed / segmentDuration))
+      : 0;
 
-    const segmentProgress = Math.min(1, Math.max(0, segmentElapsedTime / segmentDuration));
+    console.log({
+      elapsedTime,
+      totalDuration,
+      mappedIndex,
+      start,
+      end,
+      segmentProgress,
+      planePosition: this.currentAproximatePosition,
+    });
 
     return {
       latitude: start.latitude + segmentProgress * (end.latitude - start.latitude),
       longitude: start.longitude + segmentProgress * (end.longitude - start.longitude),
     };
+
   }
+
 
 
 
@@ -243,6 +321,12 @@ export class Tab2Page implements OnInit {
       this.updateFlightStatus();
       this.updatePlanePosition();
     }, 1000);
+
+    setInterval(() => {
+      if (this.currentAproximatePosition) {
+        this.fetchLocationData();
+      }
+    }, 60000);
   }
 
   formatFlightPath(flightPath: any[]): { timestamp: number; latitude: number; longitude: number }[] {
@@ -255,4 +339,5 @@ export class Tab2Page implements OnInit {
     return formatted;
   }
 
+  
 }
