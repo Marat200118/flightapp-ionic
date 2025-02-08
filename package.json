@@ -4,6 +4,7 @@
   "author": "Ionic Framework",
   "homepage": "https://ionicframework.com/",
   "scripts": {
+    "preinstall": "npm config set legacy-peer-deps true",
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
