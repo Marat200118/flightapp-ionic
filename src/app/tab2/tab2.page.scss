@@ -10,7 +10,7 @@
 
 .fancy-header {
   background: var(--header-background);
-  color: var(--header-text-color);
+  color: var(--always-white);
   padding: 40px 20px;
   border-bottom-left-radius: 30px;
   border-bottom-right-radius: 30px;
@@ -24,6 +24,7 @@
 ion-card {
   box-shadow: none;
   background: none;
+  color: var(--always-white);
 }
 
 ion-chip {
@@ -157,3 +158,8 @@ ion-chip {
   font-weight: 600;
   color: var(--always-white);
 }
+
+.location-card ion-card-title {
+  color: var(--always-white);
+}
+

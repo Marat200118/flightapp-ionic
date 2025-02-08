@@ -1,17 +1,6 @@
 //supabase.service.ts
 
 
-
-// export interface User {
-//   id: string;
-//   email: string;
-//   user_metadata: {
-//     avatar_url: string;
-//     [key: string]: any;
-//   };
-// }
-
-
 import { Injectable } from '@angular/core';
 import { StorageService } from './storage.service';
 import { Capacitor } from '@capacitor/core';
@@ -42,6 +31,7 @@ export class SupabaseService {
   
   private supabase: SupabaseClient;
   private sessionLock: boolean = false;
+  private authListenerRegistered: boolean = false;
 
   constructor(
     private loadingCtrl: LoadingController,
@@ -57,19 +47,24 @@ export class SupabaseService {
       },
     });
 
-    console.log('Supabase URL:', environment.supabaseUrl);
-    console.log('Supabase Key:', environment.supabaseKey);
+    this.registerAuthStateListener();
+  }
 
-    this.supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth event detected:', event);
+    private registerAuthStateListener() {
+    if (this.authListenerRegistered) {
+      console.log('Auth listener is already registered. Skipping...');
+      return;
+    }
+
+    this.supabase.auth.onAuthStateChange(async (event, session) => {
       if (session) {
-        console.log('Updating session in storage.');
-        this.storage.set('supabase_session', JSON.stringify(session));
+        await this.storage.set('supabase_session', JSON.stringify(session));
       } else {
-        console.log('No session. Clearing storage.');
-        this.storage.remove('supabase_session');
+        await this.storage.remove('supabase_session');
       }
     });
+
+    this.authListenerRegistered = true;
   }
 
   
@@ -316,7 +311,7 @@ export class SupabaseService {
       return;
     }
 
-    this.sessionLock = true; // Acquire the lock
+    this.sessionLock = true;
 
     try {
       await this.storage.create();
@@ -337,27 +332,12 @@ export class SupabaseService {
       } else {
         console.log('No session found in storage.');
       }
-
-      // Register the auth state change listener (once)
-      this.supabase.auth.onAuthStateChange(async (event, session) => {
-        console.log('Auth event detected:', event);
-        if (session) {
-          console.log('Updating session in storage.');
-          await this.storage.set('supabase_session', JSON.stringify(session));
-        } else {
-          console.log('Session is null. Clearing storage.');
-          await this.storage.remove('supabase_session');
-        }
-      });
-
     } catch (error) {
       console.error('Unexpected error during session restoration:', error);
     } finally {
-      this.sessionLock = false; // Release the lock
+      this.sessionLock = false;
     }
   }
-
-
 
 
 

@@ -5,7 +5,8 @@ import { NavController } from '@ionic/angular';
 import { StorageService } from '../services/storage.service';
 import { Flight } from '../models/flight.model';
 import { CommonModule, DatePipe } from '@angular/common';
-// import { Network } from '@capacitor/network';
+import { Network } from '@capacitor/network';
+import { Device } from '@capacitor/device';
 // import { BluetoothLe } from '@capacitor-community/bluetooth-le';
 import { SupabaseService } from '../services/supabase.service';
 import { AuthHeaderComponent } from '../components/auth-header/auth-header.component';
@@ -72,6 +73,8 @@ export class Tab2Page implements OnInit {
   private intervalId: any;
   flightDuration: string | null = null;
   locationInfo: { city: string; country: string; landmark?: string } | null = null;
+  isAirplaneMode: boolean | null = null;
+  connectionStatus: string = 'Unknown';
 
   flightDetails: any = null; 
   previousFlightDuration: number | null = null; 
@@ -79,6 +82,21 @@ export class Tab2Page implements OnInit {
   constructor(private storageService: StorageService, private navCtrl: NavController, private supabase: SupabaseService, private geocodingService: GeocodingService,) {}
 
   async ngOnInit() {
+    
+    await this.checkNetworkStatus();
+
+    if (this.connectionStatus === 'Online') {
+      this.fetchLocationData();
+    }
+
+    
+    Network.addListener('networkStatusChange', (status) => {
+      this.connectionStatus = status.connected ? 'Online' : 'Offline';
+      console.log('Network status changed:', this.connectionStatus);
+      if (status.connected) {
+        this.fetchLocationData();
+      }
+    });
 
     const profile = await this.supabase.getProfile();
     if (!profile || !profile.id) {
@@ -135,16 +153,18 @@ export class Tab2Page implements OnInit {
       } else {
         console.warn('No previous flight path available:', this.flight.previousFlight);
       }
-      
     }
-
-    
   }
 
   ngOnDestroy() {
     if (this.intervalId) {
       clearInterval(this.intervalId);
     }
+  }
+
+  async checkNetworkStatus() {
+    const status = await Network.getStatus();
+    this.connectionStatus = status.connected ? 'Online' : 'Offline';
   }
 
   goBackToMain() {
@@ -206,33 +226,17 @@ export class Tab2Page implements OnInit {
 
     this.currentAproximatePosition = this.calculateCurrentPosition(elapsedTime);
 
-    // if (this.currentAproximatePosition) {
-    //   this.geocodingService.getLocationInfo(
-    //     this.currentAproximatePosition.latitude,
-    //     this.currentAproximatePosition.longitude
-    //   ).subscribe(
-    //     (data) => {
-    //       // Update location information with fetched data
-    //       this.locationInfo = {
-    //         city: data.city || 'Unknown City',
-    //         country: data.country || 'Unknown Country',
-    //         landmark: data.landmark || '',
-    //       };
-    //       console.log('Current location info:', this.locationInfo);
-    //     },
-    //     (error) => {
-    //       console.error('Failed to fetch location info:', error);
-    //       this.locationInfo = {
-    //         city: 'Unknown',
-    //         country: 'Unknown',
-    //         landmark: '',
-    //       };
-    //     }
-    //   );
-    // }
   }
 
-  fetchLocationData() {
+  async fetchLocationData() {
+
+    const status = await Network.getStatus();
+  
+    if (!status.connected) {
+      console.warn('No network connection. Skipping location fetch.');
+      return;
+    }
+    
     if (!this.currentAproximatePosition) return;
 
     this.geocodingService.getLocationInfo(
@@ -322,9 +326,9 @@ export class Tab2Page implements OnInit {
       this.updatePlanePosition();
     }, 1000);
 
-    setInterval(() => {
+    setInterval(async() => {
       if (this.currentAproximatePosition) {
-        this.fetchLocationData();
+        await this.fetchLocationData();
       }
     }, 60000);
   }

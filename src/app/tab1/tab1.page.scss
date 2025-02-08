@@ -227,16 +227,33 @@ ion-datetime {
 
 .ongoing-flights {
   background-color: var(--app-yellow);
+  min-width: 95%;
 }
 
 .upcoming-flights {
   background-color: var(--app-green);
+  min-width: 95%;
 }
 
 .previous-flights {
   background-color: var(--app-blue);
+  min-width: 95%;
 }
 
+ion-item-options {
+  // display: flex;
+  align-items: center;
+}
+
+ion-toast::part(wrapper) {
+  transform: translateY(calc(-50px - var(--ion-safe-area-bottom, 0px))) !important;
+}
+
+ion-item-option {
+  width: 4rem;
+  border-radius: 50%;
+  height: 4rem;
+}
 
 .left {
   align-items: flex-start;
@@ -317,4 +334,8 @@ ion-modal ion-toolbar {
 .codeshares-text {
   font-weight: 600;
   color: var(--ion-color-darkblue);
+}
+
+.input-wrapper {
+  display: block !important;
 }

@@ -88,3 +88,14 @@ ion-input::part(native):-webkit-autofill:active {
   -webkit-text-fill-color: var(--always-white) !important;
   transition: background-color 5000s ease-in-out 0s !important;
 }
+
+
+ion-toast {
+  opacity: 1 !important;
+  display: block !important;
+  z-index: 9999 !important;
+}
+
+ion-toast::part(wrapper) {
+  transform: translateY(calc(-50px - var(--ion-safe-area-bottom, 0px))) !important;
+}

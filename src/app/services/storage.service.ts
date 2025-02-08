@@ -51,6 +51,19 @@ export class StorageService {
     }
   }
 
+  async deleteFlightById(flightId: string, userId: string): Promise<void> {
+    await this.ensureInitialized();
+
+    const flights: Flight[] = await this.getAllFlights(userId);
+
+    const updatedFlights = flights.filter((flight) => flight.flightId !== flightId);
+
+    await this.storage.set(userId, updatedFlights);
+    console.log(`Deleted flight with ID ${flightId}. Updated flights list:`, updatedFlights);
+  }
+
+
+
   async addFlight(flight: Flight): Promise<void> {
     await this.ensureInitialized();
 

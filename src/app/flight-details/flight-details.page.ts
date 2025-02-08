@@ -19,6 +19,10 @@ import {
   IonCard,
   IonRow,
   IonCol,
+  IonItem,
+  IonLabel,
+  IonSpinner,
+  ToastController,
   IonGrid,
   IonCardHeader,
   IonCardTitle,
@@ -39,7 +43,10 @@ import { ActivatedRoute } from '@angular/router';
     IonToolbar,
     IonButtons,
     IonGrid,
+    IonSpinner,
     IonCol,
+    IonItem,
+    IonLabel,
     IonRow,
     IonBackButton,
     IonCard,
@@ -63,19 +70,22 @@ export class FlightDetailsPage {
   openskyInfo: any = null;
   previousFlight: any = null;
   actualFlight: any = null;
+  isLoading = false;
   
   
   constructor(
     private flightService: FlightService,
     private storageService: StorageService,
+    private toastCtrl: ToastController,
   ) {
     const state = history.state;
     this.flight = state.flight || null;
   }
 
   async ngOnInit() {
+    this.setLoading(true, 'Loading flight details...');
     if (this.flight) {
-      console.log('Flight Details:', this.flight);
+      await this.presentToast('Flight details loaded successfully', 'success', 'top');
 
       const now = new Date();
       const scheduledDeparture = new Date(this.flight.flightDetails.scheduled_out);
@@ -112,6 +122,7 @@ export class FlightDetailsPage {
         console.log('Using existing flight path for actual flight:', this.flight.actualFlight?.flightPath);
       }
     }
+    this.setLoading(false);
   }
 
   isPastFlight(): boolean {
@@ -122,6 +133,7 @@ export class FlightDetailsPage {
 
 
   async findPreviousFlight() {
+    this.setLoading(true, 'Fetching previous flight data...');
     if (this.flight.previousFlight) {
       console.log('Previous flight is already available:', this.flight.previousFlight);
 
@@ -187,6 +199,8 @@ export class FlightDetailsPage {
       }
     } catch (error) {
       console.error('Error fetching previous flight:', error);
+    } finally {
+      this.setLoading(false);
     }
   }
 
@@ -213,6 +227,7 @@ export class FlightDetailsPage {
     }
 
     try {
+      this.setLoading(true, 'Fetching actual flight data...');
       let flights = await this.flightService
         .getDeparturesWithArrival(origin, startTime, endTime, destination)
         .toPromise();
@@ -255,64 +270,12 @@ export class FlightDetailsPage {
       }
     } catch (error) {
       console.error('Error fetching actual flight:', error);
+    } finally {
+      this.setLoading(false);
     }
   }
 
 
-
-
-  // loadFlightInfoFromOpenSky() {
-  //   const departureAirport = this.flight.origin; 
-  //   const arrivalAirport = this.flight.destination; 
-
-  //   const scheduledOutUTC = new Date(this.flight.scheduled_out); // UTC time
-  //   const startTime = new Date(scheduledOutUTC.getTime() - 2 * 60 * 60 * 1000); // 2 hours before
-  //   const endTime = new Date(scheduledOutUTC.getTime() + 4 * 60 * 60 * 1000)
-
-  //   const startTimeUnix = Math.floor(startTime.getTime() / 1000); // Convert to Unix timestamp
-  //   const endTimeUnix = Math.floor(endTime.getTime() / 1000); 
-
-  //   // Call the FlightService to fetch departures within the time range
-  //   this.flightService
-  //     .getDeparturesWithArrival(departureAirport, startTimeUnix, endTimeUnix, arrivalAirport)
-  //     .subscribe(
-  //       (flights: any[]) => {
-  //         console.log('Fetched Flights from OpenSky:', flights);
-
-  //         // Match a flight by origin, destination, and time
-  //         const matchingFlight = flights.find((flight) => {
-  //           const matchesDepartureAirport = flight.estDepartureAirport === departureAirport;
-  //           const matchesArrivalAirport = flight.estArrivalAirport === arrivalAirport;
-
-  //           const flightDepartureTime = new Date(flight.firstSeen * 1000);
-  //           const flightArrivalTime = new Date(flight.lastSeen * 1000);
-
-  //           const matchesTimeRange =
-  //             flightDepartureTime >= startTime && flightArrivalTime <= endTime;
-
-  //           console.log(`Checking flight: ${flight.callsign}`);
-  //           console.log(`Matches Departure Airport: ${matchesDepartureAirport}`);
-  //           console.log(`Matches Arrival Airport: ${matchesArrivalAirport}`);
-  //           console.log(`Matches Time Range: ${matchesTimeRange}`);
-
-  //           return matchesDepartureAirport && matchesArrivalAirport && matchesTimeRange;
-  //         });
-
-  //         if (matchingFlight) {
-  //           console.log('Matching Flight Found:', matchingFlight);
-
-  //           this.openskyInfo = matchingFlight;
-  //           this.saveOpenSkyInfoToLocalStorage(matchingFlight);
-  //           this.loadFlightPathFromOpenSky();
-  //         } else {
-  //           console.error('No matching flights found for this flight.');
-  //         }
-  //       },
-  //       (error) => {
-  //         console.error('Error fetching OpenSky data:', error);
-  //       }
-  //     );
-  // }
 
   async loadFlightPath(flight: any) {
 
@@ -388,60 +351,21 @@ export class FlightDetailsPage {
     return codeshares.map((code) => code.ident_iata).join(', ');
   }
 
+  async presentToast(message: string, color: 'success' | 'danger' | 'warning', position: 'top' | 'middle' | 'bottom') {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 3000,
+      color,
+      position,
+    });
+    await toast.present();
+  }
 
-  // saveOpenSkyInfoToLocalStorage(flightData: any) {
-  //   const storedFlights = JSON.parse(localStorage.getItem('openskyInfo') || '[]');
-  //   const flightKey = `${this.flight.origin}-${this.flight.destination}-${this.flight.scheduled_out}`;
+  setLoading(loading: boolean, message?: string) {
+    this.isLoading = loading;
+    if (message) {
+      console.log(message);
+    }
+  }
 
-  //   if (!storedFlights.some((stored: any) => stored.flightKey === flightKey)) {
-  //     storedFlights.push({ ...flightData, flightKey });
-  //     localStorage.setItem('openskyInfo', JSON.stringify(storedFlights));
-  //     console.log('OpenSky info saved to localStorage:', flightData);
-  //   }
-  // }
-
-  // savePreviousFlightToLocalStorage(key: string, flightData: any) {
-  //   localStorage.setItem(key, JSON.stringify(flightData));
-  //   console.log('Previous flight saved to localStorage:', flightData);
-  // }
-
-  // getPreviousFlightFromLocalStorage(key: string) {
-  //   const storedFlight = localStorage.getItem(key);
-  //   return storedFlight ? JSON.parse(storedFlight) : null;
-  // }
-
-  // saveFlightPathToLocalStorage(path: any[]) {
-  //   const storedPaths = JSON.parse(localStorage.getItem('flightPaths') || '[]');
-    
-  //   const flightKey = `${this.flight.origin}-${this.flight.destination}-${this.flight.scheduled_out}`;
-
-  //   if (!storedPaths.some((stored: any) => stored.flightKey === flightKey)) {
-  //     storedPaths.push({ path, flightKey });
-  //     localStorage.setItem('flightPaths', JSON.stringify(storedPaths));
-  //     console.log('Flight path saved to localStorage:', path);
-  //   }
-  // }
-
-
-
-  // getFlightPathFromLocalStorage() {
-  //   const storedPaths = JSON.parse(localStorage.getItem('flightPaths') || '[]');
-  //   const flightKey = `${this.flight.origin}-${this.flight.destination}-${this.flight.scheduled_out}`;
-
-  //   const storedPath = storedPaths.find((stored: any) => stored.flightKey === flightKey);
-
-  //   console.log('Retrieved flight path from localStorage:', storedPath?.path);
-  //   return storedPath?.path || null;
-  // }
-
-
-  // getOpenSkyInfoFromLocalStorage() {
-  //   const storedFlights = JSON.parse(localStorage.getItem('openskyInfo') || '[]');
-  //   const flightKey = `${this.flight.origin}-${this.flight.destination}-${this.flight.scheduled_out}`;
-
-  //   const storedFlight = storedFlights.find((stored: any) => stored.flightKey === flightKey);
-
-  //   console.log('Retrieved OpenSky info from localStorage:', storedFlight);
-  //   return storedFlight || null;
-  // }
 }

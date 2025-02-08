@@ -7,16 +7,18 @@
 
 <ion-content [fullscreen]="true" class="custom-content">
   <div class="flight-summary">
+    <p><strong>Network Connection:</strong> {{ connectionStatus }}</p>
     <div *ngIf="!flight">
       <div class="no-flight-message">
         <p>No upcoming flights to show at the moment.</p>
       </div>
     </div>
     <div class="flight-info" *ngIf="flight">
+
       <ion-chip color="warning">Aproximate Location</ion-chip>
       <ion-chip color="success">{{ status }}</ion-chip>
       <div class="flight-number">{{ flight?.flightDetails?.ident_iata }}</div>
-      <ion-card class="location-card">
+      <ion-card class="location-card" *ngIf="connectionStatus === 'Online'">
         <ion-card-header>
           <ion-card-title>Current Location</ion-card-title>
         </ion-card-header>
@@ -26,8 +28,17 @@
           <p *ngIf="locationInfo?.landmark?.length"><strong>Landmark:</strong> {{ locationInfo?.landmark || 'No landmark found' }}</p>
         </ion-card-content>
       </ion-card>
+      
+      <ion-card class="offline-card" *ngIf="connectionStatus !== 'Online'">
+        <ion-card-header>
+          <ion-card-title>No Network Connection</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <p>Current location information is unavailable without an internet connection.</p>
+        </ion-card-content>
+      </ion-card>
     </div>
-  
+
     <div class="flight-route">
       <span class="iata">{{ flight?.flightDetails?.origin_iata }}</span>
       <span class="route-line"></span>
@@ -35,7 +46,7 @@
       <span class="route-line"></span>
       <span class="iata">{{ flight?.flightDetails?.destination_iata }}</span>
     </div>
-  
+
     <div class="flight-time">
       <div class="time-info left">
         <span class="label">Departure</span>
@@ -52,20 +63,20 @@
   </div>
 
 
-    <ion-card *ngIf="flightPath.length">
-      <ion-card-header>
-        <ion-card-title>Live Flight Path</ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <app-live-flight-path-map [flightPath]="flightPath" [planePosition]="currentAproximatePosition" [scheduledDeparture]="flightDetails.scheduled_out" [previousFlightDuration]="previousFlightDuration"></app-live-flight-path-map>
-      </ion-card-content>
-    </ion-card>
+  <ion-card *ngIf="flightPath.length">
+    <ion-card-header>
+      <ion-card-title>Live Flight Path</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <app-live-flight-path-map [flightPath]="flightPath" [planePosition]="currentAproximatePosition" [scheduledDeparture]="flightDetails.scheduled_out" [previousFlightDuration]="previousFlightDuration"></app-live-flight-path-map>
+    </ion-card-content>
+  </ion-card>
 
-    <ng-template #noPath>
-      <div class="no-path-message">
-        <p>Your estimated flight path is not known yet.</p>
-      </div>
-    </ng-template>
+  <ng-template #noPath>
+    <div class="no-path-message">
+      <p>Your estimated flight path is not known yet.</p>
+    </div>
+  </ng-template>
 
   <ng-template #noFlight>
     <div class="no-flight-message">

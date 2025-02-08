@@ -14,9 +14,13 @@ PODS:
     - SQLCipher
     - ZIPFoundation
   - CapacitorCordova (6.2.0)
+  - CapacitorDevice (7.0.0):
+    - Capacitor
   - CapacitorHaptics (6.0.2):
     - Capacitor
   - CapacitorKeyboard (6.0.3):
+    - Capacitor
+  - CapacitorNetwork (7.0.0):
     - Capacitor
   - CapacitorPreferences (6.0.3):
     - Capacitor
@@ -47,8 +51,10 @@ DEPENDENCIES:
   - "CapacitorApp (from `../../node_modules/@capacitor/app`)"
   - "CapacitorCommunitySqlite (from `../../node_modules/@capacitor-community/sqlite`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
+  - "CapacitorDevice (from `../../node_modules/@capacitor/device`)"
   - "CapacitorHaptics (from `../../node_modules/@capacitor/haptics`)"
   - "CapacitorKeyboard (from `../../node_modules/@capacitor/keyboard`)"
+  - "CapacitorNetwork (from `../../node_modules/@capacitor/network`)"
   - "CapacitorPreferences (from `../../node_modules/@capacitor/preferences`)"
   - "CapacitorStatusBar (from `../../node_modules/@capacitor/status-bar`)"
   - "CodetrixStudioCapacitorGoogleAuth (from `../../node_modules/@codetrix-studio/capacitor-google-auth`)"
@@ -72,10 +78,14 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor-community/sqlite"
   CapacitorCordova:
     :path: "../../node_modules/@capacitor/ios"
+  CapacitorDevice:
+    :path: "../../node_modules/@capacitor/device"
   CapacitorHaptics:
     :path: "../../node_modules/@capacitor/haptics"
   CapacitorKeyboard:
     :path: "../../node_modules/@capacitor/keyboard"
+  CapacitorNetwork:
+    :path: "../../node_modules/@capacitor/network"
   CapacitorPreferences:
     :path: "../../node_modules/@capacitor/preferences"
   CapacitorStatusBar:
@@ -91,8 +101,10 @@ SPEC CHECKSUMS:
   CapacitorApp: e1e6b7d05e444d593ca16fd6d76f2b7c48b5aea7
   CapacitorCommunitySqlite: 0299d20f4b00c2e6aa485a1d8932656753937b9b
   CapacitorCordova: b33e7f4aa4ed105dd43283acdd940964374a87d9
+  CapacitorDevice: 069faf433b3a99c3d5f0e500fbe634f60a8c6a84
   CapacitorHaptics: 4fc15afe22b123d093e6ace24d95e8e3b1f261b9
   CapacitorKeyboard: e89189ad398b815b6ff7e52271f0fb4f911a0a0a
+  CapacitorNetwork: 30c2e78a0ed32530656cb426c8ee6c2caec10dbf
   CapacitorPreferences: f3eadae2369ac3ab8e21743a2959145b0d1286a3
   CapacitorStatusBar: b16799a26320ffa52f6c8b01737d5a95bbb8f3eb
   CodetrixStudioCapacitorGoogleAuth: 9dcfabfb7dd804ad6231a1513bc6e81e620cbec6
@@ -103,6 +115,6 @@ SPEC CHECKSUMS:
   SQLCipher: 77fbe633cd84db04b07876dd50766b4924b57d61
   ZIPFoundation: b8c29ea7ae353b309bc810586181fd073cb3312c
 
-PODFILE CHECKSUM: cc7158f215c9210cd21c75891e723341837e9e95
+PODFILE CHECKSUM: bebc2d6bdaf2c44a5314ce14d8abf68367011a0c
 
 COCOAPODS: 1.16.2

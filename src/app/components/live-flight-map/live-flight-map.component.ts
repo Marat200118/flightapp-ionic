@@ -77,11 +77,11 @@ export class LiveFlightPathMapComponent implements OnInit, OnChanges, OnDestroy 
 
     const planeIcon = L.divIcon({
       html: `<div style="transform: rotate(${bearing - 90}deg);">
-              <img src="assets/airplane-outline.svg" style="width: 32px; height: 32px;">
+              <img src="assets/live-plane.svg" style="width: 50px; height: 50px;" class="live-plane">
             </div>`,
       className: '',
-      iconSize: [32, 32],
-      iconAnchor: [16, 16],
+      iconSize: [50, 50],
+      // iconAnchor: [16, 16],
     });
 
     if (!this.planeMarker) {

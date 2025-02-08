@@ -1,4 +1,18 @@
 //main.ts
+const originalConsoleError = console.error;
+
+console.error = (...args: any[]) => {
+  if (
+    typeof args[0] === 'string' &&
+    (args[0].includes('Navigator LockManager lock') ||
+     args[0].includes('Missing required parameter') || 
+     args[0].includes('sb-auth-token'))
+  ) {
+    return; // Suppress specific errors
+  }
+
+  originalConsoleError(...args);
+};
 
 import { bootstrapApplication } from '@angular/platform-browser';
 import { RouteReuseStrategy, provideRouter, withPreloading, PreloadAllModules } from '@angular/router';
