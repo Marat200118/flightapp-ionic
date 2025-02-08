@@ -66,10 +66,6 @@ export const routes: Routes = [
         (m) => m.FlightDetailsPage
       ),
   },
-  // {
-  //   path: '**', 
-  //   redirectTo: 'auth/onboarding',
-  // },
   {
     path: 'statistics',
     loadComponent: () => import('./statistics/statistics.page').then( m => m.StatisticsPage)

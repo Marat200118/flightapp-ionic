@@ -8,7 +8,7 @@ console.error = (...args: any[]) => {
      args[0].includes('Missing required parameter') || 
      args[0].includes('sb-auth-token'))
   ) {
-    return; // Suppress specific errors
+    return; 
   }
 
   originalConsoleError(...args);

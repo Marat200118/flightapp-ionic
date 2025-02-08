@@ -406,17 +406,4 @@ export class Tab1Page {
     }
   }
 
-  // showToast(message: string, color: 'success' | 'danger' | 'warning') {
-  //   this.toastConfig = {
-  //     isVisible: true,
-  //     message,
-  //     color,
-  //     duration: 5000
-  //   };
-  // }
-
-  // hideToast() {
-  //   this.toastConfig.isVisible = false;
-  // }
-
 }

@@ -60,9 +60,6 @@ import {
     IonButton,
 
   ],
-  // schemas: [
-  //   CUSTOM_ELEMENTS_SCHEMA,
-  // ]
 })
 export class LoginPage {
   email = '';
@@ -75,8 +72,6 @@ export class LoginPage {
 
   async login() {
     console.log('Login button clicked');
-    // const loader = await this.supabase.createLoader();
-    // await loader.present();
     console.log('Logging in with email:', this.email);
 
     try {
@@ -88,19 +83,8 @@ export class LoginPage {
     } catch (err: any) {
       console.error('Login failed:', err.message);
       this.supabase.createNotice(err.message);
-    } finally {
-      // loader.dismiss();
     }
   }
-
-  // async loginWithGoogle() {
-  //   try {
-  //     await this.supabase.signInWithGoogle();
-  //     console.log('Google login successful!');
-  //   } catch (error) {
-  //     console.error('Google login failed:', error);
-  //   }
-  // }
 
   async loginWithGoogle() {
     try {
@@ -118,8 +102,6 @@ export class LoginPage {
       console.error('Google login failed:', error);
     }
   }
-
-
 
   goToSignUp() {
     this.navCtrl.navigateForward('/auth/signup');

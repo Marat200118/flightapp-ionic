@@ -66,7 +66,6 @@ import {
 })
 
 
-
 export class Tab3Page implements OnInit {
   profile: Profile = {
     id: '',
@@ -75,17 +74,13 @@ export class Tab3Page implements OnInit {
     avatar_url: '',
   };
 
-  
-
   email = ''; 
-
 
   constructor(private supabase: SupabaseService, private navCtrl: NavController,) {}
 
   ngOnInit() {
     this.loadProfile();
   }
-
   
   async loadProfile() {
     try {

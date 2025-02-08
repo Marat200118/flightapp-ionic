@@ -7,7 +7,6 @@ import { Flight } from '../models/flight.model';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Network } from '@capacitor/network';
 import { Device } from '@capacitor/device';
-// import { BluetoothLe } from '@capacitor-community/bluetooth-le';
 import { SupabaseService } from '../services/supabase.service';
 import { AuthHeaderComponent } from '../components/auth-header/auth-header.component';
 import { GeocodingService } from '../services/geocoding.service';
@@ -244,7 +243,7 @@ export class Tab2Page implements OnInit {
       this.currentAproximatePosition.longitude
     ).subscribe(
       (data) => {
-        // Update location information with fetched data
+
         this.locationInfo = {
           city: data.city || 'Unknown City',
           country: data.country || 'Unknown Country',
@@ -316,9 +315,6 @@ export class Tab2Page implements OnInit {
     };
 
   }
-
-
-
 
   startLiveUpdates() {
     this.intervalId = setInterval(() => {

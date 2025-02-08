@@ -275,10 +275,7 @@ export class FlightDetailsPage {
     }
   }
 
-
-
   async loadFlightPath(flight: any) {
-
     if (flight.flightPath) {
       console.log('Flight already has a flightPath:', flight.flightPath);
       return flight.flightPath;

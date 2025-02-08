@@ -7,7 +7,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SupabaseService } from '../services/supabase.service';
 import { AuthHeaderComponent } from '../components/auth-header/auth-header.component';
-
 import { GaugeComponent } from '../components/gauge/gauge.component';
 import { ProgressBarComponent } from '../components/progress-bar/progress-bar.component';
 import { LineChartComponent } from '../components/line-chart/line-chart.component';
@@ -96,7 +95,6 @@ export class StatisticsPage implements OnInit {
     this.calculateStatistics();
   }
 
-
   async loadFlights() {
     this.flights = await this.storageService.getAllFlights(this.profileId);
     console.log('Fetched flights:', this.flights);
@@ -179,7 +177,6 @@ export class StatisticsPage implements OnInit {
       .map((point) => this.convertFlightPathPoint(point))
       .filter((point) => point.latitude !== undefined && point.longitude !== undefined);
 
-    // console.log('Valid Path Points:', validPath);
 
     for (let i = 0; i < validPath.length - 1; i++) {
       const pointA = validPath[i];
@@ -197,7 +194,6 @@ export class StatisticsPage implements OnInit {
   }
 
   calculateDistanceBetweenPoints(lat1: number, lon1: number, lat2: number, lon2: number): number {
-    // console.log('Calculating distance between points:', lat1, lon1, lat2, lon2);
     const R = 6371; // Radius of the Earth in km
     const dLat = this.degreesToRadians(lat2 - lat1);
     const dLon = this.degreesToRadians(lon2 - lon1);
@@ -211,7 +207,7 @@ export class StatisticsPage implements OnInit {
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-    return R * c; // Distance in km
+    return R * c; 
   }
 
   degreesToRadians(degrees: number): number {

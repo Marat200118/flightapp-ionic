@@ -70,10 +70,8 @@ export class SupabaseService {
   
 
   get user(): Promise<User | null> {
-  return this.supabase.auth.getUser().then(({ data }) => data?.user ?? null);
-
-  
-}
+    return this.supabase.auth.getUser().then(({ data }) => data?.user ?? null);
+  }
 
 
   async signIn(email: string, password: string) {
@@ -98,8 +96,8 @@ export class SupabaseService {
   async signInWithGoogle() {
     const redirectTo =
       Capacitor.isNativePlatform() 
-        ? 'myapp://auth/callback'  // Custom URL for mobile
-        : window.location.origin + '/auth/callback';  // For web
+        ? 'myapp://auth/callback' 
+        : window.location.origin + '/auth/callback';  
 
     const { error } = await this.supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -338,11 +336,6 @@ export class SupabaseService {
       this.sessionLock = false;
     }
   }
-
-
-
-
-
 
   async createLoader() {
     const loader = await this.loadingCtrl.create();

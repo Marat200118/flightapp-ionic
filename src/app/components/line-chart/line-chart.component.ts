@@ -35,10 +35,9 @@ export class LineChartComponent implements OnChanges {
 
   createChart() {
     if (this.chartInstance) {
-      this.chartInstance.destroy();  // Destroy previous chart to avoid conflicts
+      this.chartInstance.destroy();
     }
 
-    // Register required components
     Chart.register(
       CategoryScale,
       LinearScale,
