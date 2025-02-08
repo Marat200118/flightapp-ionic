@@ -255,6 +255,10 @@ ion-item-option {
   height: 4rem;
 }
 
+ion-item {
+  --background: none;
+}
+
 .left {
   align-items: flex-start;
 }
@@ -339,3 +343,4 @@ ion-modal ion-toolbar {
 .input-wrapper {
   display: block !important;
 }
+
