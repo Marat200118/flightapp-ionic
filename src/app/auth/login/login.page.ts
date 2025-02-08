@@ -6,7 +6,7 @@ import { SupabaseService } from '../../services/supabase.service';
 import { FormsModule } from '@angular/forms';
 import { HeaderComponent } from 'src/app/components/header/header.component';
 import { CommonModule } from '@angular/common';
-import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
+// import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 import { Capacitor } from '@capacitor/core';
 import { Provider } from '@supabase/supabase-js';
 

@@ -7,7 +7,7 @@ import { Storage } from '@ionic/storage-angular';
 import { Platform } from '@ionic/angular';
 import { LoginPage } from './auth/login/login.page';
 import { NavController } from '@ionic/angular';
-import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
+// import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 import { Capacitor } from '@capacitor/core';
 
 @Component({
@@ -25,7 +25,7 @@ export class AppComponent {
     
   ) {
     
-    GoogleAuth.initialize();
+    // GoogleAuth.initialize();
     this.initializeApp();
   }
 
