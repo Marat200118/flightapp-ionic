@@ -17,7 +17,7 @@
 
       <ion-chip color="warning">Aproximate Location</ion-chip>
       <ion-chip color="success">{{ status }}</ion-chip>
-      <div class="flight-number">{{ flight?.flightDetails?.ident_iata }}</div>
+      <div class="flight-number">{{ flight.flightDetails.ident_iata }}</div>
       <ion-card class="location-card" *ngIf="connectionStatus === 'Online'">
         <ion-card-header>
           <ion-card-title>Current Location</ion-card-title>

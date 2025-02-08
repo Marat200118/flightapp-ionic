@@ -112,6 +112,8 @@ export class Tab1Page {
   origin = '';
   destination = ''; 
   isLoading = false;
+  private isToastVisible = false;
+  
 
   private apiBaseUrl = 'https://flight-api-backend.vercel.app/api/schedules';
   private apiKey = 'wHf94IBGL2dxGFS13wlB5sbGS34bBfT3';
@@ -142,14 +144,34 @@ export class Tab1Page {
   }
 
   async presentToast(message: string, color: 'success' | 'danger' | 'warning', position: 'top' | 'middle' | 'bottom') {
-    const toast = await this.toastCtrl.create({
-      message,
-      color,
-      duration: 3000,
-      position,
-    });
-    await toast.present();
+    if (this.isToastVisible) {
+      console.warn('Toast already visible, skipping new toast.');
+      return;
+    }
+
+    try {
+      this.isToastVisible = true;
+
+      const toast = await this.toastCtrl.create({
+        message,
+        color,
+        duration: 3000,
+        position,
+      });
+
+      toast.onWillDismiss().then(() => {
+        this.isToastVisible = false;
+        console.log('Toast will be dismissed.');
+      });
+
+      await toast.present();
+
+    } catch (error) {
+      console.error('Error presenting toast:', error);
+      this.isToastVisible = false;
+    }
   }
+
 
   async loadProfile(): Promise<void> {
     try {
