@@ -15,7 +15,6 @@ export class ActualFlightPathMapComponent implements OnInit {
   private map: L.Map | undefined;
 
   ngOnInit(): void {
-    console.log('Processed flight path:', this.flightPath);
     if (!this.flightPath || this.flightPath.length === 0) {
       console.error('No flight path provided.');
       return;
@@ -42,10 +41,6 @@ export class ActualFlightPathMapComponent implements OnInit {
       this.flightPath[0].longitude,
     ], 10);
 
-    console.log('Map:', this.map);
-
-    // this.map = L.map('map').setView([0, 0], 2);
-
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       minZoom: 5,
       maxZoom: 18,
@@ -71,7 +66,6 @@ export class ActualFlightPathMapComponent implements OnInit {
     });
 
     flightPathPolyline.addTo(this.map);
-    console.log('Flight path polyline:', flightPathPolyline);
 
     this.map.fitBounds(flightPathPolyline.getBounds());
   }

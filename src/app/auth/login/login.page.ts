@@ -71,13 +71,9 @@ export class LoginPage {
   ) {}
 
   async login() {
-    console.log('Login button clicked');
-    console.log('Logging in with email:', this.email);
 
     try {
       const data = await this.supabase.signIn(this.email, this.password);
-      console.log('Login successful:', data);
-
       this.supabase.createNotice('Login successful!');
       this.navCtrl.navigateRoot('/tabs/tab1');
     } catch (err: any) {
@@ -96,8 +92,6 @@ export class LoginPage {
         provider: 'google' as Provider,
         redirectTo,
       });
-
-      console.log('Google login successful!', data);
     } catch (error) {
       console.error('Google login failed:', error);
     }

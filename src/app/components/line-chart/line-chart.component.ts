@@ -29,7 +29,6 @@ export class LineChartComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data'] && this.data.length > 0) {
       this.createChart();
-      console.log('Chart Data:', this.data);
     }
   }
 

@@ -30,7 +30,6 @@ export class LiveFlightPathMapComponent implements OnInit, OnChanges, OnDestroy 
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['flightPath']) {
-      console.log('Updated Flight Path:', this.flightPath);
     }
     if (changes['planePosition'] && this.planePosition) {
       this.updatePlaneMarker();

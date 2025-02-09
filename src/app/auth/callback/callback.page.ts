@@ -15,15 +15,12 @@ export class AuthCallbackPage implements OnInit {
 
   async ngOnInit() {
     try {
-      console.log('Processing OAuth callback...');
 
-      // Extract URL fragment parameters
       const fragmentParams = new URLSearchParams(window.location.hash.substring(1));
       const accessToken = fragmentParams.get('access_token');
       const refreshToken = fragmentParams.get('refresh_token');
 
       if (accessToken && refreshToken) {
-        // Manually set the session using the access token and refresh token
         const { data, error } = await this.supabase.setSession({
           access_token: accessToken,
           refresh_token: refreshToken,

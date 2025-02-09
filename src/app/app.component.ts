@@ -34,10 +34,8 @@ export class AppComponent {
     await this.supabase.restoreSession(); 
     const user = await this.supabase.user;
     if (user) {
-      console.log('User is logged in, navigating to main page');
       this.navCtrl.navigateRoot('/tabs/tab1');
     } else {
-      console.log('No session found, navigating to onboarding/login');
       this.navCtrl.navigateRoot('/onboarding');
     }
   }

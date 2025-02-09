@@ -126,7 +126,6 @@ export class Tab1Page {
     private alertController: AlertController,
     private toastCtrl: ToastController,
   ) {
-    console.log('ToastController instance:', toastCtrl);
   }
 
   async ngOnInit() {
@@ -145,7 +144,6 @@ export class Tab1Page {
 
   async presentToast(message: string, color: 'success' | 'danger' | 'warning', position: 'top' | 'middle' | 'bottom') {
     if (this.isToastVisible) {
-      console.warn('Toast already visible, skipping new toast.');
       return;
     }
 
@@ -161,13 +159,11 @@ export class Tab1Page {
 
       toast.onWillDismiss().then(() => {
         this.isToastVisible = false;
-        console.log('Toast will be dismissed.');
       });
 
       await toast.present();
 
     } catch (error) {
-      console.error('Error presenting toast:', error);
       this.isToastVisible = false;
     }
   }
@@ -177,7 +173,6 @@ export class Tab1Page {
     try {
       this.profile = await this.supabase.getProfile();
       if (this.profile) {
-        console.log('Profile loaded successfully:', this.profile);
       } else {
         console.error('Profile not loaded or missing.');
       }
@@ -191,15 +186,13 @@ export class Tab1Page {
   }
 
   async deleteFlight(flight: Flight, slidingItem: IonItemSliding) {
-    console.log('Deleting flight:', flight);
 
     try {
       if (this.profile && this.profile.id) {
-        console.log('Deleting flight from storage...');
         await this.storageService.deleteFlightById(flight.flightId, this.profile.id);
         this.flights = this.flights.filter(f => f.flightId !== flight.flightId);
         await this.loadFlightsFromStorage();
-        // this.presentToast('Flight deleted successfully', 'success');
+        this.presentToast('Flight deleted successfully', 'success', 'top');
       } else {
         console.error('User profile is not available. Cannot delete flight.');
       }
@@ -217,7 +210,6 @@ export class Tab1Page {
         role: 'cancel',
         handler: () => {
           slidingItem.close();
-          console.log('Delete canceled');
         },
       },
       {
@@ -231,7 +223,6 @@ export class Tab1Page {
 
 
   async confirm() {
-    console.log("Flight Number:", this.flightNumber, "Date:", this.flightDate, "Origin:", this.origin, "Destination:", this.destination);
 
     if (!this.flightNumber || !this.flightDate || !this.origin || !this.destination) {
       this.presentToast('Please fill all fields', 'warning', 'top');
@@ -255,7 +246,6 @@ export class Tab1Page {
     this.http.get(url, { headers, params }).subscribe(
       async (response: any) => {
         this.setLoading(false);
-        console.log("API Response:", response);
 
         if (response.scheduled && response.scheduled.length > 0) {
           const flight = response.scheduled[0];
@@ -269,7 +259,6 @@ export class Tab1Page {
 
           const existingFlight = await this.storageService.getFlightById(flight.fa_flight_id, userId);
           if (existingFlight) {
-            console.log('Flight already exists in storage:', existingFlight);
             alert('This flight is already saved.');
           } else {
             const flightRecord: Flight = {
@@ -290,7 +279,6 @@ export class Tab1Page {
         }
       },
       (error) => {
-        console.error("Error fetching flight data:", error);
         alert("Failed to fetch flight data. Please try again.");
       }
     );
@@ -303,59 +291,16 @@ export class Tab1Page {
   }
 
   async loadFlightsFromStorage() {
-    console.log('User profile at start of loadFlightsFromStorage:', this.profile);
 
     const userId = this.profile?.id;
 
     if (!this.profile?.id) {
-      console.error('User ID is not available. Skipping flight storage loading.');
       return;
     }
 
     this.flights = await this.storageService.getAllFlights(this.profile.id);
     this.presentToast('Flights loaded successfully', 'success', 'top');
 
-    const testFlight: Flight = {
-      userId: this.profile?.id ?? '',
-      flightId: 'UAL784-1736491986-airline-250p',
-      flightDetails: {
-        ident: 'LOT784',
-        ident_icao: 'LOT784',
-        ident_iata: 'LO784',
-        actual_ident: null,
-        actual_ident_icao: null,
-        actual_ident_iata: null,
-        aircraft_type: 'E75L',
-        scheduled_in: '2025-01-24T13:50:00Z',
-        scheduled_out: '2025-01-24T12:00:00Z',
-        origin: 'EVRA',
-        origin_icao: 'EVRA',
-        origin_iata: 'RIX',
-        origin_lid: null,
-        destination: 'EPWA',
-        destination_icao: 'EPWA',
-        destination_iata: 'WAW',
-        destination_lid: null,
-        fa_flight_id: 'UAL784-1736491986-airline-250p',
-        meal_service: 'Business: Snack or brunch / Economy: Food for sale',
-        seats_cabin_business: 3,
-        seats_cabin_coach: 76,
-        seats_cabin_first: 0,
-        isTest: true,
-      },
-    };
-
-    const isTestFlightAdded = this.flights.some(
-      (flight) => flight.flightId === testFlight.flightId && flight.userId === testFlight.userId
-    );
-
-    if (!isTestFlightAdded) {
-      console.log('Adding test flight to storage...');
-      await this.storageService.addFlight(testFlight);
-      this.flights.unshift(testFlight);
-    } else {
-      console.log('Test flight already exists. Skipping add.');
-    }
 
     const today = new Date();
     const now = new Date();
@@ -374,12 +319,6 @@ export class Tab1Page {
       const scheduledDeparture = new Date(flight.flightDetails.scheduled_out);
       const scheduledArrival = new Date(flight.flightDetails.scheduled_in);
       return scheduledDeparture <= now && scheduledArrival >= now;
-    });
-
-    console.log('Organized flights:', {
-      upcomingFlights: this.upcomingFlights,
-      previousFlights: this.previousFlights,
-      ongoingFlights: this.ongoingFlights,
     });
   }
 
@@ -405,11 +344,9 @@ export class Tab1Page {
 
   async ionViewWillEnter() {
     if (!this.profile) {
-      console.warn('Profile is not available yet. Skipping flight load.');
       return;
     }
 
-    console.log('Profile available. Loading flights...');
     await this.loadFlightsFromStorage();
 
   }
@@ -424,7 +361,6 @@ export class Tab1Page {
   setLoading(loading: boolean, message?: string) {
     this.isLoading = loading;
     if (message) {
-      console.log(message);
     }
   }
 

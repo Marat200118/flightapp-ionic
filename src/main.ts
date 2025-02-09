@@ -1,18 +1,40 @@
-//main.ts
+const ignoredErrors = [
+  'Navigator LockManager lock',
+  'sb-auth-token',
+  'Missing required parameter',
+];
+
 const originalConsoleError = console.error;
 
 console.error = (...args: any[]) => {
-  if (
-    typeof args[0] === 'string' &&
-    (args[0].includes('Navigator LockManager lock') ||
-     args[0].includes('Missing required parameter') || 
-     args[0].includes('sb-auth-token'))
-  ) {
+  const errorMessage = typeof args[0] === 'string' ? args[0] : JSON.stringify(args[0]);
+
+  if (ignoredErrors.some((ignored) => errorMessage.includes(ignored))) {
     return; 
   }
 
-  originalConsoleError(...args);
+  originalConsoleError(...args); 
 };
+
+window.addEventListener('error', (event) => {
+  if (event.message.includes('Navigator LockManager lock') || event.message.includes('sb-auth-token')) {
+    event.preventDefault();
+  }
+});
+
+
+window.addEventListener('unhandledrejection', (event) => {
+  const reasonMessage = event.reason?.toString() || '';
+
+  if (
+    reasonMessage.includes('Navigator LockManager lock') || 
+    reasonMessage.includes('sb-auth-token') || 
+    reasonMessage.includes('Acquiring an exclusive')
+  ) {
+    event.preventDefault();
+  }
+});
+
 
 import { bootstrapApplication } from '@angular/platform-browser';
 import { RouteReuseStrategy, provideRouter, withPreloading, PreloadAllModules } from '@angular/router';
@@ -39,4 +61,5 @@ bootstrapApplication(AppComponent, {
     provideRouter(routes, withPreloading(PreloadAllModules)),
     provideHttpClient(),
   ],
+  
 });

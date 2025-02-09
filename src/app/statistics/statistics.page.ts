@@ -83,7 +83,6 @@ export class StatisticsPage implements OnInit {
   async ngOnInit() {
     const profile = await this.supabase.getProfile();
     if (!profile || !profile.id) {
-      console.error('Profile not found.');
       return;
     }
 
@@ -97,7 +96,6 @@ export class StatisticsPage implements OnInit {
 
   async loadFlights() {
     this.flights = await this.storageService.getAllFlights(this.profileId);
-    console.log('Fetched flights:', this.flights);
   }
 
   calculateStatistics() {
@@ -127,7 +125,6 @@ export class StatisticsPage implements OnInit {
         if (flight.actualFlight.flightPath && flight.actualFlight.flightPath.length > 1) {
           const flightDistance = this.calculateFlightDistance(flight.actualFlight.flightPath);
           this.totalDistance += flightDistance;
-          console.log(`Distance for flight ${flight.flightDetails.ident_iata}:`, flightDistance, 'km');
         }
       }
     });
@@ -136,8 +133,6 @@ export class StatisticsPage implements OnInit {
       month: key,
       hours: parseFloat(hours.toFixed(2)), 
     }));
-
-    console.log('Monthly Flight Hours Data:', this.monthlyFlightHours);
 
     this.setAchievements();
   }
@@ -188,8 +183,6 @@ export class StatisticsPage implements OnInit {
         console.warn('Invalid points detected:', pointA, pointB);
       }
     }
-
-    console.log('Total Distance Calculated:', distance);
     return distance;
   }
 

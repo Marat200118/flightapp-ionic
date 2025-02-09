@@ -91,7 +91,6 @@ export class Tab2Page implements OnInit {
     
     Network.addListener('networkStatusChange', (status) => {
       this.connectionStatus = status.connected ? 'Online' : 'Offline';
-      console.log('Network status changed:', this.connectionStatus);
       if (status.connected) {
         this.fetchLocationData();
       }
@@ -99,16 +98,12 @@ export class Tab2Page implements OnInit {
 
     const profile = await this.supabase.getProfile();
     if (!profile || !profile.id) {
-      console.error('User profile not found.');
       return;
     }
 
     const userId = profile.id;
 
-     const flights = await this.storageService.getAllFlights(userId);
-    console.log('Fetched flights from storage:', flights);
-    console.log('Flight Path:', this.flightPath);
-
+    const flights = await this.storageService.getAllFlights(userId);
     const now = new Date();
     const upcomingFlight = flights.find((flight: Flight) => {
       const scheduledArrival = new Date(flight.flightDetails.scheduled_in);
@@ -119,7 +114,6 @@ export class Tab2Page implements OnInit {
     if (upcomingFlight) {
       this.flight = upcomingFlight;
       this.flightDetails = upcomingFlight.flightDetails;
-      console.log('Upcoming flight:', this.flight);
 
       const departureTime = new Date(this.flightDetails.scheduled_out);
       const arrivalTime = new Date(this.flightDetails.scheduled_in);
@@ -138,15 +132,11 @@ export class Tab2Page implements OnInit {
 
 
       if (this.flight.previousFlight?.flightPath) {
-        console.log('Previous Flight Path:', this.flight.previousFlight.flightPath);
         this.flightPath = this.formatFlightPath(this.flight.previousFlight.flightPath);
 
         const firstPoint = this.flightPath[0];
         const lastPoint = this.flightPath[this.flightPath.length - 1];
         this.previousFlightDuration = lastPoint.timestamp - firstPoint.timestamp;
-
-        
-        console.log('Previous Flight Duration (seconds):', this.previousFlightDuration);
 
         this.startLiveUpdates();
       } else {
@@ -208,8 +198,6 @@ export class Tab2Page implements OnInit {
     } else {
       this.status = 'Arrived at destination';
     }
-
-    console.log('Current Status:', this.status);
   }
 
 
@@ -249,10 +237,8 @@ export class Tab2Page implements OnInit {
           country: data.country || 'Unknown Country',
           landmark: data.landmark || '',
         };
-        console.log('Current location info:', this.locationInfo);
       },
       (error) => {
-        console.error('Failed to fetch location info:', error);
         this.locationInfo = {
           city: 'Unknown',
           country: 'Unknown',
@@ -299,16 +285,6 @@ export class Tab2Page implements OnInit {
       ? Math.min(1, Math.max(0, adjustedElapsed / segmentDuration))
       : 0;
 
-    console.log({
-      elapsedTime,
-      totalDuration,
-      mappedIndex,
-      start,
-      end,
-      segmentProgress,
-      planePosition: this.currentAproximatePosition,
-    });
-
     return {
       latitude: start.latitude + segmentProgress * (end.latitude - start.latitude),
       longitude: start.longitude + segmentProgress * (end.longitude - start.longitude),
@@ -335,7 +311,6 @@ export class Tab2Page implements OnInit {
       latitude: point[1],
       longitude: point[2],
     }));
-    console.log('Formatted Flight Path:', formatted);
     return formatted;
   }
 
