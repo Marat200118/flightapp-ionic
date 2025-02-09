@@ -198,23 +198,23 @@
           <p>Fill in the details below to add your upcoming flight.</p>
         </div>
   
-        <ion-item class="input-item">
+        <ion-item class="input-item text">
           <ion-label position="stacked">Flight Number</ion-label>
           <ion-input placeholder="e.g., LO784" [(ngModel)]="flightNumber" required></ion-input>
         </ion-item>
   
-        <ion-item class="input-item">
+        <ion-item class="input-item text">
           <ion-label position="stacked">Origin Airport (IATA/ICAO)</ion-label>
           <ion-input placeholder="e.g., RIX" [(ngModel)]="origin" required></ion-input>
         </ion-item>
   
-        <ion-item class="input-item">
+        <ion-item class="input-item text">
           <ion-label position="stacked">Destination Airport (IATA/ICAO)</ion-label>
           <ion-input placeholder="e.g., WAW" [(ngModel)]="destination" required></ion-input>
         </ion-item>
   
         <ion-item class="input-item">
-          <ion-label position="stacked">Departure Date & Time</ion-label>
+          <ion-label position="stacked" style="color: white;">Departure Date & Time</ion-label>
           <ion-datetime [(ngModel)]="flightDate" presentation="date" placeholder="Select date and time"></ion-datetime>
         </ion-item>
   

@@ -259,6 +259,10 @@ ion-item {
   --background: none;
 }
 
+.input-item.text {
+  color: var(--always-white);
+}
+
 .left {
   align-items: flex-start;
 }
