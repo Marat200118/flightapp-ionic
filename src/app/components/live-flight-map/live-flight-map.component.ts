@@ -92,7 +92,7 @@ export class LiveFlightPathMapComponent implements OnInit, OnChanges, OnDestroy 
       this.planeMarker.setIcon(planeIcon);
     }
 
-    this.map.setView([this.planePosition.latitude, this.planePosition.longitude], 10, { animate: true });
+    this.map.setView([this.planePosition.latitude, this.planePosition.longitude]);
   }
 
    private calculateBearing(): number {
