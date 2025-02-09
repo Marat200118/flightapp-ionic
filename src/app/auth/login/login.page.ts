@@ -6,7 +6,7 @@ import { SupabaseService } from '../../services/supabase.service';
 import { FormsModule } from '@angular/forms';
 import { HeaderComponent } from 'src/app/components/header/header.component';
 import { CommonModule } from '@angular/common';
-import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
+// import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 import { Capacitor } from '@capacitor/core';
 import { Provider } from '@supabase/supabase-js';
 
@@ -60,9 +60,6 @@ import {
     IonButton,
 
   ],
-  // schemas: [
-  //   CUSTOM_ELEMENTS_SCHEMA,
-  // ]
 })
 export class LoginPage {
   email = '';
@@ -74,33 +71,16 @@ export class LoginPage {
   ) {}
 
   async login() {
-    console.log('Login button clicked');
-    // const loader = await this.supabase.createLoader();
-    // await loader.present();
-    console.log('Logging in with email:', this.email);
 
     try {
       const data = await this.supabase.signIn(this.email, this.password);
-      console.log('Login successful:', data);
-
       this.supabase.createNotice('Login successful!');
       this.navCtrl.navigateRoot('/tabs/tab1');
     } catch (err: any) {
       console.error('Login failed:', err.message);
       this.supabase.createNotice(err.message);
-    } finally {
-      // loader.dismiss();
     }
   }
-
-  // async loginWithGoogle() {
-  //   try {
-  //     await this.supabase.signInWithGoogle();
-  //     console.log('Google login successful!');
-  //   } catch (error) {
-  //     console.error('Google login failed:', error);
-  //   }
-  // }
 
   async loginWithGoogle() {
     try {
@@ -112,14 +92,10 @@ export class LoginPage {
         provider: 'google' as Provider,
         redirectTo,
       });
-
-      console.log('Google login successful!', data);
     } catch (error) {
       console.error('Google login failed:', error);
     }
   }
-
-
 
   goToSignUp() {
     this.navCtrl.navigateForward('/auth/signup');

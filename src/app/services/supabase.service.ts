@@ -1,17 +1,6 @@
 //supabase.service.ts
 
 
-
-// export interface User {
-//   id: string;
-//   email: string;
-//   user_metadata: {
-//     avatar_url: string;
-//     [key: string]: any;
-//   };
-// }
-
-
 import { Injectable } from '@angular/core';
 import { StorageService } from './storage.service';
 import { Capacitor } from '@capacitor/core';
@@ -42,6 +31,7 @@ export class SupabaseService {
   
   private supabase: SupabaseClient;
   private sessionLock: boolean = false;
+  private authListenerRegistered: boolean = false;
 
   constructor(
     private loadingCtrl: LoadingController,
@@ -57,44 +47,41 @@ export class SupabaseService {
       },
     });
 
-    console.log('Supabase URL:', environment.supabaseUrl);
-    console.log('Supabase Key:', environment.supabaseKey);
+    this.registerAuthStateListener();
+  }
 
-    this.supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth event detected:', event);
+    private registerAuthStateListener() {
+    if (this.authListenerRegistered) {
+      return;
+    }
+
+    this.supabase.auth.onAuthStateChange(async (event, session) => {
       if (session) {
-        console.log('Updating session in storage.');
-        this.storage.set('supabase_session', JSON.stringify(session));
+        await this.storage.set('supabase_session', JSON.stringify(session));
       } else {
-        console.log('No session. Clearing storage.');
-        this.storage.remove('supabase_session');
+        await this.storage.remove('supabase_session');
       }
     });
+
+    this.authListenerRegistered = true;
   }
 
   
 
   get user(): Promise<User | null> {
-  return this.supabase.auth.getUser().then(({ data }) => data?.user ?? null);
-
-  
-}
+    return this.supabase.auth.getUser().then(({ data }) => data?.user ?? null);
+  }
 
 
   async signIn(email: string, password: string) {
-    console.log('Attempting sign in with:', email);
     const { data, error } = await this.supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
-      console.error('Sign-in error:', error.message);
       throw error;
     }
 
-    console.log('Login successful:', data.session);
-
     if (data.session) {
       await this.storage.set('supabase_session', JSON.stringify(data.session));
-      console.log('Session saved in storage.');
     }
 
     return data;
@@ -103,8 +90,8 @@ export class SupabaseService {
   async signInWithGoogle() {
     const redirectTo =
       Capacitor.isNativePlatform() 
-        ? 'myapp://auth/callback'  // Custom URL for mobile
-        : window.location.origin + '/auth/callback';  // For web
+        ? 'myapp://auth/callback' 
+        : window.location.origin + '/auth/callback';  
 
     const { error } = await this.supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -114,11 +101,8 @@ export class SupabaseService {
     });
 
     if (error) {
-      console.error('Google sign-in failed:', error.message);
       throw error;
     }
-
-    console.log('Redirecting to Google OAuth...');
   }
 
   async signUpWithGoogle(): Promise<void> {
@@ -132,21 +116,16 @@ export class SupabaseService {
     });
 
     if (error) {
-      console.error('Google sign-up failed:', error.message);
       throw error;
     }
-
-    console.log('Redirecting to Google OAuth for sign-up...');
     
   } catch (error: any) {
-    console.error('Google sign-up error:', error.message);
     this.createNotice(error.message);
   }
 }
 
 
   async signOut() {
-    console.log('Signing out...');
     await this.supabase.auth.signOut();
     await this.storage.remove('supabase_session');
   }
@@ -156,14 +135,10 @@ export class SupabaseService {
       const { data, error } = await this.supabase.auth.exchangeCodeForSession(window.location.href);
 
       if (error) {
-        console.error('Error handling OAuth callback:', error.message);
         return { error };
       }
-
-      console.log('OAuth callback successful. Session:', data);
       return { data };
     } catch (err) {
-      console.error('Unexpected error during callback:', err);
       throw err;
     }
   }
@@ -178,13 +153,11 @@ export class SupabaseService {
       });
 
       if (error) {
-        console.error('OAuth sign-in error:', error.message);
         throw error;
       }
 
       return { data };
     } catch (err) {
-      console.error('Unexpected error during OAuth sign-in:', err);
       throw err;
     }
   }
@@ -202,11 +175,8 @@ export class SupabaseService {
     });
 
     if (error) {
-      console.error('Failed to set session:', error);
       return { error };
     }
-
-    console.log('Session set successfully:', data);
     return { data };
   }
 
@@ -312,11 +282,10 @@ export class SupabaseService {
 
   async restoreSession() {
     if (this.sessionLock) {
-      console.log('Session restoration is already in progress. Skipping...');
       return;
     }
 
-    this.sessionLock = true; // Acquire the lock
+    this.sessionLock = true;
 
     try {
       await this.storage.create();
@@ -324,45 +293,21 @@ export class SupabaseService {
 
       if (storedSession) {
         const session: Session = JSON.parse(storedSession);
-        console.log('Restoring session from storage:', session);
 
         const { error } = await this.supabase.auth.setSession(session);
 
         if (error) {
-          console.error('Failed to restore session:', error.message);
           await this.storage.remove('supabase_session');
         } else {
-          console.log('Session restored successfully.');
         }
       } else {
-        console.log('No session found in storage.');
       }
-
-      // Register the auth state change listener (once)
-      this.supabase.auth.onAuthStateChange(async (event, session) => {
-        console.log('Auth event detected:', event);
-        if (session) {
-          console.log('Updating session in storage.');
-          await this.storage.set('supabase_session', JSON.stringify(session));
-        } else {
-          console.log('Session is null. Clearing storage.');
-          await this.storage.remove('supabase_session');
-        }
-      });
-
     } catch (error) {
       console.error('Unexpected error during session restoration:', error);
     } finally {
-      this.sessionLock = false; // Release the lock
+      this.sessionLock = false;
     }
   }
-
-
-
-
-
-
-
 
   async createLoader() {
     const loader = await this.loadingCtrl.create();

@@ -29,16 +29,14 @@ export class LineChartComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data'] && this.data.length > 0) {
       this.createChart();
-      console.log('Chart Data:', this.data);
     }
   }
 
   createChart() {
     if (this.chartInstance) {
-      this.chartInstance.destroy();  // Destroy previous chart to avoid conflicts
+      this.chartInstance.destroy();
     }
 
-    // Register required components
     Chart.register(
       CategoryScale,
       LinearScale,

@@ -1,5 +1,3 @@
-// environment.prod.ts
-
 export const environment = {
   production: true,
   supabaseUrl: 'https://arqsriqjdzgjtelsxcch.supabase.co',

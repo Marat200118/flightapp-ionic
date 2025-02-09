@@ -21,11 +21,9 @@ export class StorageService {
     try {
       await this.storage.defineDriver(CordovaSQLiteDriver);
       const storage = await this.storage.create();
-      console.log('Storage initialized with driver:', storage.driver);
 
       this._storage = storage;
     } catch (error) {
-      console.error('Failed to initialize storage:', error);
     }
   }
 
@@ -40,9 +38,6 @@ export class StorageService {
     await this.ensureInitialized();
 
     if (this.currentUserId !== userId) {
-      console.log('New user detected, resetting storage for user:', userId);
-
-      // Clear old data and set new key for the current user
       if (this.currentUserId) {
         await this.storage.remove(this.currentUserId);
       }
@@ -50,6 +45,18 @@ export class StorageService {
       this.currentUserId = userId;
     }
   }
+
+  async deleteFlightById(flightId: string, userId: string): Promise<void> {
+    await this.ensureInitialized();
+
+    const flights: Flight[] = await this.getAllFlights(userId);
+
+    const updatedFlights = flights.filter((flight) => flight.flightId !== flightId);
+
+    await this.storage.set(userId, updatedFlights);
+  }
+
+
 
   async addFlight(flight: Flight): Promise<void> {
     await this.ensureInitialized();
@@ -66,7 +73,6 @@ export class StorageService {
     }
 
     await this.storage.set(key, existingFlights);
-    console.log(`Flights stored under key "${key}":`, existingFlights);
   }
 
 
@@ -76,7 +82,6 @@ export class StorageService {
 
     const key = userId;
     const storedFlights: Flight[] = (await this.storage.get(key)) || [];
-    console.log(`Fetched flights for user "${userId}":`, storedFlights);
 
     return storedFlights;
   }
@@ -105,12 +110,10 @@ export class StorageService {
     if (flightIndex !== -1) {
       existingFlights[flightIndex] = flight;
     } else {
-      console.warn(`Flight with ID ${flight.flightId} not found for update. Adding it instead.`);
       existingFlights.push(flight);
     }
 
     await this.storage.set(key, existingFlights);
-    console.log('Updated flights for user:', existingFlights);
   }
 
 
@@ -121,7 +124,6 @@ export class StorageService {
   async clear(): Promise<void> {
     if (this.currentUserId) {
       await this.storage.remove(this.currentUserId);
-      console.log(`Cleared storage for user: ${this.currentUserId}`);
     }
   }
 
@@ -131,7 +133,6 @@ export class StorageService {
 
   public async get(key: string): Promise<any> {
     const data = await this._storage?.get(key);
-    console.log(`Data fetched for key "${key}":`, data);
 
     if (typeof data !== 'string') {
       return data;
@@ -140,7 +141,6 @@ export class StorageService {
     try {
       return JSON.parse(data);
     } catch (error) {
-      console.error(`Failed to parse JSON for key "${key}":`, error);
       return data;
     }
   }

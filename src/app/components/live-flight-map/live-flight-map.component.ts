@@ -1,3 +1,5 @@
+//live-flight-map.component.ts
+
 import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
 import * as L from 'leaflet';
 
@@ -28,7 +30,6 @@ export class LiveFlightPathMapComponent implements OnInit, OnChanges, OnDestroy 
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['flightPath']) {
-      console.log('Updated Flight Path:', this.flightPath);
     }
     if (changes['planePosition'] && this.planePosition) {
       this.updatePlaneMarker();
@@ -75,11 +76,11 @@ export class LiveFlightPathMapComponent implements OnInit, OnChanges, OnDestroy 
 
     const planeIcon = L.divIcon({
       html: `<div style="transform: rotate(${bearing - 90}deg);">
-              <img src="assets/airplane-outline.svg" style="width: 32px; height: 32px;">
+              <img src="assets/live-plane.svg" style="width: 50px; height: 50px;" class="live-plane">
             </div>`,
       className: '',
-      iconSize: [32, 32],
-      iconAnchor: [16, 16],
+      iconSize: [50, 50],
+      // iconAnchor: [16, 16],
     });
 
     if (!this.planeMarker) {
@@ -91,7 +92,7 @@ export class LiveFlightPathMapComponent implements OnInit, OnChanges, OnDestroy 
       this.planeMarker.setIcon(planeIcon);
     }
 
-    this.map.setView([this.planePosition.latitude, this.planePosition.longitude], 10, { animate: true });
+    this.map.setView([this.planePosition.latitude, this.planePosition.longitude]);
   }
 
    private calculateBearing(): number {

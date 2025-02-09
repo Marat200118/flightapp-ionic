@@ -10,6 +10,10 @@
 </ion-header>
 
 <ion-content class="custom-content">
+  <ion-item *ngIf="isLoading">
+    <ion-label>Loading...</ion-label>
+    <ion-spinner name="circular"></ion-spinner>
+  </ion-item>
   <div class="flight-summary">
     <div class="flight-info">
       <div class="flight-number">{{ flight.flightDetails.ident_iata }}</div>

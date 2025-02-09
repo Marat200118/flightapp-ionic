@@ -13,8 +13,12 @@
       </div>
     </div>
   </div>
+  <ion-item *ngIf="isLoading">
+    <ion-label>Loading...</ion-label>
+    <ion-spinner name="circular"></ion-spinner>
+  </ion-item>
 
-  <div class="flights-container">
+  <div class="flights-container" *ngIf="!isLoading">
     <div *ngIf="ongoingFlights.length > 0" class="flights-section">
       <h2>Ongoing Flights</h2>
       <ion-list>
@@ -58,88 +62,113 @@
 
     <div *ngIf="upcomingFlights.length === 0 && ongoingFlights.length === 0" class="no-flights">
       <ion-icon name="airplane-outline"></ion-icon>
-      <p>No flights available to display</p>
+      <p>No upcoming flights available to display</p>
     </div>
 
     <div *ngIf="upcomingFlights.length > 0" class="flights-section">
       <h2>Upcoming Flights</h2>
       <ion-list>
-        <ion-card *ngFor="let flight of upcomingFlights" class="flight-card upcoming-flights" (click)="openFlightDetails(flight)">
-          <ion-card-content>
-            <div class="flight-card-container">
-              <div class="flight-info">
-                <div class="flight-number">{{ flight.flightDetails.ident_iata }}</div>
-              </div>
-              <div class="codeshare-info" *ngIf="codesharesAsString(flight.flightDetails.codeshares)">
-                <span class="label">Codeshares:</span>
-                <span class="codeshares-text">{{ codesharesAsString(flight.flightDetails.codeshares) }}</span>
-              </div>
+        <ion-item-sliding *ngFor="let flight of upcomingFlights" #slidingItem>
+          <ion-item [button]="true" (click)="openFlightDetails(flight)">
+            <ion-card class="flight-card upcoming-flights">
+              <ion-card-content>
+                <div class="flight-card-container">
+                  <div class="flight-info">
+                    <div class="flight-number">{{ flight.flightDetails.ident_iata }}</div>
+                  </div>
+                  <div class="codeshare-info" *ngIf="codesharesAsString(flight.flightDetails.codeshares)">
+                    <span class="label">Codeshares:</span>
+                    <span class="codeshares-text">{{ codesharesAsString(flight.flightDetails.codeshares) }}</span>
+                  </div>
     
-              <div class="flight-route">
-                <span class="iata">{{ flight.flightDetails.origin_iata }}</span>
-                <span class="route-line"></span>
-                <ion-icon name="airplane-outline"></ion-icon>
-                <span class="route-line"></span>
-                <span class="iata">{{ flight.flightDetails.destination_iata }}</span>
-              </div>
+                  <div class="flight-route">
+                    <span class="iata">{{ flight.flightDetails.origin_iata }}</span>
+                    <span class="route-line"></span>
+                    <ion-icon name="airplane-outline"></ion-icon>
+                    <span class="route-line"></span>
+                    <span class="iata">{{ flight.flightDetails.destination_iata }}</span>
+                  </div>
     
-              <div class="flight-time">
-                <div class="time-info left">
-                  <span class="label">Departure</span>
-                  <span class="date">{{ flight.flightDetails.scheduled_out | date: 'EEE dd MMM' }}</span>
-                  <span class="time">{{ flight.flightDetails.scheduled_out | date: 'HH:mm' }}</span>
+                  <div class="flight-time">
+                    <div class="time-info left">
+                      <span class="label">Departure</span>
+                      <span class="date">{{ flight.flightDetails.scheduled_out | date: 'EEE dd MMM' }}</span>
+                      <span class="time">{{ flight.flightDetails.scheduled_out | date: 'HH:mm' }}</span>
+                    </div>
+                    <div class="duration">2h 30min</div>
+                    <div class="time-info right">
+                      <span class="label">Arrival</span>
+                      <span class="date">{{ flight.flightDetails.scheduled_in | date: 'EEE dd MMM' }}</span>
+                      <span class="time">{{ flight.flightDetails.scheduled_in | date: 'HH:mm' }}</span>
+                    </div>
+                  </div>
                 </div>
-                <div class="duration">2h 30min</div>
-                <div class="time-info right">
-                  <span class="label">Arrival</span>
-                  <span class="date">{{ flight.flightDetails.scheduled_in | date: 'EEE dd MMM' }}</span>
-                  <span class="time">{{ flight.flightDetails.scheduled_in | date: 'HH:mm' }}</span>
-                </div>
-              </div>
-            </div>
-          </ion-card-content>
-        </ion-card>
+              </ion-card-content>
+            </ion-card>
+          </ion-item>
+          <ion-item-options side="end">
+            <ion-item-option id="present-alert-upcoming-{{ flight.flightId }}" color="danger">
+              <ion-icon slot="icon-only" name="trash"></ion-icon>
+            </ion-item-option>
+          </ion-item-options>
+    
+          <ion-alert [trigger]="'present-alert-upcoming-' + flight.flightId" header="Confirm Delete" [message]="'Are you sure you want to delete flight ' + flight.flightDetails.ident_iata + '?'" [buttons]="getAlertButtons(flight, slidingItem)">
+          </ion-alert>
+        </ion-item-sliding>
       </ion-list>
     </div>
+ 
 
     <div *ngIf="previousFlights.length > 0" class="flights-section">
       <h2>Previous Flights</h2>
       <ion-list>
-        <ion-card *ngFor="let flight of previousFlights" class="flight-card previous-flights" (click)="openFlightDetails(flight)">
-          <ion-card-content>
-            <div class="flight-card-container">
-              <div class="flight-info">
-                <div class="flight-number">{{ flight.flightDetails.ident_iata }}</div>
-              </div>
-              <div class="codeshare-info" *ngIf="codesharesAsString(flight.flightDetails.codeshares)">
-                <span class="label">Codeshares:</span>
-                <span class="codeshares-text">{{ codesharesAsString(flight.flightDetails.codeshares) }}</span>
-              </div>
-
-              <div class="flight-route">
-                <span class="iata">{{ flight.flightDetails.origin_iata }}</span>
-                <span class="route-line"></span>
-                <ion-icon name="airplane-outline"></ion-icon>
-                <span class="route-line"></span>
-                <span class="iata">{{ flight.flightDetails.destination_iata }}</span>
-              </div>
-
-              <div class="flight-time">
-                <div class="time-info left">
-                  <span class="label">Departure</span>
-                  <span class="date">{{ flight.flightDetails.scheduled_out | date: 'EEE dd MMM' }}</span>
-                  <span class="time">{{ flight.flightDetails.scheduled_out | date: 'HH:mm' }}</span>
+        <ion-item-sliding *ngFor="let flight of previousFlights" #slidingItem>
+          <ion-item [button]="true" (click)="openFlightDetails(flight)">
+            <ion-card class="flight-card previous-flights">
+              <ion-card-content>
+                <div class="flight-card-container">
+                  <div class="flight-info">
+                    <div class="flight-number">{{ flight.flightDetails.ident_iata }}</div>
+                  </div>
+                  <div class="codeshare-info" *ngIf="codesharesAsString(flight.flightDetails.codeshares)">
+                    <span class="label">Codeshares:</span>
+                    <span class="codeshares-text">{{ codesharesAsString(flight.flightDetails.codeshares) }}</span>
+                  </div>
+    
+                  <div class="flight-route">
+                    <span class="iata">{{ flight.flightDetails.origin_iata }}</span>
+                    <span class="route-line"></span>
+                    <ion-icon name="airplane-outline"></ion-icon>
+                    <span class="route-line"></span>
+                    <span class="iata">{{ flight.flightDetails.destination_iata }}</span>
+                  </div>
+    
+                  <div class="flight-time">
+                    <div class="time-info left">
+                      <span class="label">Departure</span>
+                      <span class="date">{{ flight.flightDetails.scheduled_out | date: 'EEE dd MMM' }}</span>
+                      <span class="time">{{ flight.flightDetails.scheduled_out | date: 'HH:mm' }}</span>
+                    </div>
+                    <div class="duration">3h 15min</div>
+                    <div class="time-info right">
+                      <span class="label">Arrival</span>
+                      <span class="date">{{ flight.flightDetails.scheduled_in | date: 'EEE dd MMM' }}</span>
+                      <span class="time">{{ flight.flightDetails.scheduled_in | date: 'HH:mm' }}</span>
+                    </div>
+                  </div>
                 </div>
-                <div class="duration">3h 15min</div>
-                <div class="time-info right">
-                  <span class="label">Arrival</span>
-                  <span class="date">{{ flight.flightDetails.scheduled_in | date: 'EEE dd MMM' }}</span>
-                  <span class="time">{{ flight.flightDetails.scheduled_in | date: 'HH:mm' }}</span>
-                </div>
-              </div>
-            </div>
-          </ion-card-content>
-        </ion-card>
+              </ion-card-content>
+            </ion-card>
+          </ion-item>
+          <ion-item-options side="end">
+            <ion-item-option id="present-alert-{{ flight.flightId }}" color="danger">
+              <ion-icon slot="icon-only" name="trash"></ion-icon>
+            </ion-item-option>
+          </ion-item-options>
+
+          <ion-alert [trigger]="'present-alert-' + flight.flightId" header="Confirm Delete" [message]="'Are you sure you want to delete flight ' + flight.flightDetails.ident_iata + '?'" [buttons]="getAlertButtons(flight, slidingItem)">
+          </ion-alert>
+        </ion-item-sliding>
       </ion-list>
     </div>
   </div>
@@ -169,23 +198,23 @@
           <p>Fill in the details below to add your upcoming flight.</p>
         </div>
   
-        <ion-item class="input-item">
+        <ion-item class="input-item text">
           <ion-label position="stacked">Flight Number</ion-label>
           <ion-input placeholder="e.g., LO784" [(ngModel)]="flightNumber" required></ion-input>
         </ion-item>
   
-        <ion-item class="input-item">
+        <ion-item class="input-item text">
           <ion-label position="stacked">Origin Airport (IATA/ICAO)</ion-label>
           <ion-input placeholder="e.g., RIX" [(ngModel)]="origin" required></ion-input>
         </ion-item>
   
-        <ion-item class="input-item">
+        <ion-item class="input-item text">
           <ion-label position="stacked">Destination Airport (IATA/ICAO)</ion-label>
           <ion-input placeholder="e.g., WAW" [(ngModel)]="destination" required></ion-input>
         </ion-item>
   
         <ion-item class="input-item">
-          <ion-label position="stacked">Departure Date & Time</ion-label>
+          <ion-label position="stacked" style="color: white;">Departure Date & Time</ion-label>
           <ion-datetime [(ngModel)]="flightDate" presentation="date" placeholder="Select date and time"></ion-datetime>
         </ion-item>
   

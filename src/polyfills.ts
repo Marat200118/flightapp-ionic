@@ -47,7 +47,33 @@ import './zone-flags';
 /***************************************************************************************************
  * Zone JS is required by default for Angular itself.
  */
-import 'zone.js';  // Included with Angular CLI.
+import 'zone.js';  // Import Zone.js
+
+// Fork a new Zone to handle errors
+const customErrorHandlingZone = Zone.current.fork({
+  name: 'customErrorHandler',
+  onHandleError: (parentZoneDelegate, currentZone, targetZone, error) => {
+    const errorMessage = error?.message || error?.toString();
+
+    // Suppress specific errors
+    if (
+      errorMessage.includes('Navigator LockManager lock') || 
+      errorMessage.includes('sb-auth-token') || 
+      errorMessage.includes('Acquiring an exclusive')
+    ) {
+      return false;  // Prevents the error from being logged to the console
+    }
+
+    // Pass other errors to the default handler
+    return parentZoneDelegate.handleError(targetZone, error);
+  }
+});
+
+// Run the application inside the custom zone to enable error suppression
+customErrorHandlingZone.run(() => {
+  import('./main');  // Bootstraps the Angular application
+});
+
 
 
 /***************************************************************************************************

@@ -7,7 +7,7 @@ import { Storage } from '@ionic/storage-angular';
 import { Platform } from '@ionic/angular';
 import { LoginPage } from './auth/login/login.page';
 import { NavController } from '@ionic/angular';
-import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
+// import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 import { Capacitor } from '@capacitor/core';
 
 @Component({
@@ -25,7 +25,7 @@ export class AppComponent {
     
   ) {
     
-    GoogleAuth.initialize();
+    // GoogleAuth.initialize();
     this.initializeApp();
   }
 
@@ -34,10 +34,8 @@ export class AppComponent {
     await this.supabase.restoreSession(); 
     const user = await this.supabase.user;
     if (user) {
-      console.log('User is logged in, navigating to main page');
       this.navCtrl.navigateRoot('/tabs/tab1');
     } else {
-      console.log('No session found, navigating to onboarding/login');
       this.navCtrl.navigateRoot('/onboarding');
     }
   }

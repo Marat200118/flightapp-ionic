@@ -27,13 +27,13 @@ export class AddFlightModalComponent {
     }
 
     const newFlight = {
-      id: Date.now(), // Generate a unique ID
+      id: Date.now(),
       flightNumber: this.flightNumber,
-      originAirport: 'Sample Origin', // Replace with actual API data
-      destinationAirport: 'Sample Destination', // Replace with actual API data
+      originAirport: 'Sample Origin',
+      destinationAirport: 'Sample Destination',
       date: this.flightDate,
     };
 
-    this.modalController.dismiss(newFlight); // Pass the new flight data back
+    this.modalController.dismiss(newFlight);
   }
 }
